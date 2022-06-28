@@ -4,9 +4,8 @@ services:
     build: streamer/.
     ports:
       - "8554:8554"
-    # volumes:
-    #   - .:/code
-    #   - logvolume01:/var/log
+    volumes:
+    - /run/udev:/run/udev:ro
     privileged: true
     restart: always
     network_mode: host
