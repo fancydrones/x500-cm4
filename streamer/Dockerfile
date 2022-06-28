@@ -1,7 +1,7 @@
 FROM python:3-slim-bullseye
 
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get upgrade
+RUN apt-get update && apt-get upgrade -y
 
 RUN apt-get install libx264-dev libjpeg-dev -y
 RUN apt-get install libgstreamer1.0-dev \
