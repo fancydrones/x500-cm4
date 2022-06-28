@@ -25,4 +25,6 @@ RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
 COPY *.py ./
 
+ENV UDEV=on
+
 CMD ["python3", "main.py"]
