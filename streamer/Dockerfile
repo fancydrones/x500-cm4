@@ -17,7 +17,7 @@ RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
 RUN apt-get install gir1.2-gst-rtsp-server-1.0 -y
 
 RUN apt-get install libcamera-dev \
-    libcamera-apps-lite \
+#    libcamera-apps-lite \
     python3 \
     v4l-utils -y
 
