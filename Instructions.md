@@ -28,6 +28,12 @@ Either by downloading image and burning directly to SD card, or by using rpi-ima
     sudo apt-get install -y uidmap
 
 
+## Install repo
+    sudo apt install git -y
+
+    git clone https://gitlab.com/got.vision/rpiuav
+    cd rpiuav
+    sudo docker compose build
 
 
 
