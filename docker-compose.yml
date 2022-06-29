@@ -31,3 +31,4 @@ services:
     restart: always
     volumes:
     - mavlink-router.conf:/etc/mavlink-router/main.conf
+    - /dev/serial0:/dev/serial0
