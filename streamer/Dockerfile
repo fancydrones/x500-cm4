@@ -1,7 +1,14 @@
-FROM ubuntu:22.04
+FROM debian:bullseye
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && apt-get install -y cmake build-essential curl git
+
+RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" > /etc/apt/sources.list.d/raspi.list
+RUN curl "https://archive.raspberrypi.org/debian/raspberrypi.gpg.key" | apt-key add -
+
 RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y libcamera-dev libjpeg-dev libgphoto2-dev
 
 RUN apt-get install libx264-dev libjpeg-dev -y
 RUN apt-get install libgstreamer1.0-dev \
@@ -16,10 +23,6 @@ RUN apt-get install libgstrtspserver-1.0-0 libgstreamer1.0-dev -y
 RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
 RUN apt-get install gir1.2-gst-rtsp-server-1.0 -y
 
-RUN apt-get install libcamera-dev \
-#    libcamera-apps-lite \
-    python3 \
-    v4l-utils -y
 
 RUN apt-get install python3-pip -y
 
