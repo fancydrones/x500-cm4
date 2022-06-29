@@ -26,6 +26,7 @@ services:
     ports:
     - 5760:5760
     network_mode: host
+    privileged: true
     restart: always
     volumes:
     - ./mavlink-router.conf:/etc/mavlink-router/main.conf
