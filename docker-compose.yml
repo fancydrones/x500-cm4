@@ -3,7 +3,7 @@ services:
   streamer:
     build: streamer/.
     ports:
-      - "8554:8554"
+    - 8554:8554
     volumes:
     - /run/udev:/run/udev:ro
     privileged: true
@@ -21,3 +21,13 @@ services:
           queue max-size-buffers=1 name=q_enc ! 
           h264parse ! 
           rtph264pay config-interval=1 name=pay0 pt=96
+  router:
+    build: router/.
+    ports:
+    - 5760:5760
+    networks:
+      - networkName
+    network_mode: host
+    restart: always
+    volumes:
+    - mavlink-router.conf:/etc/mavlink-router/main.conf
