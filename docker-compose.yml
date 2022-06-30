@@ -25,6 +25,8 @@ services:
     build: router/.
     ports:
     - 5760:5760
+    - 14560:14560
+    - 14561:14561
     network_mode: host
     privileged: true
     restart: always
@@ -35,7 +37,7 @@ services:
     build: announcer/.
     network_mode: host
     environment:
-      - CAMERA_URL=rtsp://10.7.1.92:8554/video0
+      - CAMERA_URL=rtsp://10.177.177.3:8554/video0
       - CAMERA_ID=100
       - CAMERA_NAME=Main
       - SYSTEM_HOST=127.0.0.1
