@@ -10,9 +10,9 @@ https://pinout.xyz/#
 GND: 6+9
 
 ## UART:
-TX: 8
-RX: 10
-GND: 14
+RPI - TX: 8 <--> 3 RX - Tel1
+RPI - RX: 10 <--> 2 TX - Tel1
+RPI - GND: 14 <--> 6 TX - Tel1
 
 
 # Install
