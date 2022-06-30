@@ -1,27 +1,23 @@
-#FROM debian:bullseye
-#FROM python:3-slim-bullseye
 FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 
-#RUN apt-get update && apt-get install -y cmake build-essential curl git
 RUN apt-get update && apt-get install -y curl gnupg
 
 RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" > /etc/apt/sources.list.d/raspi.list
 RUN curl "https://archive.raspberrypi.org/debian/raspberrypi.gpg.key" | apt-key add -
 
 RUN apt-get update && apt-get upgrade -y
-#RUN apt-get install -y libcamera-dev libjpeg-dev libgphoto2-dev
 RUN apt-get install -y libcamera-dev
 
-RUN apt-get install libx264-dev libjpeg-dev -y
-RUN apt-get install libgstreamer1.0-dev \
-     libgstreamer-plugins-base1.0-dev \
-     libgstreamer-plugins-bad1.0-dev \
-     gstreamer1.0-plugins-ugly \
-     gstreamer1.0-tools \
-     gstreamer1.0-gl \
-     gstreamer1.0-gtk3 -y
+# RUN apt-get install libx264-dev libjpeg-dev -y
+# RUN apt-get install libgstreamer1.0-dev \
+#      libgstreamer-plugins-base1.0-dev \
+#      libgstreamer-plugins-bad1.0-dev \
+#      gstreamer1.0-plugins-ugly \
+#      gstreamer1.0-tools \
+#      gstreamer1.0-gl \
+#      gstreamer1.0-gtk3 -y
 
 RUN apt-get install libgstrtspserver-1.0-0 libgstreamer1.0-dev -y
 RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
