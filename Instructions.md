@@ -64,5 +64,9 @@ Either by downloading image and burning directly to SD card, or by using rpi-ima
     curl -s https://install.zerotier.com | sudo bash
 
 
+## Enable serial0 (ttyS0)
+    sudo raspi-config nonint do_serial 2 # disable serial console, but enable serial hardware (/dev/serial0)
+
+
 export CAMERA_PIPELINE0='libcamerasrc ! video/x-raw,width=1280,height=720,format=NV12,colorimetry=bt601,interlace-mode=progressive ! videoflip video-direction=identity ! videorate ! video/x-raw,framerate=30/1 ! v4l2convert ! v4l2h264enc output-io-mode=2 extra-controls="controls,repeat_sequence_header=1,video_bitrate_mode=1,h264_profile=3,video_bitrate=5000000" ! video/x-h264,profile=main,level=(string)4 ! queue max-size-buffers=1 name=q_enc ! h264parse ! rtph264pay config-interval=1 name=pay0 pt=96'
 
