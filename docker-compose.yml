@@ -31,3 +31,14 @@ services:
     volumes:
     - ./mavlink-router.conf:/etc/mavlink-router/main.conf
     - /dev/serial0:/dev/serial0
+  announcer:
+    build: announcer/.
+    network_mode: host
+    environment:
+      - CAMERA_URL=rtsp://10.7.1.92:8554/video0
+      - CAMERA_ID=100
+      - CAMERA_NAME=Main
+      - SYSTEM_HOST=127.0.0.1
+      - SYSTEM_PORT=14560
+      - SYSTEM_ID=2
+      - MAVLINK20=1
