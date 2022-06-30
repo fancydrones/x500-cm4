@@ -36,11 +36,13 @@ services:
   announcer:
     build: announcer/.
     network_mode: host
+    restart: always
+    privileged: true # Can be removed?
     environment:
       - CAMERA_URL=rtsp://10.177.177.3:8554/video0
       - CAMERA_ID=100
       - CAMERA_NAME=Main
       - SYSTEM_HOST=127.0.0.1
       - SYSTEM_PORT=14560
-      - SYSTEM_ID=2
+      - SYSTEM_ID=1
       - MAVLINK20=1
