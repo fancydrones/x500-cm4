@@ -1,10 +1,11 @@
 #FROM debian:bullseye
-FROM python:3-slim-bullseye
+#FROM python:3-slim-bullseye
+FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 
 #RUN apt-get update && apt-get install -y cmake build-essential curl git
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl gnupg
 
 RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" > /etc/apt/sources.list.d/raspi.list
 RUN curl "https://archive.raspberrypi.org/debian/raspberrypi.gpg.key" | apt-key add -
