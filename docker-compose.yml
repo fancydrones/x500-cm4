@@ -37,7 +37,6 @@ services:
     build: announcer/.
     network_mode: host
     restart: always
-    privileged: true # Can be removed?
     environment:
       - CAMERA_URL=rtsp://10.177.177.3:8554/video0
       - CAMERA_ID=100
