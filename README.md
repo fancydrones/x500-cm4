@@ -1,4 +1,7 @@
 # RPiUAV
+
+- [Gimbal](gimbal/README.md)
+
 ## TODO
 - [x] Mavlink Router
 - [x] Video Announcer
