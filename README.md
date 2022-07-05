@@ -9,5 +9,5 @@
 - [ ] Smaller images
 - [ ] Build and store images in container registry
 - [ ] fluxcd.io
-
-
+- [ ] Step-by-step guide
+- [ ] Document BOM (Bill of Materials)
