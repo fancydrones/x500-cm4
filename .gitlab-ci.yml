@@ -27,4 +27,23 @@ docker-build:
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - echo "BUILD_TAG=$tag" >> build.env
-    - docker buildx build --platform linux/aarch64 --push -t "$CI_REGISTRY_IMAGE_MAVLINK_ROUTER:${tag}" ./router
+    
+    - docker buildx build
+      --platform linux/aarch64
+      --tag "$CI_IMAGE_ANNOUNCER:${tag}"
+      --push
+      ./announcer
+
+    - docker buildx build
+      --platform linux/aarch64
+      --tag "$CI_IMAGE_STREAMER:${tag}"
+      --push
+      ./streamer
+
+    - docker buildx build
+      --platform linux/aarch64
+      --tag "$CI_IMAGE_ROUTER:${tag}"
+      --push
+      ./router
+
+    
