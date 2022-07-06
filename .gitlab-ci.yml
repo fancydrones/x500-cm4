@@ -1,7 +1,74 @@
 variables:
   BUILDX_VER: "0.8.2"
 
-docker-build:
+build-streamer:
+  image: docker:latest
+  stage: build
+  services:
+    - name: docker:dind
+      command: ["--experimental"]
+
+  before_script:
+    # Prepare BuildX
+    - mkdir -p ~/.docker/cli-plugins
+    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
+    - chmod a+x ~/.docker/cli-plugins/docker-buildx
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker buildx create --use
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag="1.0.$CI_PIPELINE_IID"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
+      else
+        tag="$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - echo "BUILD_TAG=$tag" >> build.env
+
+    - docker buildx build
+      --platform linux/aarch64
+      --tag "$CI_IMAGE_STREAMER:${tag}"
+      --push
+      ./streamer
+
+
+build-router:
+  image: docker:latest
+  stage: build
+  services:
+    - name: docker:dind
+      command: ["--experimental"]
+
+  before_script:
+    # Prepare BuildX
+    - mkdir -p ~/.docker/cli-plugins
+    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
+    - chmod a+x ~/.docker/cli-plugins/docker-buildx
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker buildx create --use
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag="1.0.$CI_PIPELINE_IID"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
+      else
+        tag="$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - echo "BUILD_TAG=$tag" >> build.env
+
+    - docker buildx build
+      --platform linux/aarch64
+      --tag "$CI_IMAGE_ROUTER:${tag}"
+      --push
+      ./router
+
+build-announcer:
   image: docker:latest
   stage: build
   services:
@@ -33,17 +100,3 @@ docker-build:
       --tag "$CI_IMAGE_ANNOUNCER:${tag}"
       --push
       ./announcer
-
-    - docker buildx build
-      --platform linux/aarch64
-      --tag "$CI_IMAGE_STREAMER:${tag}"
-      --push
-      ./streamer
-
-    - docker buildx build
-      --platform linux/aarch64
-      --tag "$CI_IMAGE_ROUTER:${tag}"
-      --push
-      ./router
-
-    
