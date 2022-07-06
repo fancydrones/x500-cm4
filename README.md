@@ -12,5 +12,8 @@
 - [ ] Smaller images
 - [ ] Build and store images in container registry
 - [ ] fluxcd.io
+- [ ] Document zerotier
+- [ ] Document autoupdate OS
+- [ ] Consider if Raspberry Pi OS or Ubuntu
 - [ ] Step-by-step guide
 - [ ] Document BOM (Bill of Materials)
