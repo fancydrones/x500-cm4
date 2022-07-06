@@ -10,7 +10,7 @@
 - [ ] Document 3D model for pant/tilt setup
 - [ ] k3s
 - [ ] Smaller images
-- [ ] Build and store images in container registry
+- [x] Build and store images in container registry
 - [ ] fluxcd.io
 - [ ] Document zerotier
 - [ ] Document autoupdate OS
