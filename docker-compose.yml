@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   streamer:
-    image: registry.gitlab.com/got.vision/rpiuav/streamer
+    image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.2
     ports:
     - 8554:8554
     volumes:
@@ -22,7 +22,7 @@ services:
           h264parse ! 
           rtph264pay config-interval=1 name=pay0 pt=96
   router:
-    image: registry.gitlab.com/got.vision/rpiuav/router
+    image: registry.gitlab.com/got.vision/rpiuav/router:1.0.2
     ports:
     - 5760:5760
     - 14560:14560
@@ -34,7 +34,7 @@ services:
     - ./mavlink-router.conf:/etc/mavlink-router/main.conf
     - /dev/serial0:/dev/serial0
   announcer:
-    image: registry.gitlab.com/got.vision/rpiuav/announcer
+    image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.2
     network_mode: host
     restart: always
     environment:
