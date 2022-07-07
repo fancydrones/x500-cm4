@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: mavision-announcer0
+  name: mavision-announcer0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mavision-announcer0-recreate-strategy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mavision-announcer0-recreate-strategy
+    spec:
+      containers:
+      - env:
+        - name: CAMERA_URL
+          value: rtsp://10.177.177.2:8554/video0
+        - name: CAMERA_ID
+          value: "100"
+        - name: CAMERA_NAME
+          value: Front
+        - name: SYSTEM_HOST
+          value: 127.0.0.1
+        - name: SYSTEM_PORT
+          value: "14560"
+        - name: SYSTEM_ID
+          value: "2"
+        - name: MAVLINK20
+          value: "1"
+        image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.5
+        name: mavision-announcer0-recreate-strategy
+      hostNetwork: true

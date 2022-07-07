@@ -100,3 +100,54 @@ build-announcer:
       --tag "$CI_IMAGE_ANNOUNCER:${tag}"
       --push
       ./announcer
+
+update-manifest:
+  needs:
+    job: docker-build
+    artifacts: true
+  image: alpine:latest
+  stage: deploy
+
+  before_script:
+    # Prepare Git and Kustomize
+    - echo "before"
+    - apk --no-cache add git curl gettext openssh
+    - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+    - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
+    - git config --global user.email "rpiuav@got.vision"
+    - git config --global user.name "RPi UAV Builder"
+
+  script:
+    - echo "Deploying tag ${BUILD_TAG}"
+    - git clone https://gitlab.com/got.vision/rpiuav.git
+
+    # Patch Streamer
+    - rm kustomization.yaml -f
+    - kustomize create
+    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/streamer:${BUILD_TAG}
+    - kustomize edit add resource deployments/rpi4-serial/manifests/streamer.yaml
+    - kustomize build . > x.yaml
+    - mv x.yaml deployments/rpi4-serial/manifests/streamer.yaml
+
+    # Patch Router
+    - rm kustomization.yaml -f
+    - kustomize create
+    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
+    - kustomize edit add resource deployments/rpi4-serial/manifests/router.yaml
+    - kustomize build . > x.yaml
+    - mv x.yaml deployments/rpi4-serial/manifests/router.yaml
+
+    # Patch Announcer
+    - rm kustomization.yaml -f
+    - kustomize create
+    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
+    - kustomize edit add resource deployments/rpi4-serial/manifests/announcer.yaml
+    - kustomize build . > x.yaml
+    - mv x.yaml deployments/rpi4-serial/manifests/announcer.yaml
+    
+    # Push update
+    - cd mavx-manifest/
+    - git remote add mani-repo https://${MANIFEST_USERNAME}:${MANIFEST_PASSWORD}@gitlab.com/got.vision/mavx-manifest.git
+    - git add .
+    - git commit -m "Mavision Streamer version to ${BUILD_TAG}"
+    - git push --push-option=ci.skip mani-repo main

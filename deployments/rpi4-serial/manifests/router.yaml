@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: mavision-router
+  name: mavision-router
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mavision-router-recreate-strategy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mavision-router-recreate-strategy
+    spec:
+      containers:
+      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.5
+        name: mavision-router-recreate-strategy
+        volumeMounts:
+        - mountPath: /etc/mavlink-router/main.conf
+          name: main-conf
+      hostNetwork: true
+      volumes:
+      - hostPath:
+          path: /home/roy/mavlink-router.conf
+        name: main-conf
