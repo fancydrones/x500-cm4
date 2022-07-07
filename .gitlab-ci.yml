@@ -27,9 +27,8 @@ prepare-build-tag:
 build-streamer:
   image: docker:latest
   stage: build
-  needs:
-    - job: prepare-build-tag
-      artifacts: true
+  dependencies:
+    - prepare-build-tag
 
   services:
     - name: docker:dind
@@ -45,9 +44,10 @@ build-streamer:
     - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
+    - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
-      --tag "$CI_IMAGE_STREAMER:${tag}"
+      --tag "$CI_IMAGE_STREAMER:${BUILD_TAG}"
       --push
       ./streamer
   artifacts:
@@ -57,9 +57,8 @@ build-streamer:
 build-router:
   image: docker:latest
   stage: build
-  needs:
-    - job: prepare-build-tag
-      artifacts: true
+  dependencies:
+    - prepare-build-tag
   services:
     - name: docker:dind
       command: ["--experimental"]
@@ -74,18 +73,18 @@ build-router:
     - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
+    - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
-      --tag "$CI_IMAGE_ROUTER:${tag}"
+      --tag "$CI_IMAGE_ROUTER:${BUILD_TAG}"
       --push
       ./router
 
 build-announcer:
   image: docker:latest
   stage: build
-  needs:
-    - job: prepare-build-tag
-      artifacts: true
+  dependencies:
+    - prepare-build-tag
   services:
     - name: docker:dind
       command: ["--experimental"]
@@ -100,22 +99,21 @@ build-announcer:
     - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
+    - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
-      --tag "$CI_IMAGE_ANNOUNCER:${tag}"
+      --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
       --push
       ./announcer
 
 update-manifest:
-  needs:
-    - job: prepare-build-tag
-      artifacts: true
-    - job: build-streamer
-    - job: build-router
-    - job: build-announcer
+  dependencies:
+    - prepare-build-tag
+    - build-streamer
+    - build-router
+    - build-announcer
   image: alpine:latest
   stage: deploy
-
   before_script:
     # Prepare Git and Kustomize
     - echo "before"
