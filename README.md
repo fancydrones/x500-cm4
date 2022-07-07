@@ -35,3 +35,4 @@ This repository aims at giving step by step instructs from zero to a fully opera
 - [ ] Document power-button
 - [ ] Test (and document if successful) LED indicating running OS
 - [ ] install.sh
+- [ ] Document 6X network settings
