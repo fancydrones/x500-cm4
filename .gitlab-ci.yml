@@ -2,9 +2,35 @@ variables:
   BUILDX_VER: "0.8.2"
   KUSTOMIZE_VER: "4.5.5"
 
+stages:
+- prebuild
+- build
+- deploy
+
+prepare-build-tag:
+  stage: prebuild
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag="1.0.$CI_PIPELINE_IID"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
+      else
+        tag="$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - echo "BUILD_TAG=$tag" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+
 build-streamer:
   image: docker:latest
   stage: build
+  needs:
+    - job: prepare-build-tag
+      artifacts: true
+
   services:
     - name: docker:dind
       command: ["--experimental"]
@@ -19,26 +45,21 @@ build-streamer:
     - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
-    - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="1.0.$CI_PIPELINE_IID"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
-      else
-        tag="$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - echo "BUILD_TAG=$tag" >> build.env
-
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_STREAMER:${tag}"
       --push
       ./streamer
-
+  artifacts:
+    reports:
+      dotenv: build.env
 
 build-router:
   image: docker:latest
   stage: build
+  needs:
+    - job: prepare-build-tag
+      artifacts: true
   services:
     - name: docker:dind
       command: ["--experimental"]
@@ -53,16 +74,6 @@ build-router:
     - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
-    - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="1.0.$CI_PIPELINE_IID"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
-      else
-        tag="$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - echo "BUILD_TAG=$tag" >> build.env
-
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_ROUTER:${tag}"
@@ -72,6 +83,9 @@ build-router:
 build-announcer:
   image: docker:latest
   stage: build
+  needs:
+    - job: prepare-build-tag
+      artifacts: true
   services:
     - name: docker:dind
       command: ["--experimental"]
@@ -86,16 +100,6 @@ build-announcer:
     - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
-    - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="1.0.$CI_PIPELINE_IID"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
-      else
-        tag="$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - echo "BUILD_TAG=$tag" >> build.env
-    
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_ANNOUNCER:${tag}"
@@ -103,7 +107,12 @@ build-announcer:
       ./announcer
 
 update-manifest:
-  needs: [build-streamer, build-router, build-announcer]
+  needs:
+    - job: prepare-build-tag
+      artifacts: true
+    - job: build-streamer
+    - job: build-router
+    - job: build-announcer
   image: alpine:latest
   stage: deploy
 
