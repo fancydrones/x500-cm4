@@ -102,9 +102,7 @@ build-announcer:
       ./announcer
 
 update-manifest:
-  needs:
-    job: docker-build
-    artifacts: true
+  needs: [build-streamer, build-router, build-announcer]
   image: alpine:latest
   stage: deploy
 
