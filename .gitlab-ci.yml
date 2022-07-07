@@ -1,5 +1,6 @@
 variables:
   BUILDX_VER: "0.8.2"
+  KUSTOMIZE_VER: "4.5.5"
 
 build-streamer:
   image: docker:latest
