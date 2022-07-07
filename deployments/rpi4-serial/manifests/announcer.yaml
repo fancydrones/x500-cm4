@@ -32,6 +32,6 @@ spec:
           value: "2"
         - name: MAVLINK20
           value: "1"
-        image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.5
+        image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.15
         name: mavision-announcer0-recreate-strategy
       hostNetwork: true

@@ -17,7 +17,7 @@ spec:
         app: mavision-router-recreate-strategy
     spec:
       containers:
-      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.5
+      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.15
         name: mavision-router-recreate-strategy
         volumeMounts:
         - mountPath: /etc/mavlink-router/main.conf

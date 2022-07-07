@@ -26,7 +26,7 @@ spec:
             name=q_enc ! h264parse ! rtph264pay config-interval=1 name=pay0 pt=96
         - name: VIDEO_PORT
           value: "8554"
-        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.5
+        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.15
         name: mavision-streamer-recreate-strategy
         ports:
         - containerPort: 8554
