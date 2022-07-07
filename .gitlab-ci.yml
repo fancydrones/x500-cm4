@@ -15,7 +15,7 @@ build-streamer:
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
     - |
@@ -49,7 +49,7 @@ build-router:
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
     - |
@@ -82,7 +82,7 @@ build-announcer:
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
   
   script:
     - |
@@ -145,7 +145,7 @@ update-manifest:
     
     # Push update
     - cd mavx-manifest/
-    - git remote add mani-repo https://${MANIFEST_USERNAME}:${MANIFEST_PASSWORD}@gitlab.com/got.vision/mavx-manifest.git
+    - git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
     - git add .
-    - git commit -m "Mavision Streamer version to ${BUILD_TAG}"
+    - git commit -m "Update versions to ${BUILD_TAG}"
     - git push --push-option=ci.skip mani-repo main
