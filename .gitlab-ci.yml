@@ -145,7 +145,7 @@ update-manifest:
     - mv x.yaml deployments/rpi4-serial/manifests/announcer.yaml
     
     # Push update
-    - cd mavx-manifest/
+    - cd rpiuav/
     - git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
     - git add .
     - git commit -m "Update versions to ${BUILD_TAG}"
