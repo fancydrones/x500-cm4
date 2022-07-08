@@ -8,34 +8,27 @@ This repository aims at giving step by step instructs from zero to a fully opera
 ## Details
 - [Gimbal](gimbal/README.md)
 
-
-## TODO: Describe better: GPU memory:
-    sudo sh -c "echo 'gpu_mem=256' >> /boot/config.txt"
-
-## TODO: Describe better: Enable serial port for Pixhawk:
-    sudo sh -c "echo 'enable_uart=1' >> /boot/config.txt"
-
-
 ## TODOs
 - [x] Mavlink Router
 - [x] Video Announcer
 - [x] Servoes
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
-- [ ] k3s
+- [x] k3s
 - [ ] Smaller image for STREAMER, if possible
 - [ ] Smaller image for ANNOUNCER, if possible
 - [x] Build and store images in container registry
 - [ ] fluxcd.io
 - [ ] Document zerotier
 - [ ] Document autoupdate OS
-- [ ] Consider if Raspberry Pi OS or Ubuntu
+- [x] Consider if Raspberry Pi OS or Ubuntu. Raspberry PI OS for now. Will test out DietPi
 - [ ] Step-by-step guide
 - [ ] Document BOM (Bill of Materials)
 - [ ] Document power-button
 - [ ] Test (and document if successful) LED indicating running OS
 - [ ] install.sh
 - [ ] Document 6X network settings
+- [ ] Document install OS
 
 
 
