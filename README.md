@@ -36,3 +36,8 @@ This repository aims at giving step by step instructs from zero to a fully opera
 - [ ] Test (and document if successful) LED indicating running OS
 - [ ] install.sh
 - [ ] Document 6X network settings
+
+
+
+## Install
+    curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install.sh | sh -
