@@ -19,11 +19,22 @@ spec:
       containers:
       - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.15
         name: mavision-router-recreate-strategy
+        securityContext:
+          privileged: true
         volumeMounts:
         - mountPath: /etc/mavlink-router/main.conf
           name: main-conf
+        - mountPath: /dev/serial0
+          name: serial
+        ports:
+        - containerPort: 5760
+        - containerPort: 14560
+        - containerPort: 14561
       hostNetwork: true
       volumes:
-      - hostPath:
-          path: /home/roy/mavlink-router.conf
-        name: main-conf
+      - name: main-conf
+        hostPath:
+          path: /home/pi/mavlink-router.conf
+      - name: serial
+        hostPath:
+          path: /dev/serial0
