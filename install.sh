@@ -2,7 +2,7 @@
 # TODO: Check if need to elevate
 
 # Update + upgrade
-sudo apt-get update && sudo apt-get upgrade
+sudo apt-get update && sudo apt-get upgrade -y
 
 # Docker
 #curl -sSL https://get.docker.com | sh
