@@ -49,7 +49,7 @@ build-streamer:
       --platform linux/aarch64
       --tag "$CI_IMAGE_STREAMER:${BUILD_TAG}"
       --push
-      ./streamer
+      ./images/streamer
   artifacts:
     reports:
       dotenv: build.env
@@ -78,7 +78,7 @@ build-router:
       --platform linux/aarch64
       --tag "$CI_IMAGE_ROUTER:${BUILD_TAG}"
       --push
-      ./router
+      ./images/router
 
 build-announcer:
   image: docker:latest
@@ -104,7 +104,7 @@ build-announcer:
       --platform linux/aarch64
       --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
       --push
-      ./announcer
+      ./images/announcer
 
 update-manifest:
   dependencies:
