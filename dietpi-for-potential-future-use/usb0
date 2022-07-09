@@ -1,0 +1,4 @@
+#/etc/network/interfaces.d/usb0
+auto usb0
+allow-hotplug usb0
+iface usb0 inet dhcp
