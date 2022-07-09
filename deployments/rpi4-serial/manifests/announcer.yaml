@@ -17,9 +17,7 @@ spec:
         app: mavision-announcer0-recreate-strategy
     spec:
       containers:
-      - name: mavision-announcer0-recreate-strategy
-        image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.15
-        env:
+      - env:
         - name: CAMERA_URL
           value: rtsp://10.177.177.3:8554/video0
         - name: CAMERA_ID
@@ -34,4 +32,6 @@ spec:
           value: "1"
         - name: MAVLINK20
           value: "1"
+        image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.25
+        name: mavision-announcer0-recreate-strategy
       hostNetwork: true

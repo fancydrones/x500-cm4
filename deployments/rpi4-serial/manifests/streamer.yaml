@@ -17,12 +17,7 @@ spec:
         app: mavision-streamer-recreate-strategy
     spec:
       containers:
-      - name: mavision-streamer-recreate-strategy
-        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.15
-        
-        securityContext:
-          privileged: true
-        env:
+      - env:
         - name: CAMERA_PIPELINE0
           value: libcamerasrc ! video/x-raw,width=1280,height=720,format=NV12,colorimetry=bt601,interlace-mode=progressive
             ! videoflip video-direction=180 ! videorate ! video/x-raw,framerate=30/1
@@ -31,13 +26,17 @@ spec:
             name=q_enc ! h264parse ! rtph264pay config-interval=1 name=pay0 pt=96
         - name: VIDEO_PORT
           value: "8554"
+        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.25
+        name: mavision-streamer-recreate-strategy
         ports:
         - containerPort: 8554
+        securityContext:
+          privileged: true
         volumeMounts:
         - mountPath: /run/udev
           name: udev
       hostNetwork: true
       volumes:
-      - name: udev
-        hostPath:
+      - hostPath:
           path: /run/udev
+        name: udev
