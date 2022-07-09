@@ -1,12 +1,33 @@
 # RPiUAV
 This repository aims at giving step by step instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and can be replaced as this hopefully improves going forward.
 
-## Main components
-- UAV from Holybro: X500 v2 ARF: [https://shop.holybro.com/x500-v2-kit_p1288.html](https://shop.holybro.com/x500-v2-kit_p1288.html)
-- Pixhawk 6C (can be replaced if cheaper option comes available): 
+# High level
+You build you own UAV using the recommended BOM here, and this repo provides you with software. The idea is to give you a cheap camera sensor in the sky that is not tied into any random eco system, but instead based on open source sortware and relatively cheap hardware (which hopefully also is available to buy). Should you deviate too much from the recommended BOM, you might have to either clone this repo and host everything yourself (which is not too hard to do), or convince the maintainer to include another deployment (which is OK if the setup is not too exotic).
 
-## Details
-- [Gimbal](gimbal/README.md)
+The operator will connect to the UAV using his/hers phone, and the UAV will be connected using LTE. Any direct IP based radio/link can also be used, but a separate configuration will be needed.
+
+The UAV should look something like this:
+
+![](media/uav_4.jpeg)
+
+And the handcontroller like this:
+
+![](media/handcontroller.jpeg)
+
+[More pictures can be found here.](pictures.md)
+
+## Dronecode ecosystem
+The setup is built on the foundation of [Dronecode Foundation](https://www.dronecode.org/), which means that the following projects are used:
+- [Pixhawk](https://pixhawk.org/) for autopilot hardware
+- [PX4](https://px4.io/) for autopilo software (Ardupilot will work as well, but requires a slightly different configuration)
+- [QGroundcontol](http://qgroundcontrol.com/) for handcontroller software
+
+## Other major components
+For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB recommended)](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) and the [Raspberry Pi HQ Camera](https://www.raspberrypi.com/products/raspberry-pi-high-quality-camera/) ([or v2](https://www.raspberrypi.com/products/camera-module-v2/)). For communication we are using LTE and [Zerotier](https://www.zerotier.com/) for "VPN" like connectivity. [Zerotier is free for up to 25 nodes](https://www.zerotier.com/pricing/), and resonably priced above that.
+
+## Main components
+- UAV from Holybro: [X500 v2 ARF](https://shop.holybro.com/x500-v2-kit_p1288.html)
+- Pixhawk 6X: [Standard set + M8N GPS](https://shop.holybro.com/pixhawk-6x_p1333.html)
 
 ## TODOs
 - [x] Mavlink Router
@@ -24,8 +45,8 @@ This repository aims at giving step by step instructs from zero to a fully opera
 - [x] Consider if Raspberry Pi OS or Ubuntu. Raspberry PI OS for now. Will test out DietPi
 - [ ] Step-by-step guide
 - [ ] Document BOM (Bill of Materials)
-- [ ] Document power-button
-- [ ] Test (and document if successful) LED indicating running OS
+- [x] Document power-button
+- [x] Test (and document if successful) LED indicating running OS
 - [ ] install.sh
 - [x] Document 6X network settings
 - [ ] Document install OS
@@ -34,3 +55,12 @@ This repository aims at giving step by step instructs from zero to a fully opera
 
 ## Install
     curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install.sh | sh -
+
+## Details
+- [Gimbal](gimbal/README.md)
+
+## Shutdown button
+Connect [GND](https://pinout.xyz/pinout/ground#) and [GPIO 3](https://pinout.xyz/pinout/pin5_gpio3#) between a button. Final step is to add `dtoverlay=gpio-shutdown,gpio_pin=3` to the end of the file `/boot/config.txt` (install.sh will do this for you). A quick reboot later, and you can shut doen the OS by clicking the button. Mark that the RPi will not power down, and hence, still consume a bit of power. But the OS will be cleanly shut down, to prevent currupted files. This in combination with a status LED will make sure your RPi will operate for a long time.
+
+## Staus LED
+Connect the short leg of the LED to an resistor of about 480OHM, and the other side of the resistor to [GND](https://pinout.xyz/pinout/ground#). The long leg of the LED you connect to [GPIO 17](https://pinout.xyz/pinout/pin11_gpio17#). Also add `dtoverlay=gpio-led,gpio=17,trigger=default-on,label=statusled0` to the end of the file `/boot/config.txt` (install.sh will do this for you). Reboot, and you will have en external LED, that can be much easier for the operator to see than the fixed on RPi.
