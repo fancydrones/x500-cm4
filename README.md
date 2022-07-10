@@ -25,32 +25,27 @@ The setup is built on the foundation of [Dronecode Foundation](https://www.drone
 ## Other major components
 For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB recommended)](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) and the [Raspberry Pi HQ Camera](https://www.raspberrypi.com/products/raspberry-pi-high-quality-camera/) ([or v2](https://www.raspberrypi.com/products/camera-module-v2/)). For communication we are using LTE and [Zerotier](https://www.zerotier.com/) for "VPN" like connectivity. [Zerotier is free for up to 25 nodes](https://www.zerotier.com/pricing/), and resonably priced above that.
 
-## Main components
-- UAV from Holybro: [X500 v2 ARF](https://shop.holybro.com/x500-v2-kit_p1288.html)
-- Pixhawk 6X: [Standard set + M8N GPS](https://shop.holybro.com/pixhawk-6x_p1333.html)
-
 ## TODOs
 - [x] Mavlink Router
 - [x] Video Announcer
 - [x] Servoes
-- [ ] Document use of pan/tilt servoes
-- [ ] Document 3D model for pant/tilt setup
 - [x] k3s
-- [ ] Smaller image for STREAMER, if possible
 - [x] Smaller image for ANNOUNCER, if possible
 - [x] Build and store images in container registry
+- [x] Consider if Raspberry Pi OS or Ubuntu. Raspberry PI OS for now. Will test out DietPi
+- [x] Document BOM (Bill of Materials)
+- [x] Document power-button
+- [x] Test (and document if successful) LED indicating running OS
+- [x] Document 6X network settings
+- [ ] Document use of pan/tilt servoes
+- [ ] Document 3D model for pant/tilt setup
 - [ ] fluxcd.io
 - [ ] Document zerotier
 - [ ] Document autoupdate OS
-- [x] Consider if Raspberry Pi OS or Ubuntu. Raspberry PI OS for now. Will test out DietPi
 - [ ] Step-by-step guide
-- [ ] Document BOM (Bill of Materials)
-- [x] Document power-button
-- [x] Test (and document if successful) LED indicating running OS
 - [ ] install.sh (only missing cgroup part)
-- [x] Document 6X network settings
+- [ ] Smaller image for STREAMER, if possible
 - [ ] Document install OS
-
 
 
 ## Install
