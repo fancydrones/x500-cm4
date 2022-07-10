@@ -1,22 +1,23 @@
 FROM python:3-alpine
 
-RUN apk update && apk add --no-cache libcamera
+RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
+
+RUN apk update && apk add --no-cache libcamera-dev
         #&&  rm -rf /var/cache/apk/*
 
-RUN apk add --no-cache gstreamer
-
+RUN apk add --no-cache gstreamer-dev
+RUN apk add --no-cache gst-plugins-good
+RUN apk add --no-cache gst-plugins-bad
 RUN apk add --no-cache gst-plugins-base-dev
-#RUN apk add --no-cache cairo-dev
-#RUN apk add --no-cache py3-cairo
-#RUN apk add --no-cache gcc
-#RUN apk add --no-cache musl-dev
+RUN apk add --no-cache gst-plugins-ugly
+RUN apk add --no-cache cairo-dev
+RUN apk add --no-cache py3-cairo
+RUN apk add --no-cache gcc
+RUN apk add --no-cache musl-dev
 
-#RUN apk add --no-cache gst-rtsp-server
-
-
-
-#RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
-#RUN apt-get install gir1.2-gst-rtsp-server-1.0 -y
+RUN apk add --no-cache gst-rtsp-server
+RUN apk add --no-cache gobject-introspection-dev
+RUN apk add --no-cache py3-gobject3
 
 WORKDIR /src
 

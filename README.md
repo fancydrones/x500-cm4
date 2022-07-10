@@ -2,7 +2,7 @@
 This repository aims at giving step by step instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and can be replaced as this hopefully improves going forward.
 
 # High level
-You build you own UAV using the recommended BOM here, and this repo provides you with software. The idea is to give you a cheap camera sensor in the sky that is not tied into any random eco system, but instead based on open source sortware and relatively cheap hardware (which hopefully also is available to buy). Should you deviate too much from the recommended BOM, you might have to either clone this repo and host everything yourself (which is not too hard to do), or convince the maintainer to include another deployment (which is OK if the setup is not too exotic).
+You build you own UAV using the recommended BOM here, and this repo provides you with software. The idea is to give you a cheap camera sensor in the sky that is not tied into any random eco system, but instead based on open source sortware and relatively cheap hardware (which hopefully also is available to buy). Should you deviate too much from the [recommended BOM](bom.md), you might have to either clone this repo and host everything yourself (which is not too hard to do), or convince the maintainer to include another deployment (which is OK if the setup is not too exotic).
 
 The operator will connect to the UAV using his/hers phone, and the UAV will be connected using LTE. Any direct IP based radio/link can also be used, but a separate configuration will be needed.
 
@@ -37,7 +37,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Document 3D model for pant/tilt setup
 - [x] k3s
 - [ ] Smaller image for STREAMER, if possible
-- [ ] Smaller image for ANNOUNCER, if possible
+- [x] Smaller image for ANNOUNCER, if possible
 - [x] Build and store images in container registry
 - [ ] fluxcd.io
 - [ ] Document zerotier
@@ -47,7 +47,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Document BOM (Bill of Materials)
 - [x] Document power-button
 - [x] Test (and document if successful) LED indicating running OS
-- [ ] install.sh
+- [ ] install.sh (only missing cgroup part)
 - [x] Document 6X network settings
 - [ ] Document install OS
 
