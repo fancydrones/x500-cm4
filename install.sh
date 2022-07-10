@@ -20,9 +20,8 @@ sudo sh -c "echo 'dtoverlay=gpio-led,gpio=17,trigger=default-on,label=statusled0
 curl -s https://install.zerotier.com | sudo bash
 
 # cgroups
-#sudo sh -c "echo 'cgroup_enable=memory' >> /boot/cmdline.txt"
-#sudo sh -c "echo 'cgroup_memory=1' >> /boot/cmdline.txt"
-# cgroup_memory=1 cgroup_enable=memory
+# Need to append the lines to allow K3S to work properly
+sudo sed -i '$s/$/ cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
 
 # Update + upgrade
 sudo apt-get update && sudo apt-get upgrade -y
