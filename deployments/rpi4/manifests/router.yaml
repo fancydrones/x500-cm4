@@ -17,7 +17,7 @@ spec:
         app: mavision-router-recreate-strategy
     spec:
       containers:
-      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.29
+      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.33
         name: mavision-router-recreate-strategy
         ports:
         - containerPort: 5760
