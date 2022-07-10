@@ -133,7 +133,7 @@ update-manifest:
     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/streamer:${BUILD_TAG}
     - kustomize edit add resource rpiuav/deployments/rpi4/manifests/streamer.yaml
     - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4-serial/manifests/streamer.yaml
+    - mv x.yaml rpiuav/deployments/rpi4/manifests/streamer.yaml
 
     # Patch Router
     - rm kustomization.yaml -f
@@ -141,7 +141,7 @@ update-manifest:
     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
     - kustomize edit add resource rpiuav/deployments/rpi4/manifests/router.yaml
     - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4-serial/manifests/router.yaml
+    - mv x.yaml rpiuav/deployments/rpi4/manifests/router.yaml
 
     # Patch Announcer
     - rm kustomization.yaml -f
@@ -149,7 +149,7 @@ update-manifest:
     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
     - kustomize edit add resource rpiuav/deployments/rpi4/manifests/announcer.yaml
     - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4-serial/manifests/announcer.yaml
+    - mv x.yaml rpiuav/deployments/rpi4/manifests/announcer.yaml
     
     # Push update
     - cd rpiuav/
