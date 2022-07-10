@@ -1,0 +1,29 @@
+FROM python:3-alpine
+
+RUN apk update && apk add --no-cache libcamera
+        #&&  rm -rf /var/cache/apk/*
+
+RUN apk add --no-cache gstreamer
+
+RUN apk add --no-cache gst-plugins-base-dev
+#RUN apk add --no-cache cairo-dev
+#RUN apk add --no-cache py3-cairo
+#RUN apk add --no-cache gcc
+#RUN apk add --no-cache musl-dev
+
+#RUN apk add --no-cache gst-rtsp-server
+
+
+
+#RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
+#RUN apt-get install gir1.2-gst-rtsp-server-1.0 -y
+
+WORKDIR /src
+
+COPY requirements.txt requirements.txt
+RUN python -m pip install --upgrade pip
+RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
+
+COPY *.py ./
+
+CMD ["python3", "main.py"]
