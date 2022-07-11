@@ -40,5 +40,8 @@ echo "  dns-nameservers 1.1.1.1" | sudo tee -a /etc/network/interfaces.d/eth0 > 
 sudo apt-get install unattended-upgrades -y
 sudo dpkg-reconfigure --priority=medium unattended-upgrades
 
+# Flux
+curl -s https://fluxcd.io/install.sh | sudo bash
+
 # Update + upgrade
 sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
