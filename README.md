@@ -40,13 +40,12 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [x] install.sh (only missing cgroup part)
 - [x] Document autoupdate OS
 - [x] Document install OS
+- [x] Document zerotier
 - [ ] fluxcd.io
-- [ ] Document zerotier
 - [ ] Step-by-step guide
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Smaller image for STREAMER, if possible
-
 
 
 ## Install

@@ -8,4 +8,3 @@ Description based on the guide at [this link](https://www.stderr.nl/Blog/Hardwar
 ## Step by step
 ### Overlay
     sudo sh -c "echo 'dtoverlay=gpio-shutdown,gpio_pin=3' >> /boot/config.txt"
-

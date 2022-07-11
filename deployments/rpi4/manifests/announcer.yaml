@@ -19,7 +19,7 @@ spec:
       containers:
       - env:
         - name: CAMERA_URL
-          value: rtsp://10.177.177.3:8554/video0
+          value: rtsp://10.10.10.2:8554/video0
         - name: CAMERA_ID
           value: "100"
         - name: CAMERA_NAME
