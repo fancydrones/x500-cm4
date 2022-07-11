@@ -32,8 +32,8 @@ echo "  gateway 10.9.8.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/nu
 echo "  dns-nameservers 1.1.1.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
 
 # Automatic updates
-sudo apt-get install unattended-upgrades
-sudo dpkg-reconfigure --priority=low unattended-upgrades -y
+sudo apt-get install unattended-upgrades -y
+sudo dpkg-reconfigure --priority=medium unattended-upgrades -y
 
 # Update + upgrade
 sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade
