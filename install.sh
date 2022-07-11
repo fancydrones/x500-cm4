@@ -2,7 +2,7 @@
 # TODO: Check if need to elevate
 
 # Update + upgrade
-sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade
 
 # Docker
 #curl -sSL https://get.docker.com | sh
@@ -36,4 +36,4 @@ sudo apt-get install unattended-upgrades
 sudo dpkg-reconfigure --priority=low unattended-upgrades -y
 
 # Update + upgrade
-sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade
