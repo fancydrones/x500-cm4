@@ -2,7 +2,11 @@
 # TODO: Check if need to elevate
 
 # Update + upgrade
-sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade
+sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
+
+ cgroups
+# Need to append the lines to allow K3S to work properly
+sudo sed -i '$s/$/ cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
 
 # Docker
 #curl -sSL https://get.docker.com | sh
@@ -32,8 +36,8 @@ echo "  gateway 10.9.8.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/nu
 echo "  dns-nameservers 1.1.1.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
 
 # Automatic updates
-sudo apt-get install unattended-upgrades
-sudo dpkg-reconfigure --priority=medium unattended-upgrades -y
+sudo apt-get install unattended-upgrades -y
+sudo dpkg-reconfigure --priority=medium unattended-upgrades
 
 # Update + upgrade
-sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade
+sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
