@@ -1,2 +1,2 @@
-# Zerotier
+# Configure Zerotier
 TODO

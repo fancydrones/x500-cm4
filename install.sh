@@ -23,5 +23,17 @@ curl -s https://install.zerotier.com | sudo bash
 # Need to append the lines to allow K3S to work properly
 sudo sed -i '$s/$/ cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
 
+# Set static IP for wired ethernet
+echo "auto eth0" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
+echo "iface eth0 inet static" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
+echo "  address 10.9.8.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
+echo "  netmask 255.255.255.0" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
+echo "  gateway 10.9.8.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
+echo "  dns-nameservers 1.1.1.1" | sudo tee -a /etc/network/interfaces.d/eth0 > /dev/null
+
+# Automatic updates
+sudo apt-get install unattended-upgrades
+sudo dpkg-reconfigure --priority=low unattended-upgrades -y
+
 # Update + upgrade
 sudo apt-get update && sudo apt-get upgrade -y
