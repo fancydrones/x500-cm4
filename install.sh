@@ -1,5 +1,6 @@
 #!/bin/bash
 # TODO: Check if need to elevate
+# TODO: Make idempotent (possible to run multiple times)
 
 # Update + upgrade
 sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
