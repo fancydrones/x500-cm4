@@ -45,3 +45,6 @@ curl -s https://fluxcd.io/install.sh | sudo bash
 
 # Update + upgrade
 sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
+
+# Prepare K3S for flux
+sudo sh -c "echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> /etc/profile"
