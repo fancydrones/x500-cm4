@@ -4,6 +4,7 @@ metadata:
   labels:
     name: mavision-streamer
   name: mavision-streamer
+  namespace: rpiuav
 spec:
   replicas: 1
   selector:

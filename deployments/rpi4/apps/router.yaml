@@ -4,6 +4,7 @@ metadata:
   labels:
     name: mavision-router
   name: mavision-router
+  namespace: rpiuav
 spec:
   replicas: 1
   selector:
