@@ -4,6 +4,7 @@ metadata:
   labels:
     name: mavision-announcer
   name: mavision-announcer
+  namespace: rpiuav
 spec:
   replicas: 1
   selector:
