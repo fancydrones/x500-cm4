@@ -1,13 +1,9 @@
 # Configure Flux
-## Init
+## Install
 Create the initial flux-file using this command:
-    flux install --version=latest --export > gotk-component.yaml
-    kubectl apply -f gotk-component.yaml
 
+    kubectl apply -f https://gitlab.com/got.vision/rpiuav/-/raw/main/deployments/rpi4/flux-system/gotk-components.yaml?inline=false
 
+    flux create source git flux-infra --url=https://gitlab.com/got.vision/rpiuav --branch=main --interval=1m
 
-    flux bootstrap gitlab --owner=got.vision --repository=rpiuav --path=deployments/rpi4 --reconsile
-
-
-
-flux create source git flux-infra   --url=https://gitlab.com/got.vision/rpiuav   --interval=1m --branch=main
+    flux create kustomization rpi4 --source=flux-infra --path="./deployments/rpi4" --prune=true --interval=5m
