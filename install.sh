@@ -48,3 +48,7 @@ sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
 
 # Prepare K3S for flux
 sudo sh -c "echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> /etc/profile"
+
+
+# Copy initial mavlink-router.conf
+curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/deployments/rpi4/manifests/mavlink-router.conf > mavlink-router.conf
