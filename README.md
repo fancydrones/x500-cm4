@@ -42,22 +42,31 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [x] Document install OS
 - [x] Document zerotier
 - [x] fluxcd.io
-- [ ] Step-by-step guide
+- [x] Step-by-step guide
+- [ ] Separate service for config
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
+- [ ] Document hardware installation
+- [ ] Document high level concept
 - [ ] Smaller image for STREAMER, if possible
-- [ ] Separate service for config
 
 
 ## Install software
-### Step 1 - base software
+### Step 1 - Install OS
+Follow [these insstruction](os.md)
+
+### Step 2 - base software
     curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install_base.sh | sh -
 
-### Step 2 - reboot
+### Step 3 - reboot
     sudo reboot
 
-### Step 3 - specific software
+### Step 4 - specific software
     curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install_rpiuav.sh | sh -
+
+
+### Step 5 - join Zerotier network
+Follow [instructions here](zerotier.md)
     
 
 ## Details
