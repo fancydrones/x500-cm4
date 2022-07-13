@@ -49,8 +49,16 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Separate service for config
 
 
-## Install
-    curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install.sh | sh -
+## Install software
+### Step 1 - base software
+    curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install_base.sh | sh -
+
+### Step 2 - reboot
+    sudo reboot
+
+### Step 3 - specific software
+    curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install_rpiuav.sh | sh -
+    
 
 ## Details
 - [Gimbal](gimbal/README.md)
