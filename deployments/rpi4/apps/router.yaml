@@ -27,15 +27,18 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-        - mountPath: /etc/mavlink-router/main.conf
+        - mountPath: /etc/mavlink-router
           name: main-conf
         - mountPath: /dev/serial0
           name: serial
       hostNetwork: true
       volumes:
-      - hostPath:
-          path: /home/pi/mavlink-router.conf
-        name: main-conf
+      - name: main-conf
+        configMap:
+          name: rpi4-config
+          items:
+          - key: ROUTER_CONFIG
+            path: main.conf
       - hostPath:
           path: /dev/serial0
         name: serial
