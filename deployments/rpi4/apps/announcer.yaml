@@ -20,7 +20,10 @@ spec:
       containers:
       - env:
         - name: CAMERA_URL
-          value: rtsp://10.10.10.2:8554/video0
+          valueFrom:
+            configMapKeyRef:
+              name: rpi4-config
+              key: ANNOUNCER_CAMERA_URL
         - name: CAMERA_ID
           value: "100"
         - name: CAMERA_NAME
@@ -30,7 +33,10 @@ spec:
         - name: SYSTEM_PORT
           value: "14560"
         - name: SYSTEM_ID
-          value: "1"
+          valueFrom:
+            configMapKeyRef:
+              name: rpi4-config
+              key: ANNOUNCER_SYSTEM_ID
         - name: MAVLINK20
           value: "1"
         image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.51
