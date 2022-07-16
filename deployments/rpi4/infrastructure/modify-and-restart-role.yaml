@@ -1,0 +1,11 @@
+# TODO: Reduce access grabted in this role
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: rpiuav
+  name: modify-and-restart
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
