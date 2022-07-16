@@ -6,5 +6,5 @@ metadata:
 rules:
 - apiGroups: ["", "apps", "extensions"]
   resources: ["deployments", "configmaps"]
-  resourceNames: ["${DEPLOYMENT}"]
+  resourceNames: ["*"]
   verbs: ["get", "patch", "list", "watch"]
