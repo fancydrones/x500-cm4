@@ -4,7 +4,11 @@ metadata:
   namespace: rpiuav
   name: modify-and-restart
 rules:
-- apiGroups: ["", "apps", "extensions"]
-  resources: ["deployments", "configmaps"]
+- apiGroups: ["apps", "extensions"]
+  resources: ["deployments"]
+  resourceNames: ["*"]
+  verbs: ["get", "patch", "list", "watch"]
+- apiGroups: ["*"]
+  resources: ["configmaps"]
   resourceNames: ["*"]
   verbs: ["get", "patch", "list", "watch"]
