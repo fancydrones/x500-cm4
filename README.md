@@ -49,6 +49,12 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Document hardware installation
 - [ ] Document high level concept
 - [ ] Smaller image for STREAMER, if possible
+- [ ] Service for Router
+- [ ] Service for Companion
+- [ ] IngressRoute for Companion
+- [ ] Secret for Companion
+- [ ] API call for modify ConfigMap from Companion
+- [ ] API call for restarting deployment from Companion
 
 
 ## Install software
