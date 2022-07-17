@@ -18,7 +18,7 @@ spec:
         app: mavision-router-recreate-strategy
     spec:
       containers:
-      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.51
+      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.73
         name: mavision-router-recreate-strategy
         ports:
         - containerPort: 5760
@@ -33,12 +33,12 @@ spec:
           name: serial
       hostNetwork: true
       volumes:
-      - name: main-conf
-        configMap:
-          name: rpi4-config
+      - configMap:
           items:
           - key: ROUTER_CONFIG
             path: main.conf
+          name: rpi4-config
+        name: main-conf
       - hostPath:
           path: /dev/serial0
         name: serial

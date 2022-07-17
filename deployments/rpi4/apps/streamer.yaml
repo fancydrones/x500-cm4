@@ -22,11 +22,11 @@ spec:
         - name: CAMERA_PIPELINE0
           valueFrom:
             configMapKeyRef:
-              name: rpi4-config
               key: STREAMER_CAMERA_PIPELINE0
+              name: rpi4-config
         - name: VIDEO_PORT
           value: "8554"
-        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.51
+        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.73
         name: mavision-streamer-recreate-strategy
         ports:
         - containerPort: 8554
