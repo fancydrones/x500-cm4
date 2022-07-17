@@ -40,7 +40,7 @@ URL: https://${KUBERNETES_PORT_443_TCP_ADDR}/api/v1/namespaces
 
 ### Restart deployment
     token = "xxxx"
-    url = "https://10.10.10.2:6443/apis/apps/v1/namespaces/rpiuav/deployments/mavision-router?fieldManager=rpi-modifier"
+    url = "https://10.10.10.2:6443/apis/apps/v1/namespaces/rpiuav/deployments/router?fieldManager=rpi-modifier"
     headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
     options = [ssl: [cacertfile: "/home/roy/ca.crt"]]
     body = "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kubectl.kubernetes.io/restartedAt\":\"2022-07-16T15:46:00+02:00\"}}}}}"
@@ -63,4 +63,4 @@ ClusterRoleBinding - connecting servceiAccount and ClusterRole
 
 
 ## To restart
-    curl -X PATCH "$KUBE_API/apis/apps/v1/namespaces/rpiuav/deployments/mavision-router?fieldManager=rpi-modifier" -k -H "Authorization: Bearer $JWT_TOKEN" -H "Content-Type: application/strategic-merge-patch+json" -d '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2022-07-16T15:05:00+02:00"}}}}}'
+    curl -X PATCH "$KUBE_API/apis/apps/v1/namespaces/rpiuav/deployments/router?fieldManager=rpi-modifier" -k -H "Authorization: Bearer $JWT_TOKEN" -H "Content-Type: application/strategic-merge-patch+json" -d '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2022-07-16T15:05:00+02:00"}}}}}'

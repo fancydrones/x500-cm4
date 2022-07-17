@@ -2,20 +2,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    name: mavision-streamer
-  name: mavision-streamer
+    name: streamer
+  name: streamer
   namespace: rpiuav
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mavision-streamer-recreate-strategy
+      app: streamer-recreate-strategy
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: mavision-streamer-recreate-strategy
+        app: streamer-recreate-strategy
     spec:
       containers:
       - env:
@@ -27,7 +27,7 @@ spec:
         - name: VIDEO_PORT
           value: "8554"
         image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.85
-        name: mavision-streamer-recreate-strategy
+        name: streamer-recreate-strategy
         ports:
         - containerPort: 8554
         securityContext:
