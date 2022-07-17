@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: companion-strategy
-  serviceAccountName: rpimodifier
   strategy:
     type: Recreate
   template:
@@ -18,6 +17,7 @@ spec:
       labels:
         app: companion-strategy
     spec:
+      serviceAccountName: rpimodifier
       containers:
       - env:
         - name: PHX_SERVER
