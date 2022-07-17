@@ -72,6 +72,7 @@ if config_env() == :prod do
   config :companion,
     token_file: "/var/run/secrets/kubernetes.io/serviceaccount/token", # default in k8s
     namespace_file: "/var/run/secrets/kubernetes.io/serviceaccount/namespace", # default in k8s
-    kubernetes_server: System.get_env("KUBERNETES_PORT_443_TCP_ADDR"), # default in k8s
+    kubernetes_server: System.get_env("KUBERNETES_SERVICE_HOST"), # default in k8s
+    kubernetes_server_port: System.get_env("KUBERNETES_SERVICE_PORT_HTTPS"), # default in k8s
     root_ca_certificate_file: "/var/lib/rancher/k3s/server/tls/server-ca.crt" # default in k3s - needs volume mount in addition
 end

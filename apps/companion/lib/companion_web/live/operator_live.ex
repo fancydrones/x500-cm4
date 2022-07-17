@@ -31,13 +31,14 @@ defmodule CompanionWeb.OperatorLive do
     token_file = Application.get_env(:companion, :token_file)
     ca_file = Application.get_env(:companion, :root_ca_certificate_file)
     kube_server = Application.get_env(:companion, :kubernetes_server)
+    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
 
     {:ok, token} = File.read(token_file)
     token = token |> String.trim
     {:ok, namespace} = File.read(namespace_file)
     namespace = namespace |> String.trim
 
-    url = "https://#{kube_server}:6443/api/v1/namespaces/#{namespace}/configmaps/rpi4-config"
+    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config"
     Logger.info("URL: #{url}")
     headers = ["Authorization": "Bearer #{token}"]
     options = [ssl: [cacertfile: ca_file]]
@@ -46,7 +47,7 @@ defmodule CompanionWeb.OperatorLive do
     IO.inspect(response)
     200 = response.status_code
     {:ok, resp} = Jason.decode(response.body)
-    ##Logger.info(resp["data"])
+    #Logger.info(resp["data"])
     IO.inspect(resp["data"])
 
     #DroneAction.action(:shutdown_button)
