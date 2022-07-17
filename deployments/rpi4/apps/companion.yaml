@@ -30,4 +30,15 @@ spec:
         name: companion-strategy
         ports:
         - containerPort: 4000
+        volumeMounts:
+        - mountPath: /var/lib/rancher/k3s/server/tls/server-ca.crt
+          name: ca
       hostNetwork: true
+      volumes:
+      - hostPath:
+          path: /var/lib/rancher/k3s/server/tls/server-ca.crt
+        name: ca
+
+
+
+      

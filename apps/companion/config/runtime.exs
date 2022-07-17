@@ -33,14 +33,14 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  mavlink_connection =
-    System.get_env("MAVLINK_CONNECTION") ||
-      raise """
-      environment variable MAVLINK_CONNECTION is missing.
-      Can be serial, UDP or TCP.
-      """
+  # mavlink_connection =
+  #   System.get_env("MAVLINK_CONNECTION") ||
+  #     raise """
+  #     environment variable MAVLINK_CONNECTION is missing.
+  #     Can be serial, UDP or TCP.
+  #     """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  #host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   # config :companion, CompanionWeb.Endpoint,
@@ -63,10 +63,15 @@ if config_env() == :prod do
       # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: String.to_integer(System.get_env("PORT") || "4000")
+      port: port
     ],
     check_origin: false, # TODO: Consider to add back later
     secret_key_base: secret_key_base
 
-  config :mavlink, dialect: Common, connections: [mavlink_connection] #"serial:ttyTHS1:3000000"
+  #config :mavlink, dialect: Common, connections: [mavlink_connection] #"serial:ttyTHS1:3000000"
+  config :companion,
+    token_file: "/var/run/secrets/kubernetes.io/serviceaccount/token", # default in k8s
+    namespace_file: "/var/run/secrets/kubernetes.io/serviceaccount/namespace", # default in k8s
+    kubernetes_server: System.get_env("KUBERNETES_PORT_443_TCP_ADDR"), # default in k8s
+    root_ca_certificate_file: "/var/lib/rancher/k3s/server/tls/server-ca.crt" # default in k3s - needs volume mount in addition
 end

@@ -45,6 +45,7 @@ defmodule Companion.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.19"},
       {:jason, "~> 1.3"},
+      {:httpoison, "~> 1.8"},
       {:plug_cowboy, "~> 2.5"}
     ]
   end

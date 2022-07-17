@@ -65,4 +65,10 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 #config :mavlink, dialect: Common, connections: ["serial:ttyTHS1:3000000"]
-config :mavlink, dialect: Common, connections: []
+#config :mavlink, dialect: Common, connections: []
+
+config :companion,
+  token_file: "/home/roy/token",
+  namespace_file: "/home/roy/namespace",
+  kubernetes_server: "10.10.10.2",
+  root_ca_certificate_file: "/home/roy/ca.crt"
