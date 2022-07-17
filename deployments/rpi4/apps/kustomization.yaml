@@ -5,3 +5,4 @@ resources:
 - announcer.yaml
 - router.yaml
 - streamer.yaml
+- companion.yaml

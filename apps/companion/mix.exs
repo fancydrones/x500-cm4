@@ -33,7 +33,7 @@ defmodule Companion.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:mavlink_util, git: "https://github.com/beamuav/elixir_mavlink_util.git"},
+      #{:mavlink_util, git: "https://github.com/beamuav/elixir_mavlink_util.git"},
       {:phoenix, "~> 1.6.11"},
       {:phoenix_html, "~> 3.2"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},

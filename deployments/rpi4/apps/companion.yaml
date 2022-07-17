@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: companion
+  name: companion
+  namespace: rpiuav
+spec:
+  serviceAccountName: rpimodifier
+  replicas: 1
+  selector:
+    matchLabels:
+      app: companion-strategy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: companion-strategy
+    spec:
+      containers:
+      - env:
+        - name: PHX_SERVER
+          value: "True"
+        - name: SECRET_KEY_BASE # TODO: Generate a secret for each installation instead of hardcoding
+          value: "GM4Nv3AsIrj36aK6y2NJYmuKZSKoJ9i5bjxaLSLTH+2A16LC69JzQzHe7X3m7YJR"
+        - name: MAVLINK_CONNECTION
+          value: "udpout:127.0.0.1:14550"
+        image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.51
+        name: companion-strategy
+        ports:
+        - containerPort: 4000
+      hostNetwork: true

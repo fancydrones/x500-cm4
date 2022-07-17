@@ -176,6 +176,14 @@ update-manifest:
     - kustomize edit add resource rpiuav/deployments/rpi4/apps/announcer.yaml
     - kustomize build . > x.yaml
     - mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
+
+    # Patch Companion
+    - rm kustomization.yaml -f
+    - kustomize create
+    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
+    - kustomize edit add resource rpiuav/deployments/rpi4/apps/companion.yaml
+    - kustomize build . > x.yaml
+    - mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
     
     # Push update
     - cd rpiuav/
