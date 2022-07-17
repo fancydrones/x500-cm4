@@ -7,59 +7,24 @@ defmodule CompanionWeb.OperatorLive do
     {:ok, socket}
   end
 
-  def handle_event("restart_router", _, socket) do
-    Logger.info("Clicked restart Router")
+  def handle_event("set_config_system_id_123456", _, socket) do
+    Logger.info("Clicked Set System ID = 123456")
 
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
-
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
-
-    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config?fieldManager=rpi-modifier"
-    headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
-    options = [ssl: [cacertfile: ca_file]]
-    body = "{\"data\":{\"ANNOUNCER_SYSTEM_ID\":\"123456\"}}"
-    {:ok, response} = HTTPoison.patch(url, body, headers, options)
-
-    IO.inspect(response)
-    200 = response.status_code
+    set_system_id("123456")
 
     {:noreply, socket}
   end
 
-  def handle_event("restart_streamer", _, socket) do
-    Logger.info("Clicked restart Streamer")
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+  def handle_event("set_config_system_id_1", _, socket) do
+    Logger.info("Clicked Set System ID = 1")
 
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
-
-    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config?fieldManager=rpi-modifier"
-    headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
-    options = [ssl: [cacertfile: ca_file]]
-    body = "{\"data\":{\"ANNOUNCER_SYSTEM_ID\":\"1\"}}"
-    {:ok, response} = HTTPoison.patch(url, body, headers, options)
-
-    IO.inspect(response)
-    200 = response.status_code
+    set_system_id("1")
 
     {:noreply, socket}
   end
 
-  def handle_event("restart_announcer", _, socket) do
-    Logger.info("Clicked restart Announcer")
+  def handle_event("get_config", _, socket) do
+    Logger.info("Clicked restart Get Config")
 
     namespace_file = Application.get_env(:companion, :namespace_file)
     token_file = Application.get_env(:companion, :token_file)
@@ -87,9 +52,31 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
-  def handle_event("restart_temp", _, socket) do
-    Logger.info("Clicked restart Temp")
+  def handle_event("restart_router", _, socket) do
+    Logger.info("Clicked restart Router")
 
+    restart_deployment("router")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("restart_streamer", _, socket) do
+    Logger.info("Clicked restart Streamer")
+
+    restart_deployment("streamer")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("restart_announcer", _, socket) do
+    Logger.info("Clicked restart Announcer")
+
+    restart_deployment("announcer")
+
+    {:noreply, socket}
+  end
+
+  defp set_system_id(system_id) do
     namespace_file = Application.get_env(:companion, :namespace_file)
     token_file = Application.get_env(:companion, :token_file)
     ca_file = Application.get_env(:companion, :root_ca_certificate_file)
@@ -101,11 +88,39 @@ defmodule CompanionWeb.OperatorLive do
     {:ok, namespace} = File.read(namespace_file)
     namespace = namespace |> String.trim
 
-    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/rpiuav/deployments/mavision-router?fieldManager=rpi-modifier"
-    Logger.info("URL: #{url}")
+    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config?fieldManager=rpi-modifier"
     headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
     options = [ssl: [cacertfile: ca_file]]
 
+    b =
+      %{
+        data: %{
+          "ANNOUNCER_SYSTEM_ID": system_id
+        }
+      }
+    body = Jason.encode!(b)
+    {:ok, response} = HTTPoison.patch(url, body, headers, options)
+
+    IO.inspect(response)
+    200 = response.status_code
+  end
+
+  defp restart_deployment(deployment_name) do
+    namespace_file = Application.get_env(:companion, :namespace_file)
+    token_file = Application.get_env(:companion, :token_file)
+    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
+    kube_server = Application.get_env(:companion, :kubernetes_server)
+    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+
+    {:ok, token} = File.read(token_file)
+    token = token |> String.trim
+    {:ok, namespace} = File.read(namespace_file)
+    namespace = namespace |> String.trim
+
+    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/rpiuav/deployments/#{deployment_name}?fieldManager=rpi-modifier"
+    Logger.info("URL: #{url}")
+    headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
+    options = [ssl: [cacertfile: ca_file]]
 
     b =
       %{
@@ -123,20 +138,22 @@ defmodule CompanionWeb.OperatorLive do
 
     {:ok, response} = HTTPoison.patch(url, body, headers, options)
 
-    # TODO
-
-    {:noreply, socket}
   end
-
 
   def render(assigns) do
     ~L"""
     <div id="liveoperator_landinggear_container">
+      <h1>Update Config:</h1>
+      <button phx-click="set_config_system_id_123456">System ID = 123456</button>
+      <button phx-click="set_config_system_id_1">System ID = 1</button>
+      <button phx-click="get_config">Get All Config</button>
+    </div>
+
+    <div id="liveoperator_landinggear_container">
       <h1>Restart apps:</h1>
-      <button phx-click="restart_router">Router (System ID = 123456)</button>
-      <button phx-click="restart_streamer">Streamer (System ID = 1)</button>
-      <button phx-click="restart_announcer">Announcer (Get All Config)</button>
-      <button phx-click="restart_temp">TEMP (Restart Router)</button>
+      <button phx-click="restart_router">Router</button>
+      <button phx-click="restart_streamer">Streamer</button>
+      <button phx-click="restart_announcer">Announcer</button>
     </div>
     """
   end
