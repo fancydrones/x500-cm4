@@ -9,6 +9,7 @@ metadata:
 spec:
   replicas: 1
   selector:
+    app.kubernetes.io/name: companion-deployment
     matchLabels:
       app: companion-deployment
   strategy:
