@@ -17,7 +17,7 @@ stages:
   - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
 
 .install_kustomize: &install_kustomize
-  - apt-get update && apt-get install -y git curl gettext openssh
+  - apk --no-cache add git curl gettext openssh
   - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
   - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
   - git config --global user.email "rpiuav@got.vision"
