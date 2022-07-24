@@ -7,3 +7,4 @@ resources:
 - streamer.yaml
 - companion.yaml
 - companion-service.yaml
+- companion-ingress.yaml
