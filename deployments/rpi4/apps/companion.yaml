@@ -17,6 +17,7 @@ spec:
     metadata:
       labels:
         app: companion-strategy
+        app.kubernetes.io/name: companion-deployment
     spec:
       containers:
       - env:
