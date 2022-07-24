@@ -18,7 +18,7 @@ spec:
         app: router-recreate-strategy
     spec:
       containers:
-      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.137
+      - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.142
         name: router-recreate-strategy
         ports:
         - containerPort: 5760
