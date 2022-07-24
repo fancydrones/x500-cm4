@@ -1,6 +1,6 @@
 # Video streamer
 
-TRIGGER 1
+TRIGGER 12
 
 
 Using GStreamer to send video

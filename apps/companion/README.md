@@ -1,6 +1,6 @@
 # Companion
 
-TRIGGER 1
+TRIGGER 12
 
 
 ## New project
