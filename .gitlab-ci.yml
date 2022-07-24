@@ -5,6 +5,7 @@ variables:
 stages:
 - prebuild
 - build
+- deploy
 
 .install_buildx: &install_buildx
   - echo "Install BuildX"
@@ -30,6 +31,7 @@ stages:
       --tag "$IMAGE_TAG:${BUILD_TAG}"
       --push
       ./$APP_DIR
+  - echo "$DEPLOY_TAG=true" >> build.env  
 
 .update_image_tag: &update_image_tag
   - echo "Deploying tag IMAGE_TAG:${BUILD_TAG}"
@@ -59,7 +61,7 @@ prepare-build-tag:
         tag="$CI_COMMIT_REF_SLUG"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
-    - echo "BUILD_TAG=$tag" >> build.env  
+    - echo "BUILD_TAG=$tag" >> build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -74,9 +76,12 @@ prepare-build-tag:
       command: ["--experimental"]
   script:
     - *install_buildx
-    - *install_kustomize
+    #- *install_kustomize
     - *build_image
-    - *update_image_tag
+    #- *update_image_tag
+  artifacts:
+    reports:
+      dotenv: build.env
 
 build-streamer:
   extends: .build_image_template
@@ -84,6 +89,7 @@ build-streamer:
     IMAGE_TAG: $CI_IMAGE_STREAMER
     APP_DIR: apps/streamer
     APP_NAME: streamer
+    DEPLOY_TAG: DEPLOY_STREAMER
   only:
     changes:
       - apps/streamer/*
@@ -94,6 +100,7 @@ build-router:
     IMAGE_TAG: $CI_IMAGE_ROUTER
     APP_DIR: apps/router
     APP_NAME: router
+    DEPLOY_TAG: DEPLOY_ROUTER
   only:
     changes:
       - apps/router/*
@@ -104,6 +111,7 @@ build-announcer:
     IMAGE_TAG: $CI_IMAGE_ANNOUNCER
     APP_DIR: apps/announcer
     APP_NAME: announcer
+    DEPLOY_TAG: DEPLOY_ANNOUNCER
   only:
     changes:
       - apps/announcer/*
@@ -114,6 +122,98 @@ build-companion:
     IMAGE_TAG: $CI_IMAGE_COMPANION
     APP_DIR: apps/companion
     APP_NAME: companion
+    DEPLOY_TAG: DEPLOY_COMPANION
   only:
     changes:
       - apps/companion/*
+
+
+update-manifest:
+  dependencies:
+    - prepare-build-tag
+    - build-streamer
+    - build-router
+    - build-announcer
+    - build-companion
+  image: alpine:latest
+  stage: deploy
+  before_script:
+    # Prepare Git and Kustomize
+    - echo "before"
+    - apk --no-cache add git curl gettext openssh
+    - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+    - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
+    - git config --global user.email "rpiuav@got.vision"
+    - git config --global user.name "RPi UAV Builder"
+
+  script:
+    - echo "Deploying tag ${BUILD_TAG}"
+    - git clone https://gitlab.com/got.vision/rpiuav.git
+
+    # Patch Streamer
+    - |
+      if [ -v $DEPLOY_STREAMER ];
+      then
+        echo "Patch Streamer"
+        rm kustomization.yaml -f
+        kustomize create
+        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/streamer:${BUILD_TAG}
+        kustomize edit add resource rpiuav/deployments/rpi4/apps/streamer.yaml
+        kustomize build . > x.yaml
+        mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
+
+        export PATCH=true
+      fi
+
+    # Patch Router
+    - |
+      if [ -v $DEPLOY_ROUTER ];
+      then
+        rm kustomization.yaml -f
+        kustomize create
+        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
+        kustomize edit add resource rpiuav/deployments/rpi4/apps/router.yaml
+        kustomize build . > x.yaml
+        mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
+
+        export PATCH=true
+      fi
+
+    # Patch Announcer
+    - |
+      if [ -v $DEPLOY_ANNOUNCER ];
+      then
+        rm kustomization.yaml -f
+        kustomize create
+        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
+        kustomize edit add resource rpiuav/deployments/rpi4/apps/announcer.yaml
+        kustomize build . > x.yaml
+        mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
+
+        export PATCH=true
+      fi
+
+    # Patch Companion
+    - |
+      if [ -v $DEPLOY_COMPANION ];
+      then
+        rm kustomization.yaml -f
+        kustomize create
+        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
+        kustomize edit add resource rpiuav/deployments/rpi4/apps/companion.yaml
+        kustomize build . > x.yaml
+        mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
+
+        export PATCH=true
+      fi
+    
+
+    # Push update
+    - |
+      if [ -v $PATCH ];
+        cd rpiuav/
+        git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
+        git add .
+        git commit -m "Update versions to ${BUILD_TAG}"
+        git push --push-option=ci.skip mani-repo main
+      fi
