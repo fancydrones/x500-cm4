@@ -1,5 +1,4 @@
 # Companion
-
 Supporting web service to configure UAV setup
 
 ## New project
