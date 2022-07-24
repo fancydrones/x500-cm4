@@ -1,3 +1,3 @@
 # Announcer for video stream
 
-TRIGGER 123
+TRIGGER 1234
