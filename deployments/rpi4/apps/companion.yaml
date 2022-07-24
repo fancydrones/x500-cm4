@@ -10,13 +10,13 @@ spec:
   selector:
     app.kubernetes.io/name: companion-deployment
     matchLabels:
-      app: companion-deployment
+      app: companion-strategy
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: companion-deployment
+        app: companion-strategy
     spec:
       containers:
       - env:
@@ -27,7 +27,7 @@ spec:
         - name: MAVLINK_CONNECTION
           value: udpout:127.0.0.1:14550
         image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.154
-        name: companion-deployment
+        name: companion-strategy
         ports:
         - containerPort: 4000
         volumeMounts:
