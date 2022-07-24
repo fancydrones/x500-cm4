@@ -5,10 +5,10 @@ variables:
 stages:
 - prebuild
 - build
-- deploy
+#- deploy
 
 .install_buildx: &install_buildx
-  # Prepare BuildX
+  - echo "Install BuildX"
   - mkdir -p ~/.docker/cli-plugins
   - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
   - chmod a+x ~/.docker/cli-plugins/docker-buildx
@@ -17,12 +17,21 @@ stages:
   - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
 
 .install_kustomize: &install_kustomize
+  - echo "Install Kustomize"
   - apk --no-cache add git curl gettext openssh
   - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
   - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
   - git config --global user.email "rpiuav@got.vision"
   - git config --global user.name "RPi UAV Builder"
-  
+
+.build_image: &build_image
+  - echo "Building tag IMAGE_TAG:${BUILD_TAG}"
+  - docker buildx build
+      --platform linux/aarch64
+      --tag "$IMAGE_TAG:${BUILD_TAG}"
+      --push
+      ./$APP_DIR
+
 
 prepare-build-tag:
   stage: prebuild
@@ -52,135 +61,134 @@ build-streamer:
   script:
     - *install_buildx
     - *install_kustomize
-    - echo "Building tag ${BUILD_TAG}"
-    - docker buildx build
-      --platform linux/aarch64
-      --tag "$CI_IMAGE_STREAMER:${BUILD_TAG}"
-      --push
-      ./apps/streamer
+    - *build_image
+
+  variables:
+    IMAGE_TAG: $CI_IMAGE_STREAMER
+    APP_DIR: apps/streamer
   # only:
   #   changes:
   #     - apps/streamer/*
 
-build-router:
-  image: docker:latest
-  stage: build
-  dependencies:
-    - prepare-build-tag
-  services:
-    - name: docker:dind
-      command: ["--experimental"]
-  script:
-    - *install_buildx
-    - *install_kustomize
-    - echo "Building tag ${BUILD_TAG}"
-    - docker buildx build
-      --platform linux/aarch64
-      --tag "$CI_IMAGE_ROUTER:${BUILD_TAG}"
-      --push
-      ./apps/router
-  # only:
-  #   changes:
-  #     - apps/router/*
+# build-router:
+#   image: docker:latest
+#   stage: build
+#   dependencies:
+#     - prepare-build-tag
+#   services:
+#     - name: docker:dind
+#       command: ["--experimental"]
+#   script:
+#     - *install_buildx
+#     - *install_kustomize
+#     - echo "Building tag ${BUILD_TAG}"
+#     - docker buildx build
+#       --platform linux/aarch64
+#       --tag "$CI_IMAGE_ROUTER:${BUILD_TAG}"
+#       --push
+#       ./apps/router
+#   # only:
+#   #   changes:
+#   #     - apps/router/*
 
-build-announcer:
-  image: docker:latest
-  stage: build
-  dependencies:
-    - prepare-build-tag
-  services:
-    - name: docker:dind
-      command: ["--experimental"]
-  script:
-    - *install_buildx
-    - *install_kustomize
-    - echo "Building tag ${BUILD_TAG}"
-    - docker buildx build
-      --platform linux/aarch64
-      --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
-      --push
-      ./apps/announcer
-  # only:
-  #   changes:
-  #     - apps/announcer/*
+# build-announcer:
+#   image: docker:latest
+#   stage: build
+#   dependencies:
+#     - prepare-build-tag
+#   services:
+#     - name: docker:dind
+#       command: ["--experimental"]
+#   script:
+#     - *install_buildx
+#     - *install_kustomize
+#     - echo "Building tag ${BUILD_TAG}"
+#     - docker buildx build
+#       --platform linux/aarch64
+#       --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
+#       --push
+#       ./apps/announcer
+#   # only:
+#   #   changes:
+#   #     - apps/announcer/*
 
-build-companion:
-  image: docker:latest
-  stage: build
-  dependencies:
-    - prepare-build-tag
-  services:
-    - name: docker:dind
-      command: ["--experimental"]
-  script:
-    - *install_buildx
-    - *install_kustomize
-    - echo "Building tag ${BUILD_TAG}"
-    - docker buildx build
-      --platform linux/aarch64
-      --tag "$CI_IMAGE_COMPANION:${BUILD_TAG}"
-      --push
-      ./apps/companion
-  # only:
-  #   changes:
-  #     - apps/companion/*
+# build-companion:
+#   image: docker:latest
+#   stage: build
+#   dependencies:
+#     - prepare-build-tag
+#   services:
+#     - name: docker:dind
+#       command: ["--experimental"]
+#   script:
+#     - *install_buildx
+#     - *install_kustomize
+#     - echo "Building tag ${BUILD_TAG}"
+#     - docker buildx build
+#       --platform linux/aarch64
+#       --tag "$CI_IMAGE_COMPANION:${BUILD_TAG}"
+#       --push
+#       ./apps/companion
+#   # only:
+#   #   changes:
+#   #     - apps/companion/*
 
-update-manifest:
-  dependencies:
-    - prepare-build-tag
-    - build-streamer
-    - build-router
-    - build-announcer
-  image: alpine:latest
-  stage: deploy
-  before_script:
-    # Prepare Git and Kustomize
-    - echo "before"
-    - apk --no-cache add git curl gettext openssh
-    - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
-    - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
-    - git config --global user.email "rpiuav@got.vision"
-    - git config --global user.name "RPi UAV Builder"
+# update-manifest:
+#   dependencies:
+#     - prepare-build-tag
+#     - build-streamer
+#     - build-router
+#     - build-announcer
+#   image: alpine:latest
+#   stage: deploy
+#   before_script:
+#     # Prepare Git and Kustomize
+#     - echo "before"
+#     - apk --no-cache add git curl gettext openssh
+#     - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+#     - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
+#     - git config --global user.email "rpiuav@got.vision"
+#     - git config --global user.name "RPi UAV Builder"
 
-  script:
-    - echo "Deploying tag ${BUILD_TAG}"
-    - git clone https://gitlab.com/got.vision/rpiuav.git
+#   script:
+#     - echo "Deploying tag ${BUILD_TAG}"
+#     - git clone https://gitlab.com/got.vision/rpiuav.git
 
-    # Patch Streamer
-    - rm kustomization.yaml -f
-    - kustomize create
-    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/streamer:${BUILD_TAG}
-    - kustomize edit add resource rpiuav/deployments/rpi4/apps/streamer.yaml
-    - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
+#     # Patch Streamer
+#     - rm kustomization.yaml -f
+#     - kustomize create
+#     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/streamer:${BUILD_TAG}
+#     - kustomize edit add resource rpiuav/deployments/rpi4/apps/streamer.yaml
+#     - kustomize build . > x.yaml
+#     - mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
 
-    # Patch Router
-    - rm kustomization.yaml -f
-    - kustomize create
-    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
-    - kustomize edit add resource rpiuav/deployments/rpi4/apps/router.yaml
-    - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
+#     # Patch Router
+#     - rm kustomization.yaml -f
+#     - kustomize create
+#     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
+#     - kustomize edit add resource rpiuav/deployments/rpi4/apps/router.yaml
+#     - kustomize build . > x.yaml
+#     - mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
 
-    # Patch Announcer
-    - rm kustomization.yaml -f
-    - kustomize create
-    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
-    - kustomize edit add resource rpiuav/deployments/rpi4/apps/announcer.yaml
-    - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
+#     # Patch Announcer
+#     - rm kustomization.yaml -f
+#     - kustomize create
+#     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
+#     - kustomize edit add resource rpiuav/deployments/rpi4/apps/announcer.yaml
+#     - kustomize build . > x.yaml
+#     - mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
 
-    # Patch Companion
-    - rm kustomization.yaml -f
-    - kustomize create
-    - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
-    - kustomize edit add resource rpiuav/deployments/rpi4/apps/companion.yaml
-    - kustomize build . > x.yaml
-    - mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
+#     # Patch Companion
+#     - rm kustomization.yaml -f
+#     - kustomize create
+#     - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
+#     - kustomize edit add resource rpiuav/deployments/rpi4/apps/companion.yaml
+#     - kustomize build . > x.yaml
+#     - mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
     
-    # Push update
-    - cd rpiuav/
-    - git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
-    - git add .
-    - git commit -m "Update versions to ${BUILD_TAG}"
-    - git push --push-option=ci.skip mani-repo main
+#     # Push update
+#     - cd rpiuav/
+#     - git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
+#     - git add .
+#     - git commit -m "Update versions to ${BUILD_TAG}"
+#     - git push --push-option=ci.skip mani-repo main
