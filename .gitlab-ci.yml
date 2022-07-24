@@ -112,9 +112,9 @@ build-announcer:
     APP_DIR: apps/announcer
     APP_NAME: announcer
     DEPLOY_TAG: DEPLOY_ANNOUNCER
-  only:
-    changes:
-      - apps/announcer/*
+  # only:
+  #   changes:
+  #     - apps/announcer/*
 
 build-companion:
   extends: .build_image_template
@@ -123,9 +123,9 @@ build-companion:
     APP_DIR: apps/companion
     APP_NAME: companion
     DEPLOY_TAG: DEPLOY_COMPANION
-  # only:
-  #   changes:
-  #     - apps/companion/*
+  only:
+    changes:
+      - apps/companion/*
 
 
 update-manifest:
@@ -150,7 +150,7 @@ update-manifest:
     - echo "Deploying tag ${BUILD_TAG}"
     - git clone https://gitlab.com/got.vision/rpiuav.git
     - PATCH = "false"
-    
+
     # Patch Streamer
     - |
       if [ -v $DEPLOY_STREAMER ]; then
