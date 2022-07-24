@@ -7,6 +7,17 @@ stages:
 - build
 - deploy
 
+.install_buildx: &install_buildx
+  script:
+  # Prepare BuildX
+  - mkdir -p ~/.docker/cli-plugins
+  - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
+  - chmod a+x ~/.docker/cli-plugins/docker-buildx
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --use
+  - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
+
+
 prepare-build-tag:
   stage: prebuild
   script:
@@ -35,13 +46,7 @@ build-streamer:
       command: ["--experimental"]
 
   before_script:
-    # Prepare BuildX
-    - mkdir -p ~/.docker/cli-plugins
-    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
-    - chmod a+x ~/.docker/cli-plugins/docker-buildx
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker buildx create --use
-    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
+    - <<:*install_buildx
   
   script:
     - echo "Building tag ${BUILD_TAG}"
@@ -49,10 +54,10 @@ build-streamer:
       --platform linux/aarch64
       --tag "$CI_IMAGE_STREAMER:${BUILD_TAG}"
       --push
-      apps/streamer
+      ./apps/streamer
   only:
     changes:
-      - ./apps/streamer/*
+      - apps/streamer/*
 
 build-router:
   image: docker:latest
@@ -64,13 +69,7 @@ build-router:
       command: ["--experimental"]
 
   before_script:
-    # Prepare BuildX
-    - mkdir -p ~/.docker/cli-plugins
-    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
-    - chmod a+x ~/.docker/cli-plugins/docker-buildx
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker buildx create --use
-    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
+    - <<:*install_buildx    
   
   script:
     - echo "Building tag ${BUILD_TAG}"
@@ -93,13 +92,7 @@ build-announcer:
       command: ["--experimental"]
 
   before_script:
-    # Prepare BuildX
-    - mkdir -p ~/.docker/cli-plugins
-    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
-    - chmod a+x ~/.docker/cli-plugins/docker-buildx
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker buildx create --use
-    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
+    - <<:*install_buildx
   
   script:
     - echo "Building tag ${BUILD_TAG}"
@@ -122,13 +115,7 @@ build-companion:
       command: ["--experimental"]
 
   before_script:
-    # Prepare BuildX
-    - mkdir -p ~/.docker/cli-plugins
-    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
-    - chmod a+x ~/.docker/cli-plugins/docker-buildx
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker buildx create --use
-    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
+    - <<:*install_buildx
   
   script:
     - echo "Building tag ${BUILD_TAG}"
