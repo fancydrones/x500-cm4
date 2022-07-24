@@ -5,6 +5,6 @@ resources:
 - announcer.yaml
 - router.yaml
 - streamer.yaml
-- companion.yaml
-- companion-service.yaml
-- companion-ingress.yaml
+#- companion.yaml
+#- companion-service.yaml
+#- companion-ingress.yaml
