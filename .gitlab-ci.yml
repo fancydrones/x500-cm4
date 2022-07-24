@@ -16,14 +16,6 @@ stages:
   - docker buildx create --use
   - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
 
-.install_kustomize: &install_kustomize
-  - echo "Install Kustomize"
-  - apk --no-cache add git curl gettext openssh
-  - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
-  - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
-  - git config --global user.email "rpiuav@got.vision"
-  - git config --global user.name "RPi UAV Builder"
-
 .build_image: &build_image
   - echo "Building tag $IMAGE_TAG:${BUILD_TAG}"
   - docker buildx build
@@ -32,23 +24,6 @@ stages:
       --push
       ./$APP_DIR
   - echo "$DEPLOY_TAG='TRUE'" >> build.env  
-
-.update_image_tag: &update_image_tag
-  - echo "Deploying tag IMAGE_TAG:${BUILD_TAG}"
-  - git clone https://gitlab.com/got.vision/rpiuav.git
-  # Patch
-#  - rm kustomization.yaml -f
-  - kustomize create
-  - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/$APP_NAME:${BUILD_TAG}
-  - kustomize edit add resource rpiuav/deployments/rpi4/apps/$APP_NAME.yaml
-  - kustomize build . > x.yaml
-  - mv x.yaml rpiuav/deployments/rpi4/apps/$APP_NAME.yaml
-  # Push update
-  - cd rpiuav/
-  - git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
-  - git add .
-  - git commit -m "Update $IMAGE_TAG versions to ${BUILD_TAG}"
-  - git push --push-option=ci.skip mani-repo main
 
 prepare-build-tag:
   stage: prebuild
@@ -76,9 +51,7 @@ prepare-build-tag:
       command: ["--experimental"]
   script:
     - *install_buildx
-    #- *install_kustomize
     - *build_image
-    #- *update_image_tag
   artifacts:
     reports:
       dotenv: build.env
@@ -112,9 +85,9 @@ build-announcer:
     APP_DIR: apps/announcer
     APP_NAME: announcer
     DEPLOY_TAG: DEPLOY_ANNOUNCER
-  # only:
-  #   changes:
-  #     - apps/announcer/*
+  only:
+    changes:
+      - apps/announcer/*
 
 build-companion:
   extends: .build_image_template
