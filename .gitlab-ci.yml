@@ -50,8 +50,8 @@ build-streamer:
     - name: docker:dind
       command: ["--experimental"]
   script:
-    <<:*install_buildx
-    <<:*install_kustomize
+    - *install_buildx
+    - *install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
@@ -71,8 +71,8 @@ build-router:
     - name: docker:dind
       command: ["--experimental"]
   script:
-    <<:*install_buildx
-    <<:*install_kustomize
+    - *install_buildx
+    - *install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
@@ -92,8 +92,8 @@ build-announcer:
     - name: docker:dind
       command: ["--experimental"]
   script:
-    <<:*install_buildx
-    <<:*install_kustomize
+    - *install_buildx
+    - *install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
@@ -113,8 +113,8 @@ build-companion:
     - name: docker:dind
       command: ["--experimental"]
   script:
-    <<:*install_buildx
-    <<:*install_kustomize
+    - *install_buildx
+    - *install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
