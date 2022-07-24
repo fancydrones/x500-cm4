@@ -31,7 +31,7 @@ stages:
       --tag "$IMAGE_TAG:${BUILD_TAG}"
       --push
       ./$APP_DIR
-  - echo "$DEPLOY_TAG=true" >> build.env  
+  - echo "$DEPLOY_TAG='true'" >> build.env  
 
 .update_image_tag: &update_image_tag
   - echo "Deploying tag IMAGE_TAG:${BUILD_TAG}"
@@ -149,11 +149,11 @@ update-manifest:
   script:
     - echo "Deploying tag ${BUILD_TAG}"
     - git clone https://gitlab.com/got.vision/rpiuav.git
-    - PATCH="false"
+    - SHOULD_PATCH="false"
 
     # Patch Streamer
     - |
-      if [ -v $DEPLOY_STREAMER ]; then
+      if [ '$DEPLOY_STREAMER z' = 'true z' ]; then
         echo "Patch Streamer"
         rm kustomization.yaml -f
         kustomize create
@@ -162,12 +162,12 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
 
-        PATCH="true"
+        SHOULD_PATCH="true"
       fi
 
     # Patch Router
     - |
-      if [ -v $DEPLOY_ROUTER ]; then
+      if [ '$DEPLOY_ROUTER z' = 'true z' ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
@@ -175,12 +175,12 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
 
-        PATCH="true"
+        SHOULD_PATCH="true"
       fi
 
     # Patch Announcer
     - |
-      if [ -v $DEPLOY_ANNOUNCER ]; then
+      if [ '$DEPLOY_ANNOUNCER z' = 'true z' ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
@@ -188,12 +188,12 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
 
-        PATCH="true"
+        SHOULD_PATCH="true"
       fi
 
     # Patch Companion
     - |
-      if [ -v $DEPLOY_COMPANION ]; then
+      if [ '$DEPLOY_COMPANION z' = 'true z' ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
@@ -201,16 +201,19 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
 
-        PATCH="true"
+        SHOULD_PATCH="true"
       fi
     
 
     # Push update
     - |
-      if [ $PATCH = "true" ]; then
+      if [ "$SHOULD_PATCH" = "true" ]; then
+        echo "Patching"
         cd rpiuav/
         git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
         git add .
         git commit -m "Update versions to ${BUILD_TAG}"
         git push --push-option=ci.skip mani-repo main
+      else
+        echo "Nothing to patch"
       fi
