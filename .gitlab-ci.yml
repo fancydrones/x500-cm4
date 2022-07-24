@@ -152,8 +152,7 @@ update-manifest:
 
     # Patch Streamer
     - |
-      if [ -v $DEPLOY_STREAMER ];
-      then
+      if [ -v $DEPLOY_STREAMER ]; then
         echo "Patch Streamer"
         rm kustomization.yaml -f
         kustomize create
@@ -167,8 +166,7 @@ update-manifest:
 
     # Patch Router
     - |
-      if [ -v $DEPLOY_ROUTER ];
-      then
+      if [ -v $DEPLOY_ROUTER ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
@@ -181,8 +179,7 @@ update-manifest:
 
     # Patch Announcer
     - |
-      if [ -v $DEPLOY_ANNOUNCER ];
-      then
+      if [ -v $DEPLOY_ANNOUNCER ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
@@ -195,8 +192,7 @@ update-manifest:
 
     # Patch Companion
     - |
-      if [ -v $DEPLOY_COMPANION ];
-      then
+      if [ -v $DEPLOY_COMPANION ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
@@ -210,7 +206,7 @@ update-manifest:
 
     # Push update
     - |
-      if [ -v $PATCH ];
+      if [ -v $PATCH ]; then
         cd rpiuav/
         git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
         git add .
