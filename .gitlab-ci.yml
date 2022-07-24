@@ -8,7 +8,6 @@ stages:
 - deploy
 
 .install_buildx: &install_buildx
-  script:
   # Prepare BuildX
   - mkdir -p ~/.docker/cli-plugins
   - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
@@ -18,7 +17,6 @@ stages:
   - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
 
 .install_kustomize: &install_kustomize
-  script:
   - apt-get update && apt-get install -y git curl gettext openssh
   - curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
   - tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
@@ -51,19 +49,18 @@ build-streamer:
   services:
     - name: docker:dind
       command: ["--experimental"]
-  extends:
-    - .install_buildx
-    - .install_kustomize
   script:
+    - <<:*install_buildx
+    - <<:*install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_STREAMER:${BUILD_TAG}"
       --push
       ./apps/streamer
-  only:
-    changes:
-      - apps/streamer/*
+  # only:
+  #   changes:
+  #     - apps/streamer/*
 
 build-router:
   image: docker:latest
@@ -73,19 +70,18 @@ build-router:
   services:
     - name: docker:dind
       command: ["--experimental"]
-  extends:
-    - .install_buildx
-    - .install_kustomize
   script:
+    - <<:*install_buildx
+    - <<:*install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_ROUTER:${BUILD_TAG}"
       --push
       ./apps/router
-  only:
-    changes:
-      - apps/router/*
+  # only:
+  #   changes:
+  #     - apps/router/*
 
 build-announcer:
   image: docker:latest
@@ -95,19 +91,18 @@ build-announcer:
   services:
     - name: docker:dind
       command: ["--experimental"]
-  extends:
-    - .install_buildx
-    - .install_kustomize
   script:
+    - <<:*install_buildx
+    - <<:*install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
       --push
       ./apps/announcer
-  only:
-    changes:
-      - apps/announcer/*
+  # only:
+  #   changes:
+  #     - apps/announcer/*
 
 build-companion:
   image: docker:latest
@@ -117,19 +112,18 @@ build-companion:
   services:
     - name: docker:dind
       command: ["--experimental"]
-  extends:
-    - .install_buildx
-    - .install_kustomize
   script:
+    - <<:*install_buildx
+    - <<:*install_kustomize
     - echo "Building tag ${BUILD_TAG}"
     - docker buildx build
       --platform linux/aarch64
       --tag "$CI_IMAGE_COMPANION:${BUILD_TAG}"
       --push
       ./apps/companion
-  only:
-    changes:
-      - apps/companion/*
+  # only:
+  #   changes:
+  #     - apps/companion/*
 
 update-manifest:
   dependencies:
