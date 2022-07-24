@@ -32,6 +32,22 @@ stages:
       --push
       ./$APP_DIR
 
+.update_image_tag: &update_image_tag
+  - echo "Deploying tag IMAGE_TAG:${BUILD_TAG}"
+  - git clone https://gitlab.com/got.vision/rpiuav.git
+  # Patch
+#  - rm kustomization.yaml -f
+  - kustomize create
+  - kustomize edit set image registry.gitlab.com/got.vision/rpiuav/$APP_NAME:${BUILD_TAG}
+  - kustomize edit add resource rpiuav/deployments/rpi4/apps/$APP_NAME.yaml
+  - kustomize build . > x.yaml
+  - mv x.yaml rpiuav/deployments/rpi4/apps/$APP_NAME.yaml
+  # Push update
+  - cd rpiuav/
+  - git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
+  - git add .
+  - git commit -m "Update IMAGE_TAG versions to ${BUILD_TAG}"
+  - git push --push-option=ci.skip mani-repo main
 
 prepare-build-tag:
   stage: prebuild
@@ -50,25 +66,25 @@ prepare-build-tag:
       dotenv: build.env
 
 
-build-streamer:
-  image: docker:latest
-  stage: build
-  dependencies:
-    - prepare-build-tag
-  services:
-    - name: docker:dind
-      command: ["--experimental"]
-  script:
-    - *install_buildx
-    - *install_kustomize
-    - *build_image
+# build-streamer:
+#   image: docker:latest
+#   stage: build
+#   dependencies:
+#     - prepare-build-tag
+#   services:
+#     - name: docker:dind
+#       command: ["--experimental"]
+#   script:
+#     - *install_buildx
+#     - *install_kustomize
+#     - *build_image
 
-  variables:
-    IMAGE_TAG: $CI_IMAGE_STREAMER
-    APP_DIR: apps/streamer
-  # only:
-  #   changes:
-  #     - apps/streamer/*
+#   variables:
+#     IMAGE_TAG: $CI_IMAGE_STREAMER
+#     APP_DIR: apps/streamer
+#   # only:
+#   #   changes:
+#   #     - apps/streamer/*
 
 # build-router:
 #   image: docker:latest
@@ -91,26 +107,26 @@ build-streamer:
 #   #   changes:
 #   #     - apps/router/*
 
-# build-announcer:
-#   image: docker:latest
-#   stage: build
-#   dependencies:
-#     - prepare-build-tag
-#   services:
-#     - name: docker:dind
-#       command: ["--experimental"]
-#   script:
-#     - *install_buildx
-#     - *install_kustomize
-#     - echo "Building tag ${BUILD_TAG}"
-#     - docker buildx build
-#       --platform linux/aarch64
-#       --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
-#       --push
-#       ./apps/announcer
-#   # only:
-#   #   changes:
-#   #     - apps/announcer/*
+build-announcer:
+  image: docker:latest
+  stage: build
+  dependencies:
+    - prepare-build-tag
+  services:
+    - name: docker:dind
+      command: ["--experimental"]
+  script:
+    - *install_buildx
+    - *install_kustomize
+    - *build_image
+    - *update_image_tag
+  variables:
+    IMAGE_TAG: $CI_IMAGE_ANNOUNCER
+    APP_DIR: apps/announcer
+    APP_NAME: announcer
+  # only:
+  #   changes:
+  #     - apps/announcer/*
 
 # build-companion:
 #   image: docker:latest
