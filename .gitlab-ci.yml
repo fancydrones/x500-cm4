@@ -111,7 +111,7 @@ update-manifest:
   image: alpine:latest
   stage: deploy
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH' # Only publish from main branch
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH # Only publish from main branch
   before_script:
     # Prepare Git and Kustomize
     - echo "before"
