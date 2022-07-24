@@ -31,7 +31,8 @@ stages:
       --tag "$IMAGE_TAG:${BUILD_TAG}"
       --push
       ./$APP_DIR
-  - echo "$DEPLOY_TAG='true'" >> build.env  
+  - TRUE="true"
+  - echo "$DEPLOY_TAG=$TRUE" >> build.env  
 
 .update_image_tag: &update_image_tag
   - echo "Deploying tag IMAGE_TAG:${BUILD_TAG}"
@@ -158,7 +159,7 @@ update-manifest:
 
     # Patch Streamer
     - |
-      if [ "$DEPLOY_STREAMER z" = "true z" ]; then
+      if [ "$DEPLOY_STREAMERz" = "truez" ]; then
         echo "Patch Streamer"
         rm kustomization.yaml -f
         kustomize create
@@ -172,7 +173,7 @@ update-manifest:
 
     # Patch Router
     - |
-      if [ "$DEPLOY_ROUTER z" = "true z" ]; then
+      if [ "$DEPLOY_ROUTERz" = "truez" ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
@@ -185,7 +186,7 @@ update-manifest:
 
     # Patch Announcer
     - |
-      if [ "$DEPLOY_ANNOUNCER z" = "true z" ]; then
+      if [ "$DEPLOY_ANNOUNCERz" = "truez" ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
@@ -198,7 +199,7 @@ update-manifest:
 
     # Patch Companion
     - |
-      if [ "$DEPLOY_COMPANION z" = "true z" ]; then
+      if [ "$DEPLOY_COMPANIONz" = "truez" ]; then
         rm kustomization.yaml -f
         kustomize create
         kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
@@ -209,7 +210,7 @@ update-manifest:
         SHOULD_PATCH="true"
       fi
 
-    - echo "$SHOULD_PATCH"    
+    - echo "$SHOULD_PATCH"
 
     # Push update
     - |
