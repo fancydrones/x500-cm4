@@ -6,3 +6,4 @@ resources:
 - router.yaml
 - streamer.yaml
 - companion.yaml
+- companion-service.yaml
