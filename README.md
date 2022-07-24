@@ -57,6 +57,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] API call for modify ConfigMap from Companion
 - [ ] API call for restarting deployment from Companion
 - [ ] Enable Origin check for Companion
+- [ ] Get Image versions for all deployments and show in companion
 
 
 
