@@ -29,7 +29,7 @@ spec:
         - name: CAMERA_NAME
           value: Front
         - name: SYSTEM_HOST
-          value: 127.0.0.1
+          value: router-service.rpiuav.svc.cluster.local
         - name: SYSTEM_PORT
           value: "14560"
         - name: SYSTEM_ID
@@ -41,4 +41,3 @@ spec:
           value: "1"
         image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.151
         name: announcer-recreate-strategy
-      hostNetwork: true
