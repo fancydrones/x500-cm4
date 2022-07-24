@@ -123,9 +123,9 @@ build-companion:
     APP_DIR: apps/companion
     APP_NAME: companion
     DEPLOY_TAG: DEPLOY_COMPANION
-  only:
-    changes:
-      - apps/companion/*
+  # only:
+  #   changes:
+  #     - apps/companion/*
 
 
 update-manifest:
@@ -149,7 +149,8 @@ update-manifest:
   script:
     - echo "Deploying tag ${BUILD_TAG}"
     - git clone https://gitlab.com/got.vision/rpiuav.git
-
+    - PATCH = "false"
+    
     # Patch Streamer
     - |
       if [ -v $DEPLOY_STREAMER ]; then
@@ -161,7 +162,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
 
-        export PATCH=true
+        PATCH = "true"
       fi
 
     # Patch Router
@@ -174,7 +175,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
 
-        export PATCH=true
+        PATCH = "true"
       fi
 
     # Patch Announcer
@@ -187,7 +188,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
 
-        export PATCH=true
+        PATCH = "true"
       fi
 
     # Patch Companion
@@ -200,13 +201,13 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
 
-        export PATCH=true
+        PATCH = "true"
       fi
     
 
     # Push update
     - |
-      if [ -v $PATCH ]; then
+      if [ $PATCH = "true" ]; then
         cd rpiuav/
         git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
         git add .
