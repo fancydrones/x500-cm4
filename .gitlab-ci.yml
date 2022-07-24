@@ -29,11 +29,12 @@ prepare-build-tag:
   stage: prebuild
   script:
     - |
+      version="1.0.$CI_PIPELINE_IID"
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="1.0.$CI_PIPELINE_IID"
+        tag=$version
         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
       else
-        tag="$CI_COMMIT_REF_SLUG"
+        tag="$version-$CI_COMMIT_REF_SLUG"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - echo "BUILD_TAG=$tag" >> build.env
