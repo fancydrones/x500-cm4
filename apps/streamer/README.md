@@ -1,3 +1,2 @@
 # Video streamer
-
-Using GStreamer to send video
+Using GStreamer to stream video

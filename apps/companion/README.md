@@ -1,5 +1,7 @@
 # Companion
 
+Supporting web service to configure UAV setup
+
 ## New project
     mix phx.new companion --no-ecto --no-mailer --app companion --module Companion
 
