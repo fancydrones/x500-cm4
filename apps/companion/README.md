@@ -2,7 +2,6 @@
 ## New project
     mix phx.new companion --no-ecto --no-mailer --app companion --module Companion
 
-
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
