@@ -59,20 +59,26 @@ spec:
     - port: 5760
       protocol: TCP
       targetPort: 5760
+      name: router-tcp-in
     - port: 14550
       protocol: UDP
       targetPort: 14550
+      name: router-udp-default-in
     - port: 14560
       protocol: UDP
       targetPort: 14560
+      name: router-udp-extra-in-14560
     - port: 14561
       protocol: UDP
       targetPort: 14561
+      name: router-udp-extra-in-14561
     - port: 14562
       protocol: UDP
       targetPort: 14562
+      name: router-udp-extra-in-14562
     - port: 14563
       protocol: UDP
       targetPort: 14563
+      name: router-udp-extra-in-14563
   selector:
     app.kubernetes.io/name: router-deployment
