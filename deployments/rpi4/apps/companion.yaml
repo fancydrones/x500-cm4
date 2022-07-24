@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,13 +10,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: companion-strategy
+      app: companion-deployment
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: companion-strategy
+        app: companion-deployment
     spec:
       containers:
       - env:
@@ -25,8 +26,13 @@ spec:
           value: GM4Nv3AsIrj36aK6y2NJYmuKZSKoJ9i5bjxaLSLTH+2A16LC69JzQzHe7X3m7YJR
         - name: MAVLINK_CONNECTION
           value: udpout:127.0.0.1:14550
+<<<<<<< HEAD
         image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.154
         name: companion-strategy
+=======
+        image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.151
+        name: companion-deployment
+>>>>>>> d1b4c3b (Service for Companion)
         ports:
         - containerPort: 4000
         volumeMounts:
@@ -38,3 +44,32 @@ spec:
       - hostPath:
           path: /var/lib/rancher/k3s/server/tls/server-ca.crt
         name: ca
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: companion-service
+spec:
+  ports:
+    - port: 4000
+      protocol: TCP
+  selector:
+    app:  companion-deployment
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: companion-ingress
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: companion-service
+            port:
+              number: 4000
