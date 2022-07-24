@@ -44,6 +44,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [x] fluxcd.io
 - [x] Step-by-step guide
 - [x] Separate service for config
+- [x] Fix build for merge request
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation
@@ -56,7 +57,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] API call for modify ConfigMap from Companion
 - [ ] API call for restarting deployment from Companion
 - [ ] Enable Origin check for Companion
-- [ ] Fix build for merge request
+
 
 
 ## Install software

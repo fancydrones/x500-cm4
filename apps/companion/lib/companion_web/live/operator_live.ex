@@ -76,6 +76,15 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
+  def handle_event("restart_companion", _, socket) do
+    Logger.info("Clicked restart Companion")
+
+    restart_deployment("companion")
+
+    {:noreply, socket}
+  end
+
+
   defp set_system_id(system_id) do
     namespace_file = Application.get_env(:companion, :namespace_file)
     token_file = Application.get_env(:companion, :token_file)
@@ -117,7 +126,7 @@ defmodule CompanionWeb.OperatorLive do
     {:ok, namespace} = File.read(namespace_file)
     namespace = namespace |> String.trim
 
-    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/rpiuav/deployments/#{deployment_name}?fieldManager=rpi-modifier"
+    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/#{namespace}/deployments/#{deployment_name}?fieldManager=rpi-modifier"
     Logger.info("URL: #{url}")
     headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
     options = [ssl: [cacertfile: ca_file]]
@@ -138,6 +147,8 @@ defmodule CompanionWeb.OperatorLive do
 
     {:ok, response} = HTTPoison.patch(url, body, headers, options)
 
+    IO.inspect(response)
+    200 = response.status_code
   end
 
   def render(assigns) do
@@ -154,6 +165,7 @@ defmodule CompanionWeb.OperatorLive do
       <button phx-click="restart_router">Router</button>
       <button phx-click="restart_streamer">Streamer</button>
       <button phx-click="restart_announcer">Announcer</button>
+      <button phx-click="restart_companion">Companion</button>
     </div>
     """
   end
