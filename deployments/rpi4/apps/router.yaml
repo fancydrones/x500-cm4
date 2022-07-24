@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,14 +17,18 @@ spec:
     metadata:
       labels:
         app: router-recreate-strategy
+        app.kubernetes.io/name: router-deployment
     spec:
       containers:
       - image: registry.gitlab.com/got.vision/rpiuav/router:1.0.151
         name: router-recreate-strategy
         ports:
         - containerPort: 5760
+        - containerPort: 14550
         - containerPort: 14560
         - containerPort: 14561
+        - containerPort: 14562
+        - containerPort: 14563
         securityContext:
           privileged: true
         volumeMounts:
@@ -42,3 +47,32 @@ spec:
       - hostPath:
           path: /dev/serial0
         name: serial
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: router-service
+  namespace: rpiuav
+spec:
+  ports:
+    - port: 5760
+      protocol: TCP
+      targetPort: 5760
+    - port: 14550
+      protocol: UDP
+      targetPort: 14550
+    - port: 14560
+      protocol: UDP
+      targetPort: 14560
+    - port: 14561
+      protocol: UDP
+      targetPort: 14561
+    - port: 14562
+      protocol: UDP
+      targetPort: 14562
+    - port: 14563
+      protocol: UDP
+      targetPort: 14563
+  selector:
+    app.kubernetes.io/name: router-deployment

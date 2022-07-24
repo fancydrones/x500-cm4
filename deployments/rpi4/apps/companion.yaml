@@ -27,7 +27,7 @@ spec:
         - name: SECRET_KEY_BASE
           value: GM4Nv3AsIrj36aK6y2NJYmuKZSKoJ9i5bjxaLSLTH+2A16LC69JzQzHe7X3m7YJR
         - name: MAVLINK_CONNECTION
-          value: udpout:127.0.0.1:14550
+          value: udpout:router-service.rpiuav.svc.cluster.local:14550
         image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.154
         name: companion-strategy
         ports:
@@ -35,7 +35,6 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/rancher/k3s/server/tls/server-ca.crt
           name: ca
-      hostNetwork: true
       serviceAccountName: rpimodifier
       volumes:
       - hostPath:
