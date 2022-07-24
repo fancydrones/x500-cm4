@@ -149,7 +149,7 @@ update-manifest:
   script:
     - echo "Deploying tag ${BUILD_TAG}"
     - git clone https://gitlab.com/got.vision/rpiuav.git
-    - PATCH = "false"
+    - PATCH="false"
 
     # Patch Streamer
     - |
@@ -162,7 +162,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
 
-        PATCH = "true"
+        PATCH="true"
       fi
 
     # Patch Router
@@ -175,7 +175,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
 
-        PATCH = "true"
+        PATCH="true"
       fi
 
     # Patch Announcer
@@ -188,7 +188,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
 
-        PATCH = "true"
+        PATCH="true"
       fi
 
     # Patch Companion
@@ -201,7 +201,7 @@ update-manifest:
         kustomize build . > x.yaml
         mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
 
-        PATCH = "true"
+        PATCH="true"
       fi
     
 
