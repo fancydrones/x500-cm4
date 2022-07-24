@@ -18,7 +18,7 @@ prepare-build-tag:
         tag="$CI_COMMIT_REF_SLUG"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
-    - echo "BUILD_TAG=$tag" >> build.env
+    - echo "BUILD_TAG=$tag" >> build.env  
   artifacts:
     reports:
       dotenv: build.env
@@ -50,9 +50,9 @@ build-streamer:
       --tag "$CI_IMAGE_STREAMER:${BUILD_TAG}"
       --push
       ./apps/streamer
-  artifacts:
-    reports:
-      dotenv: build.env
+  only:
+    changes:
+      - ./apps/streamer/*
 
 build-router:
   image: docker:latest
@@ -79,6 +79,9 @@ build-router:
       --tag "$CI_IMAGE_ROUTER:${BUILD_TAG}"
       --push
       ./apps/router
+  only:
+    changes:
+      - ./apps/router/*
 
 build-announcer:
   image: docker:latest
@@ -105,6 +108,9 @@ build-announcer:
       --tag "$CI_IMAGE_ANNOUNCER:${BUILD_TAG}"
       --push
       ./apps/announcer
+  only:
+    changes:
+      - ./apps/announcer/*
 
 build-companion:
   image: docker:latest
@@ -131,6 +137,9 @@ build-companion:
       --tag "$CI_IMAGE_COMPANION:${BUILD_TAG}"
       --push
       ./apps/companion
+  only:
+    changes:
+      - ./apps/companion/*
 
 update-manifest:
   dependencies:
