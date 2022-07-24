@@ -52,6 +52,47 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
+  def handle_event("get_versions", _, socket) do
+    Logger.info("Clicked restart Get Versions")
+
+    #v_router = get_version("router")
+    #IO.puts(v_router)
+
+
+    namespace_file = Application.get_env(:companion, :namespace_file)
+    token_file = Application.get_env(:companion, :token_file)
+    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
+    kube_server = Application.get_env(:companion, :kubernetes_server)
+    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+
+    {:ok, token} = File.read(token_file)
+    token = token |> String.trim
+    {:ok, namespace} = File.read(namespace_file)
+    namespace = namespace |> String.trim
+
+    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/#{namespace}/deployments"
+
+    Logger.info("URL: #{url}")
+    headers = ["Authorization": "Bearer #{token}"]
+    options = [ssl: [cacertfile: ca_file]]
+    {:ok, response} = HTTPoison.get(url, headers, options)
+    Logger.info("Status Code: #{response.status_code}")
+    200 = response.status_code
+    {:ok, resp} = Jason.decode(response.body)
+    #IO.inspect(resp)
+    # containers = resp["spec"]["template"]["spec"]["containers"]
+    # c = List.first(containers)
+    # tag = c["image"]
+    # [_image, version] = String.split(tag, ":")
+    # IO.inspect(version)
+
+    deployment = List.first(resp["items"])
+
+    Enum.map(resp["items"], fn deployment -> IO.puts("#{get_name_from_deployment(deployment)} : #{get_image_version_from_deployment(deployment)}") end)
+
+    {:noreply, socket}
+  end
+
   def handle_event("restart_router", _, socket) do
     Logger.info("Clicked restart Router")
 
@@ -84,6 +125,17 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
+  defp get_name_from_deployment(deployment) do
+    deployment["metadata"]["name"]
+  end
+
+  defp get_image_version_from_deployment(deployment) do
+    containers = deployment["spec"]["template"]["spec"]["containers"]
+    c = List.first(containers)
+    tag = c["image"]
+    [_image, version] = String.split(tag, ":")
+    version
+  end
 
   defp set_system_id(system_id) do
     namespace_file = Application.get_env(:companion, :namespace_file)
@@ -158,6 +210,7 @@ defmodule CompanionWeb.OperatorLive do
       <button phx-click="set_config_system_id_222">System ID = 222</button>
       <button phx-click="set_config_system_id_1">System ID = 1</button>
       <button phx-click="get_config">Get All Config</button>
+      <button phx-click="get_versions">Get Image Versions
     </div>
 
     <div id="liveoperator_landinggear_container">
