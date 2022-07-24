@@ -1,10 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: companion-service
+  namespace: rpiuav
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 4000
+  selector:
+    app.kubernetes.io/name: companion-deployment
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    name: companion
     app.kubernetes.io/name: companion-deployment
+    name: companion
   name: companion
   namespace: rpiuav
 spec:
@@ -28,7 +40,7 @@ spec:
           value: GM4Nv3AsIrj36aK6y2NJYmuKZSKoJ9i5bjxaLSLTH+2A16LC69JzQzHe7X3m7YJR
         - name: MAVLINK_CONNECTION
           value: udpout:router-service.rpiuav.svc.cluster.local:14550
-        image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.154
+        image: registry.gitlab.com/got.vision/rpiuav/companion:1.0.177
         name: companion-strategy
         ports:
         - containerPort: 4000
@@ -40,37 +52,22 @@ spec:
       - hostPath:
           path: /var/lib/rancher/k3s/server/tls/server-ca.crt
         name: ca
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: companion-service
-  namespace: rpiuav
-spec:
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: 4000
-  selector:
-    app.kubernetes.io/name: companion-deployment
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
   name: companion-ingress
   namespace: rpiuav
-  annotations:
-    kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
   - http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
+      - backend:
           service:
             name: companion-service
             port:
               number: 80
+        path: /
+        pathType: Prefix
