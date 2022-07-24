@@ -26,7 +26,7 @@ spec:
               name: rpi4-config
         - name: VIDEO_PORT
           value: "8554"
-        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.96
+        image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.98
         name: streamer-recreate-strategy
         ports:
         - containerPort: 8554
