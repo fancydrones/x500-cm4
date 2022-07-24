@@ -1,5 +1,7 @@
 # Companion
 
+T1
+
 ## New project
     mix phx.new companion --no-ecto --no-mailer --app companion --module Companion
 
