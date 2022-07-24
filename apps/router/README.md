@@ -1,5 +1,4 @@
 # Mavlink router packaged in container for running on Arm64
-
 Packaging MAVLink Router software into a docker container.
 
 ## MAVLink Router

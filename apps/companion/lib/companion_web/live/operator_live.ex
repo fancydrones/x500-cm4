@@ -7,10 +7,10 @@ defmodule CompanionWeb.OperatorLive do
     {:ok, socket}
   end
 
-  def handle_event("set_config_system_id_22", _, socket) do
-    Logger.info("Clicked Set System ID = 22")
+  def handle_event("set_config_system_id_222", _, socket) do
+    Logger.info("Clicked Set System ID = 222")
 
-    set_system_id("22")
+    set_system_id("222")
 
     {:noreply, socket}
   end
@@ -155,7 +155,7 @@ defmodule CompanionWeb.OperatorLive do
     ~L"""
     <div id="liveoperator_landinggear_container">
       <h1>Update Config:</h1>
-      <button phx-click="set_config_system_id_22">System ID = 22</button>
+      <button phx-click="set_config_system_id_222">System ID = 222</button>
       <button phx-click="set_config_system_id_1">System ID = 1</button>
       <button phx-click="get_config">Get All Config</button>
     </div>

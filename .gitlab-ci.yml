@@ -66,10 +66,10 @@ build-streamer:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-      - apps/streamer/*
+      - apps/streamer/**/*
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       changes:
-      - apps/streamer/*
+      - apps/streamer/**/*
 
 build-router:
   extends: .build_image_template
@@ -81,10 +81,10 @@ build-router:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-      - apps/router/*
+      - apps/router/**/*
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       changes:
-      - apps/router/*
+      - apps/router/**/*
 
 build-announcer:
   extends: .build_image_template
@@ -96,10 +96,10 @@ build-announcer:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-      - apps/announcer/*
+      - apps/announcer/**/*
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       changes:
-      - apps/announcer/*
+      - apps/announcer/**/*
 
 build-companion:
   extends: .build_image_template
@@ -111,10 +111,10 @@ build-companion:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-      - apps/companion/*
+      - apps/companion/**/*
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       changes:
-      - apps/companion/*
+      - apps/companion/**/*
 
 
 update-manifest:
