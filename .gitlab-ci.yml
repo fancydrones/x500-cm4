@@ -63,8 +63,8 @@ build-streamer:
     APP_DIR: apps/streamer
     APP_NAME: streamer
     DEPLOY_TAG: DEPLOY_STREAMER
-  only:
-    changes:
+  rules:
+    - changes:
       - apps/streamer/*
 
 build-router:
@@ -74,8 +74,8 @@ build-router:
     APP_DIR: apps/router
     APP_NAME: router
     DEPLOY_TAG: DEPLOY_ROUTER
-  only:
-    changes:
+  rules:
+    - changes:
       - apps/router/*
 
 build-announcer:
@@ -85,8 +85,8 @@ build-announcer:
     APP_DIR: apps/announcer
     APP_NAME: announcer
     DEPLOY_TAG: DEPLOY_ANNOUNCER
-  only:
-    changes:
+  rules:
+    - changes:
       - apps/announcer/*
 
 build-companion:
@@ -96,8 +96,8 @@ build-companion:
     APP_DIR: apps/companion
     APP_NAME: companion
     DEPLOY_TAG: DEPLOY_COMPANION
-  only:
-    changes:
+  rules:
+    - changes:
       - apps/companion/*
 
 
@@ -110,6 +110,8 @@ update-manifest:
     - build-companion
   image: alpine:latest
   stage: deploy
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH' # Only publish from main branch
   before_script:
     # Prepare Git and Kustomize
     - echo "before"
