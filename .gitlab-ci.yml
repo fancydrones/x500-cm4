@@ -64,7 +64,11 @@ build-streamer:
     APP_NAME: streamer
     DEPLOY_TAG: DEPLOY_STREAMER
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+      - apps/streamer/*
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
       - apps/streamer/*
 
 build-router:
@@ -75,8 +79,12 @@ build-router:
     APP_NAME: router
     DEPLOY_TAG: DEPLOY_ROUTER
   rules:
-    - changes:
-      - apps/router/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+      - apps/streamer/*
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
+      - apps/streamer/*
 
 build-announcer:
   extends: .build_image_template
@@ -86,8 +94,12 @@ build-announcer:
     APP_NAME: announcer
     DEPLOY_TAG: DEPLOY_ANNOUNCER
   rules:
-    - changes:
-      - apps/announcer/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+      - apps/streamer/*
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
+      - apps/streamer/*
 
 build-companion:
   extends: .build_image_template
@@ -97,8 +109,12 @@ build-companion:
     APP_NAME: companion
     DEPLOY_TAG: DEPLOY_COMPANION
   rules:
-    - changes:
-      - apps/companion/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+      - apps/streamer/*
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      changes:
+      - apps/streamer/*
 
 
 update-manifest:
@@ -111,7 +127,7 @@ update-manifest:
   image: alpine:latest
   stage: deploy
   rules:
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH # Only publish from main branch
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push" # Only publish from main branch
   before_script:
     # Prepare Git and Kustomize
     - echo "before"
