@@ -1,6 +1,10 @@
 defmodule CompanionWeb.OperatorLive do
+
   use Phoenix.LiveView
   use Phoenix.HTML
+
+  @default_namespace "rpiuav"
+  @default_configmap "rpi4-config"
 
   require Logger
 
@@ -15,6 +19,7 @@ defmodule CompanionWeb.OperatorLive do
     {:ok, socket}
   end
 
+  @impl true
   def handle_event("get_config", _, socket) do
     Logger.info("Clicked restart Get Config")
 
@@ -83,123 +88,69 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
-  defp update_config(key, value) do
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+  def update_config(key, value) do
+    Logger.info("Updating config using new method")
+    {:ok, conn} = get_k8s_connection()
+    namespace = get_namespace()
 
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
+    body = %{data: %{key => value}}
+    operation = K8s.Client.patch("v1", "configmap", [namespace: namespace, name: @default_configmap], body)
 
-    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config?fieldManager=rpi-modifier"
-    headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
-    options = [ssl: [cacertfile: ca_file]]
-
-    b =
-      %{
-        data: %{
-          key => value
-        }
-      }
-    body = Jason.encode!(b)
-    IO.inspect(body)
-    {:ok, response} = HTTPoison.patch(url, body, headers, options)
-
-    IO.inspect(response)
-    200 = response.status_code
+    {:ok, _configmap} = K8s.Client.run(conn, operation)
   end
 
-  defp restart_deployment(deployment_name) do
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
 
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
-
-    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/#{namespace}/deployments/#{deployment_name}?fieldManager=rpi-modifier"
-    Logger.info("URL: #{url}")
-    headers = ["Authorization": "Bearer #{token}", "Content-Type": "application/strategic-merge-patch+json"]
-    options = [ssl: [cacertfile: ca_file]]
-
-    b =
-      %{
-        spec: %{
-          template: %{
-            metadata: %{
-              annotations: %{
-                "kubectl.kubernetes.io/restartedAt": DateTime.utc_now |> DateTime.to_iso8601
-              }
-            }
-          }
-        }
-      }
-    body = Jason.encode!(b)
-
-    {:ok, response} = HTTPoison.patch(url, body, headers, options)
-
-    IO.inspect(response)
-    200 = response.status_code
+  def get_k8s_connection() do
+    case Application.get_env(:companion, :use_file, :false) do
+      :true -> K8s.Conn.from_file(Application.get_env(:companion, :file_path))
+      _ -> K8s.Conn.from_service_account()
+    end
   end
 
-  defp get_configs() do
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+  defp get_namespace() do
+    case Application.get_env(:companion, :namespace_file, :NOTSET) do
+      :NOTSET ->
+        Logger.debug("Using default namespace: #{@default_namespace}")
+        @default_namespace
+      namespace_file ->
+        Logger.debug("Getting namespace using file: #{namespace_file}")
+        {:ok, namespace} = File.read(namespace_file)
+        namespace |> String.trim |> IO.inspect
+    end
+  end
 
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
+  def restart_deployment(deployment_name) do
+    Logger.info("Restart using new method")
+    {:ok, conn} = get_k8s_connection()
+    namespace = get_namespace()
 
-    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config"
-    Logger.info("URL: #{url}")
-    headers = ["Authorization": "Bearer #{token}"]
-    options = [ssl: [cacertfile: ca_file]]
-    {:ok, response} = HTTPoison.get(url, headers, options)
-    Logger.info("Status Code: #{response.status_code}")
-    200 = response.status_code
-    {:ok, resp} = Jason.decode(response.body)
-    configs = resp["data"]
+    body = %{spec: %{template: %{metadata: %{annotations: %{"kubectl.kubernetes.io/restartedAt": DateTime.utc_now |> DateTime.to_iso8601}}}}}
+    operation = K8s.Client.patch("apps/v1", "deployment", [namespace: namespace, name: deployment_name], body)
+
+    {:ok, _deployment} = K8s.Client.run(conn, operation)
+  end
+
+  def get_configs() do
+    Logger.info("Get Apps details using new method")
+    {:ok, conn} = get_k8s_connection()
+    namespace = get_namespace()
+
+    operation = K8s.Client.get("v1", :configmap, [namespace: namespace, name: @default_configmap])
+    {:ok, configmap} = K8s.Client.run(conn, operation)
+
+    configs = configmap["data"]
 
     Map.keys(configs)
     |> Enum.map(fn key -> %{key: key, value: configs[key]} end)
-
   end
 
-  defp get_apps_details() do
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
-
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
-
-    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/#{namespace}/deployments"
-
-    Logger.info("URL: #{url}")
-    headers = ["Authorization": "Bearer #{token}"]
-    options = [ssl: [cacertfile: ca_file]]
-    {:ok, response} = HTTPoison.get(url, headers, options)
-    Logger.info("Status Code: #{response.status_code}")
-    200 = response.status_code
-    {:ok, resp} = Jason.decode(response.body)
-
-    Enum.map(resp["items"], fn deployment -> %{tag: get_name_from_deployment(deployment), version: get_image_version_from_deployment(deployment)} end)
+  def get_apps_details() do
+    Logger.info("Get Apps details using new method")
+    {:ok, conn} = get_k8s_connection()
+    namespace = get_namespace()
+    operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
+    {:ok, deployments} = K8s.Client.run(conn, operation)
+    Enum.map(deployments["items"], fn deployment -> %{tag: get_name_from_deployment(deployment), version: get_image_version_from_deployment(deployment)} end)
   end
 
   defp get_name_from_deployment(deployment) do

@@ -68,8 +68,5 @@ config :phoenix, :plug_init_mode, :runtime
 #config :mavlink, dialect: Common, connections: []
 
 config :companion,
-  token_file: "/home/roy/token",
-  namespace_file: "/home/roy/namespace",
-  kubernetes_server: "10.10.10.2",
-  kubernetes_server_port: "6443",
-  root_ca_certificate_file: "/home/roy/ca.crt"
+  use_file: :true,
+  file_path: "~/x3.yaml"

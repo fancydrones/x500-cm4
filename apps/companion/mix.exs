@@ -46,7 +46,8 @@ defmodule Companion.MixProject do
       {:gettext, "~> 0.19"},
       {:jason, "~> 1.3"},
       {:httpoison, "~> 1.8"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:k8s, "~> 1.1"}
     ]
   end
 
