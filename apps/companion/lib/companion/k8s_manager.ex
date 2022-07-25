@@ -13,7 +13,12 @@ defmodule Companion.K8sManager do
   def init(_) do
     {:ok, conn} = get_k8s_connection()
     namespace = get_namespace()
-    state = %{connection: conn, namespace: namespace}
+
+    operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
+    {:ok, reference} = K8s.Client.watch(conn, operation, stream_to: self())
+    #Logger.debug(reference)
+
+    state = %{connection: conn, namespace: namespace, watch: reference}
     {:ok, state}
   end
 
@@ -71,6 +76,12 @@ defmodule Companion.K8sManager do
     operation = K8s.Client.patch("apps/v1", "deployment", [namespace: namespace, name: deployment_name], body)
 
     {:ok, _deployment} = K8s.Client.run(conn, operation)
+    {:noreply, state}
+  end
+
+  def handle_info(message, state) do
+    Logger.info("Receive from watch")
+    IO.inspect(message)
     {:noreply, state}
   end
 
