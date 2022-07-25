@@ -10,6 +10,6 @@ rules:
 - apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["get", "patch", "list", "watch"]
-- apiGroups: [""]
+- apiGroups: ["apps"]
   resources: ["replicasets"]
   verbs: ["get", "list", "watch"]
