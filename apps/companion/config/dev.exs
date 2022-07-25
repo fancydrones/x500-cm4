@@ -69,4 +69,4 @@ config :phoenix, :plug_init_mode, :runtime
 
 config :companion,
   use_file: :true,
-  file_path: "~/x3.yaml"
+  file_path: "~/k3s.yaml"
