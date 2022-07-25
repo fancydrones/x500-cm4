@@ -13,9 +13,10 @@ defmodule Companion.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Companion.PubSub},
       # Start the Endpoint (http/https)
-      CompanionWeb.Endpoint
+      CompanionWeb.Endpoint,
       # Start a worker by calling: Companion.Worker.start_link(arg)
       # {Companion.Worker, arg}
+      Companion.K8sManager
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
