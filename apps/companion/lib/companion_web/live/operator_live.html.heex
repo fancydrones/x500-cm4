@@ -1,0 +1,38 @@
+<section class="phx-hero">
+  <h1>Apps:</h1>
+  <%= if length(@apps) > 0 do %>
+    <%= for app <- @apps do %>
+      <div>
+        <b><%= app.tag %></b>: <%= app.version %>
+      </div>
+    <% end %>
+  <% else %>
+    <h3>No apps found</h3>
+  <% end %>
+  <button phx-click="get_versions">Refresh</button>
+</section>
+<section class="phx-hero">
+  <h1>Restart apps:</h1>
+  <button phx-click="restart_router">Router</button>
+  <button phx-click="restart_streamer">Streamer</button>
+  <button phx-click="restart_announcer">Announcer</button>
+  <button phx-click="restart_companion">Companion</button>
+</section>
+<section class="phx-hero">
+  <h1>Update Config:</h1>
+  <button phx-click="get_config">Refresh Config</button>
+  <h2>All configs</h2>
+  <%= if length(@configs) > 0 do %>
+    <%= for config <- @configs do %>
+      <.form let={f} for={:config} phx-submit="save_config">
+        <%= label f, config.key %>
+        <%= textarea f, config.key, value: config.value %>
+        <%= submit "Save" %>
+      </.form>
+      
+      
+    <% end %>
+  <% else %>
+    <h3>No configs found</h3>
+  <% end %>
+</section>

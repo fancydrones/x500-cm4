@@ -1,94 +1,40 @@
 defmodule CompanionWeb.OperatorLive do
   use Phoenix.LiveView
+  use Phoenix.HTML
 
   require Logger
 
-  def mount(_session, socket) do
+  @impl true
+  def mount(_params, _session, socket) do
+    images = get_apps_details()
+    configs = get_configs()
+    socket =
+      socket
+      |> assign(apps: images)
+      |> assign(configs: configs)
     {:ok, socket}
-  end
-
-  def handle_event("set_config_system_id_222", _, socket) do
-    Logger.info("Clicked Set System ID = 222")
-
-    set_system_id("222")
-
-    {:noreply, socket}
-  end
-
-  def handle_event("set_config_system_id_1", _, socket) do
-    Logger.info("Clicked Set System ID = 1")
-
-    set_system_id("1")
-
-    {:noreply, socket}
   end
 
   def handle_event("get_config", _, socket) do
     Logger.info("Clicked restart Get Config")
 
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+    configs = get_configs()
 
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
+    socket =
+      socket
+      |> assign(configs: configs)
 
-    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config"
-    Logger.info("URL: #{url}")
-    headers = ["Authorization": "Bearer #{token}"]
-    options = [ssl: [cacertfile: ca_file]]
-    {:ok, response} = HTTPoison.get(url, headers, options)
-    Logger.info("Status Code: #{response.status_code}")
-    IO.inspect(response)
-    200 = response.status_code
-    {:ok, resp} = Jason.decode(response.body)
-    IO.inspect(resp["data"])
-
-    #DroneAction.action(:shutdown_button)
     {:noreply, socket}
   end
 
   def handle_event("get_versions", _, socket) do
     Logger.info("Clicked restart Get Versions")
 
-    #v_router = get_version("router")
-    #IO.puts(v_router)
+    apps = get_apps_details()
 
-
-    namespace_file = Application.get_env(:companion, :namespace_file)
-    token_file = Application.get_env(:companion, :token_file)
-    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
-    kube_server = Application.get_env(:companion, :kubernetes_server)
-    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
-
-    {:ok, token} = File.read(token_file)
-    token = token |> String.trim
-    {:ok, namespace} = File.read(namespace_file)
-    namespace = namespace |> String.trim
-
-    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/#{namespace}/deployments"
-
-    Logger.info("URL: #{url}")
-    headers = ["Authorization": "Bearer #{token}"]
-    options = [ssl: [cacertfile: ca_file]]
-    {:ok, response} = HTTPoison.get(url, headers, options)
-    Logger.info("Status Code: #{response.status_code}")
-    200 = response.status_code
-    {:ok, resp} = Jason.decode(response.body)
-    #IO.inspect(resp)
-    # containers = resp["spec"]["template"]["spec"]["containers"]
-    # c = List.first(containers)
-    # tag = c["image"]
-    # [_image, version] = String.split(tag, ":")
-    # IO.inspect(version)
-
-    deployment = List.first(resp["items"])
-
-    Enum.map(resp["items"], fn deployment -> IO.puts("#{get_name_from_deployment(deployment)} : #{get_image_version_from_deployment(deployment)}") end)
+    socket =
+      socket
+      |> assign(apps: apps)
 
     {:noreply, socket}
   end
@@ -125,19 +71,19 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
-  defp get_name_from_deployment(deployment) do
-    deployment["metadata"]["name"]
+  def handle_event("save_config", %{"config" => update}, socket) do
+    {key, value} =
+      update
+      |> Map.to_list
+      |> List.first
+
+    Logger.info("Key: #{key} -- Value: #{value}")
+
+    update_config(key, value)
+    {:noreply, socket}
   end
 
-  defp get_image_version_from_deployment(deployment) do
-    containers = deployment["spec"]["template"]["spec"]["containers"]
-    c = List.first(containers)
-    tag = c["image"]
-    [_image, version] = String.split(tag, ":")
-    version
-  end
-
-  defp set_system_id(system_id) do
+  defp update_config(key, value) do
     namespace_file = Application.get_env(:companion, :namespace_file)
     token_file = Application.get_env(:companion, :token_file)
     ca_file = Application.get_env(:companion, :root_ca_certificate_file)
@@ -156,10 +102,11 @@ defmodule CompanionWeb.OperatorLive do
     b =
       %{
         data: %{
-          "ANNOUNCER_SYSTEM_ID": system_id
+          key => value
         }
       }
     body = Jason.encode!(b)
+    IO.inspect(body)
     {:ok, response} = HTTPoison.patch(url, body, headers, options)
 
     IO.inspect(response)
@@ -203,23 +150,67 @@ defmodule CompanionWeb.OperatorLive do
     200 = response.status_code
   end
 
-  def render(assigns) do
-    ~L"""
-    <div id="liveoperator_landinggear_container">
-      <h1>Update Config:</h1>
-      <button phx-click="set_config_system_id_222">System ID = 222</button>
-      <button phx-click="set_config_system_id_1">System ID = 1</button>
-      <button phx-click="get_config">Get All Config</button>
-      <button phx-click="get_versions">Get Image Versions
-    </div>
+  defp get_configs() do
+    namespace_file = Application.get_env(:companion, :namespace_file)
+    token_file = Application.get_env(:companion, :token_file)
+    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
+    kube_server = Application.get_env(:companion, :kubernetes_server)
+    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
 
-    <div id="liveoperator_landinggear_container">
-      <h1>Restart apps:</h1>
-      <button phx-click="restart_router">Router</button>
-      <button phx-click="restart_streamer">Streamer</button>
-      <button phx-click="restart_announcer">Announcer</button>
-      <button phx-click="restart_companion">Companion</button>
-    </div>
-    """
+    {:ok, token} = File.read(token_file)
+    token = token |> String.trim
+    {:ok, namespace} = File.read(namespace_file)
+    namespace = namespace |> String.trim
+
+    url = "https://#{kube_server}:#{kube_server_port}/api/v1/namespaces/#{namespace}/configmaps/rpi4-config"
+    Logger.info("URL: #{url}")
+    headers = ["Authorization": "Bearer #{token}"]
+    options = [ssl: [cacertfile: ca_file]]
+    {:ok, response} = HTTPoison.get(url, headers, options)
+    Logger.info("Status Code: #{response.status_code}")
+    200 = response.status_code
+    {:ok, resp} = Jason.decode(response.body)
+    configs = resp["data"]
+
+    Map.keys(configs)
+    |> Enum.map(fn key -> %{key: key, value: configs[key]} end)
+
+  end
+
+  defp get_apps_details() do
+    namespace_file = Application.get_env(:companion, :namespace_file)
+    token_file = Application.get_env(:companion, :token_file)
+    ca_file = Application.get_env(:companion, :root_ca_certificate_file)
+    kube_server = Application.get_env(:companion, :kubernetes_server)
+    kube_server_port = Application.get_env(:companion, :kubernetes_server_port)
+
+    {:ok, token} = File.read(token_file)
+    token = token |> String.trim
+    {:ok, namespace} = File.read(namespace_file)
+    namespace = namespace |> String.trim
+
+    url = "https://#{kube_server}:#{kube_server_port}/apis/apps/v1/namespaces/#{namespace}/deployments"
+
+    Logger.info("URL: #{url}")
+    headers = ["Authorization": "Bearer #{token}"]
+    options = [ssl: [cacertfile: ca_file]]
+    {:ok, response} = HTTPoison.get(url, headers, options)
+    Logger.info("Status Code: #{response.status_code}")
+    200 = response.status_code
+    {:ok, resp} = Jason.decode(response.body)
+
+    Enum.map(resp["items"], fn deployment -> %{tag: get_name_from_deployment(deployment), version: get_image_version_from_deployment(deployment)} end)
+  end
+
+  defp get_name_from_deployment(deployment) do
+    deployment["metadata"]["name"]
+  end
+
+  defp get_image_version_from_deployment(deployment) do
+    containers = deployment["spec"]["template"]["spec"]["containers"]
+    c = List.first(containers)
+    tag = c["image"]
+    [_image, version] = String.split(tag, ":")
+    version
   end
 end
