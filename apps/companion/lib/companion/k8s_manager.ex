@@ -28,10 +28,7 @@ defmodule Companion.K8sManager do
     {:ok, deployments_result} = K8s.Client.run(connection, operation)
 
     resource_version = deployments_result["metadata"]["resourceVersion"]
-    IO.inspect(resource_version)
     deployments = Enum.map(deployments_result["items"], fn deployment -> extract_deloyment_details(deployment) end)
-
-    IO.inspect(deployments)
 
     {resource_version, deployments}
   end
@@ -41,9 +38,11 @@ defmodule Companion.K8sManager do
     image_version = get_image_version_from_deployment(deployment)
     replicas_from_spec= deployment["spec"]["replicas"]
 
+
+
     status = deployment["status"]
     ready_replicas =
-      case Map.has_key?(status, "readyReplicas") do
+      case is_map(status) and Map.has_key?(status, "readyReplicas") do
         true -> status["readyReplicas"]
         _ -> 0
       end
@@ -155,6 +154,11 @@ defmodule Companion.K8sManager do
         end)
   end
 
+  defp update_deployments(deployment, "ERROR", deployments) do
+    Logger.error("Watcher failed: #{Kernel.inspect(deployment)}")
+    deployments
+  end
+
   defp get_k8s_connection() do
     case Application.get_env(:companion, :use_file, :false) do
       :true -> K8s.Conn.from_file(Application.get_env(:companion, :file_path))
@@ -180,9 +184,13 @@ defmodule Companion.K8sManager do
 
   defp get_image_version_from_deployment(deployment) do
     containers = deployment["spec"]["template"]["spec"]["containers"]
-    c = List.first(containers)
-    tag = c["image"]
-    [_image, version] = String.split(tag, ":")
-    version
+    if containers != :nil do
+      c = List.first(containers)
+      tag = c["image"]
+      [_image, version] = String.split(tag, ":")
+      version
+    else
+      "UNKNOWN"
+    end
   end
 end

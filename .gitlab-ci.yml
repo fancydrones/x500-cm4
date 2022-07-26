@@ -207,7 +207,7 @@ update-manifest:
       if [ "$SHOULD_PATCH" = "true" ]; then
         echo "Patching"
         cd rpiuav/
-        git remote add mani-repo $CI_REPOSITORY_URL
+        git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
         git add .
         git commit -m "Update versions to ${BUILD_TAG}"
         git push --push-option=ci.skip mani-repo main
