@@ -36,23 +36,12 @@ prepare-build-tag:
       command: ["--experimental"]
   script:
     # Install BuildX
-    - echo "Install BuildX"
-    - echo $CI_REGISTRY
-    - echo $CI_REPOSITORY_URL
-    - echo $CI_PROJECT_DIR
-    - echo $CI_PROJECT_ID
-    - echo $CI_PROJECT_NAME
-    - echo $CI_PROJECT_NAMESPACE
-    - echo $CI_PROJECT_PATH
-    - echo $CI_PROJECT_URL
-    
     - mkdir -p ~/.docker/cli-plugins
     - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-
 
     # BUILD IMAGE
     - echo "Building tag $IMAGE_TAG:${BUILD_TAG}"
@@ -69,7 +58,7 @@ prepare-build-tag:
 build-streamer:
   extends: .build_image_template
   variables:
-    IMAGE_TAG: $CI_IMAGE_STREAMER
+    IMAGE_TAG: $CI_REGISTRY/$CI_PROJECT_PATH/streamer
     APP_DIR: apps/streamer
     APP_NAME: streamer
     DEPLOY_TAG: DEPLOY_STREAMER
@@ -84,7 +73,7 @@ build-streamer:
 build-router:
   extends: .build_image_template
   variables:
-    IMAGE_TAG: $CI_IMAGE_ROUTER
+    IMAGE_TAG: $CI_REGISTRY/$CI_PROJECT_PATH/router
     APP_DIR: apps/router
     APP_NAME: router
     DEPLOY_TAG: DEPLOY_ROUTER
@@ -99,7 +88,7 @@ build-router:
 build-announcer:
   extends: .build_image_template
   variables:
-    IMAGE_TAG: $CI_IMAGE_ANNOUNCER
+    IMAGE_TAG: $CI_REGISTRY/$CI_PROJECT_PATH/announcer
     APP_DIR: apps/announcer
     APP_NAME: announcer
     DEPLOY_TAG: DEPLOY_ANNOUNCER
@@ -114,7 +103,7 @@ build-announcer:
 build-companion:
   extends: .build_image_template
   variables:
-    IMAGE_TAG: $CI_IMAGE_COMPANION
+    IMAGE_TAG: $CI_REGISTRY/$CI_PROJECT_PATH/companion
     APP_DIR: apps/companion
     APP_NAME: companion
     DEPLOY_TAG: DEPLOY_COMPANION
@@ -149,8 +138,9 @@ update-manifest:
 
   script:
     - echo "Deploying tag ${BUILD_TAG}"
-    - git clone https://gitlab.com/got.vision/rpiuav.git
+    - git clone $CI_REPOSITORY_URL
     - SHOULD_PATCH="false"
+    - APPS_PATH="rpiuav/deployments/rpi4/apps"
 
     - echo $DEPLOY_STREAMER
     - echo $DEPLOY_ROUTER
@@ -163,10 +153,10 @@ update-manifest:
         echo "Patch Streamer"
         rm kustomization.yaml -f
         kustomize create
-        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/streamer:${BUILD_TAG}
-        kustomize edit add resource rpiuav/deployments/rpi4/apps/streamer.yaml
+        kustomize edit set image $CI_REGISTRY/$CI_PROJECT_PATH/streamer:${BUILD_TAG}
+        kustomize edit add resource $APPS_PATH/streamer.yaml
         kustomize build . > x.yaml
-        mv x.yaml rpiuav/deployments/rpi4/apps/streamer.yaml
+        mv x.yaml $APPS_PATH/streamer.yaml
 
         SHOULD_PATCH="true"
       fi
@@ -176,10 +166,10 @@ update-manifest:
       if [ ! -z $DEPLOY_ROUTER ]; then
         rm kustomization.yaml -f
         kustomize create
-        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/router:${BUILD_TAG}
-        kustomize edit add resource rpiuav/deployments/rpi4/apps/router.yaml
+        kustomize edit set image $CI_REGISTRY/$CI_PROJECT_PATH/router:${BUILD_TAG}
+        kustomize edit add resource $APPS_PATH/router.yaml
         kustomize build . > x.yaml
-        mv x.yaml rpiuav/deployments/rpi4/apps/router.yaml
+        mv x.yaml $APPS_PATH/router.yaml
 
         SHOULD_PATCH="true"
       fi
@@ -189,10 +179,10 @@ update-manifest:
       if [ ! -z $DEPLOY_ANNOUNCER ]; then
         rm kustomization.yaml -f
         kustomize create
-        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/announcer:${BUILD_TAG}
-        kustomize edit add resource rpiuav/deployments/rpi4/apps/announcer.yaml
+        kustomize edit set image $CI_REGISTRY/$CI_PROJECT_PATH/announcer:${BUILD_TAG}
+        kustomize edit add resource $APPS_PATH/announcer.yaml
         kustomize build . > x.yaml
-        mv x.yaml rpiuav/deployments/rpi4/apps/announcer.yaml
+        mv x.yaml $APPS_PATH/announcer.yaml
 
         SHOULD_PATCH="true"
       fi
@@ -202,10 +192,10 @@ update-manifest:
       if [ ! -z $DEPLOY_COMPANION ]; then
         rm kustomization.yaml -f
         kustomize create
-        kustomize edit set image registry.gitlab.com/got.vision/rpiuav/companion:${BUILD_TAG}
-        kustomize edit add resource rpiuav/deployments/rpi4/apps/companion.yaml
+        kustomize edit set image $CI_REGISTRY/$CI_PROJECT_PATH/companion:${BUILD_TAG}
+        kustomize edit add resource $APPS_PATH/companion.yaml
         kustomize build . > x.yaml
-        mv x.yaml rpiuav/deployments/rpi4/apps/companion.yaml
+        mv x.yaml $APPS_PATH/companion.yaml
 
         SHOULD_PATCH="true"
       fi
@@ -217,7 +207,7 @@ update-manifest:
       if [ "$SHOULD_PATCH" = "true" ]; then
         echo "Patching"
         cd rpiuav/
-        git remote add mani-repo https://${CI_USER}:${CI_PASSWORD}@gitlab.com/got.vision/rpiuav.git
+        git remote add mani-repo $CI_REPOSITORY_URL
         git add .
         git commit -m "Update versions to ${BUILD_TAG}"
         git push --push-option=ci.skip mani-repo main

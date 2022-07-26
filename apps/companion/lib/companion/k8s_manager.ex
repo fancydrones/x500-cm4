@@ -13,7 +13,6 @@ defmodule Companion.K8sManager do
   def init(_) do
     {:ok, conn} = get_k8s_connection()
     namespace = get_namespace()
-
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
 
     {resource_version, deployments} = get_deployments(conn, namespace)
@@ -21,10 +20,9 @@ defmodule Companion.K8sManager do
     resource_version = "682169" # TODO: Remove after debugging
     {:ok, reference} = K8s.Client.watch(conn, operation, resource_version, [stream_to: self(), recv_timeout: :infinity])
 
-    state = %{connection: conn, namespace: namespace, watch_deployments_id: reference, deployments: deployments}
-
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
 
+    state = %{connection: conn, namespace: namespace, watch_deployments_id: reference, deployments: deployments}
     {:ok, state}
   end
 

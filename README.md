@@ -40,6 +40,8 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [x] Document zerotier
 - [x] Step-by-step guide
 - [x] Separate service for config
+- [x] Adjust version of tags
+- [x] Cleanup variables defined (https://www.balticlsc.eu/gitlab/help/ci/variables/predefined_variables.md)
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation
@@ -53,9 +55,6 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Set limit on cpu and memory for Router (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
 - [ ] Set limit on cpu and memory for Announcer (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
 - [ ] Set limit on cpu and memory for Companion (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-- [x] Adjust version of tags
-- [ ] Cleanup variables defined (https://www.balticlsc.eu/gitlab/help/ci/variables/predefined_variables.md)
-
 
 ## Install software
 ### Step 1 - Install OS
