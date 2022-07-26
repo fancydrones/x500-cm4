@@ -13,14 +13,20 @@ defmodule Companion.K8sManager do
   def init(_) do
     {:ok, conn} = get_k8s_connection()
     namespace = get_namespace()
-    operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
-    {resource_version, deployments} = get_deployments(conn, namespace)
-    {:ok, reference} = K8s.Client.watch(conn, operation, resource_version, [stream_to: self(), recv_timeout: :infinity])
+
+    {reference, deployments} = start_watch_deployments(conn, namespace)
 
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
 
     state = %{connection: conn, namespace: namespace, watch_deployments_id: reference, deployments: deployments}
     {:ok, state}
+  end
+
+  defp start_watch_deployments(connection, namespace) do
+    operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
+    {resource_version, deployments} = get_deployments(connection, namespace)
+    {:ok, reference} = K8s.Client.watch(connection, operation, resource_version, [stream_to: self(), recv_timeout: :infinity])
+    {reference, deployments}
   end
 
   defp get_deployments(connection, namespace) do
@@ -119,7 +125,7 @@ defmodule Companion.K8sManager do
     {:noreply, %{state | deployments: deployments}}
   end
 
-  def handle_info(%HTTPoison.AsyncStatus{:code => 200, :id => watch_id}, %{watch_deployments_id: watch_id} = state) do
+  def handle_info(%HTTPoison.AsyncStatus{:code => 200, :id => watch_id}, %{watch_deployments_id: watch_id, } = state) do
     Logger.debug("Watcher enabled OK")
     {:noreply, state}
   end
@@ -128,6 +134,19 @@ defmodule Companion.K8sManager do
     Logger.debug("Watcher headers: #{Kernel.inspect(headers)}")
     {:noreply, state}
   end
+
+  def handle_info(%HTTPoison.AsyncEnd{:id => watch_id},%{watch_deployments_id: watch_id, connection: conn, namespace: namespace} = state) do
+    Logger.debug("Watcher Ended. Will restart")
+    {reference, deployments} = start_watch_deployments(conn, namespace)
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
+
+    state = %{state | watch_deployments_id: reference, deployments: deployments}
+
+    {:noreply, state}
+  end
+
+  #
 
   def handle_info(message, state) do
     Logger.warning("Receive unknown message: #{Kernel.inspect(message)}")
