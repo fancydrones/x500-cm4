@@ -63,13 +63,13 @@ spec:
         - containerPort: 14562
         - containerPort: 14563
         securityContext:
-          privileged: true
+          privileged: true # TODO: Reduce privileges (if possible)
         volumeMounts:
         - mountPath: /etc/mavlink-router
           name: main-conf
         - mountPath: /dev/serial0
           name: serial
-      hostNetwork: true
+      hostNetwork: true # TODO: Reduce privileges (if possible)
       volumes:
       - configMap:
           items:

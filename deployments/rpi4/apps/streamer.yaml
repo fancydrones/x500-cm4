@@ -31,11 +31,11 @@ spec:
         ports:
         - containerPort: 8554
         securityContext:
-          privileged: true
+          privileged: true # TODO: Reduce privileges (if possible)
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-      hostNetwork: true
+      hostNetwork: true # TODO: Reduce privileges (if possible)
       volumes:
       - hostPath:
           path: /run/udev

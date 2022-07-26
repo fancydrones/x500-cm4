@@ -49,6 +49,10 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Consider k3s hardening
 - [ ] Try to avoid network=host for Streamer
 - [ ] Try to avoid network=host for Router
+- [ ] Set limit on cpu and memory for Streamer (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
+- [ ] Set limit on cpu and memory for Router (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
+- [ ] Set limit on cpu and memory for Announcer (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
+- [ ] Set limit on cpu and memory for Companion (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)s
 
 
 ## Install software
