@@ -1,15 +1,14 @@
 <section class="phx-hero">
   <h1>Apps:</h1>
-  <%= if length(@apps) > 0 do %>
-    <%= for app <- @apps do %>
-      <div>
-        <b><%= app.tag %></b>: <%= app.version %>
+  <%= if length(@deployments) > 0 do %>
+    <%= for deployment <- @deployments do %>
+      <div style={deployment.backgrond_color}>
+        <b><%= deployment.name %></b>: <%= deployment.image_version %> (<%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %>)
       </div>
     <% end %>
   <% else %>
     <h3>No apps found</h3>
   <% end %>
-  <button phx-click="get_versions">Refresh</button>
 </section>
 <section class="phx-hero">
   <h1>Restart apps:</h1>

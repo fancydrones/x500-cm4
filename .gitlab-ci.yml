@@ -11,7 +11,7 @@ prepare-build-tag:
   stage: prebuild
   script:
     - |
-      date_for_tag=$(date '+%Y%m%d')
+      date_for_tag=$(date '+%Y-%m-%d')
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag="$date_for_tag.$CI_PIPELINE_IID"
         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = $tag"
@@ -37,12 +37,22 @@ prepare-build-tag:
   script:
     # Install BuildX
     - echo "Install BuildX"
+    - echo $CI_REGISTRY
+    - echo $CI_REPOSITORY_URL
+    - echo $CI_PROJECT_DIR
+    - echo $CI_PROJECT_ID
+    - echo $CI_PROJECT_NAME
+    - echo $CI_PROJECT_NAMESPACE
+    - echo $CI_PROJECT_PATH
+    - echo $CI_PROJECT_URL
+    
     - mkdir -p ~/.docker/cli-plugins
     - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VER}/buildx-v${BUILDX_VER}.linux-amd64
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker buildx create --use
-    - docker login -u "$CI_USER" -p "$CI_PASSWORD" $CI_REGISTRY
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
 
     # BUILD IMAGE
     - echo "Building tag $IMAGE_TAG:${BUILD_TAG}"
