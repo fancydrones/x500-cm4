@@ -15,10 +15,10 @@ defmodule Companion.K8sManager do
     namespace = get_namespace()
 
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
-    {:ok, reference} = K8s.Client.watch(conn, operation, stream_to: self())
+    {:ok, reference} = K8s.Client.watch(conn, operation, stream_to: self(), recv_timeout: :infinity)
     #Logger.debug(reference)
 
-    state = %{connection: conn, namespace: namespace, watch: reference}
+    state = %{connection: conn, namespace: namespace, watch_deployments_id: reference}
     {:ok, state}
   end
 
@@ -79,9 +79,50 @@ defmodule Companion.K8sManager do
     {:noreply, state}
   end
 
+  def handle_info(%HTTPoison.AsyncChunk{:chunk => chunk, :id => watch_id}, %{watch_deployments_id: watch_id} = state) do
+    {:ok, data} = Jason.decode(chunk)
+
+    IO.puts("**************************")
+    IO.puts("Type: #{data["type"]}")
+    status = data["object"]["status"]
+
+    if Map.has_key?(status, "observedGeneration") do
+      IO.puts("observedGeneration: #{status["observedGeneration"]}")
+    end
+
+    if Map.has_key?(status, "readyReplicas") do
+      IO.puts("readyReplicas: #{status["readyReplicas"]}")
+    end
+
+    if Map.has_key?(status, "replicas") do
+      IO.puts("replicas: #{status["replicas"]}")
+    end
+
+    if Map.has_key?(status, "updatedReplicas") do
+      IO.puts("updatedReplicas: #{status["updatedReplicas"]}")
+    end
+
+    if Map.has_key?(status, "unavailableReplicas") do
+      IO.puts("unavailableReplicas: #{status["unavailableReplicas"]}")
+    end
+
+    #IO.inspect(status)
+
+    {:noreply, state}
+  end
+
+  def handle_info(%HTTPoison.AsyncStatus{:code => 200, :id => watch_id}, %{watch_deployments_id: watch_id} = state) do
+    Logger.debug("Watcher enabled OK")
+    {:noreply, state}
+  end
+
+  def handle_info(%HTTPoison.AsyncHeaders{:headers => headers, :id => watch_id}, %{watch_deployments_id: watch_id} = state) do
+    Logger.debug("Watcher headers: #{Kernel.inspect(headers)}")
+    {:noreply, state}
+  end
+
   def handle_info(message, state) do
-    Logger.info("Receive from watch")
-    IO.inspect(message)
+    Logger.warning("Receive unknown message: #{Kernel.inspect(message)}")
     {:noreply, state}
   end
 
