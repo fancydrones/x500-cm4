@@ -14,10 +14,7 @@ defmodule Companion.K8sManager do
     {:ok, conn} = get_k8s_connection()
     namespace = get_namespace()
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
-
     {resource_version, deployments} = get_deployments(conn, namespace)
-
-    resource_version = "682169" # TODO: Remove after debugging
     {:ok, reference} = K8s.Client.watch(conn, operation, resource_version, [stream_to: self(), recv_timeout: :infinity])
 
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
