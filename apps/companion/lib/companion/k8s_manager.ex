@@ -15,7 +15,9 @@ defmodule Companion.K8sManager do
     namespace = get_namespace()
 
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
-    {:ok, reference} = K8s.Client.watch(conn, operation, stream_to: self(), recv_timeout: :infinity)
+
+    resource_version = "682169"
+    {:ok, reference} = K8s.Client.watch(conn, operation, resource_version, [stream_to: self(), recv_timeout: :infinity])
     #Logger.debug(reference)
 
     state = %{connection: conn, namespace: namespace, watch_deployments_id: reference}
@@ -56,6 +58,9 @@ defmodule Companion.K8sManager do
     Logger.info("Get Apps details from k8s")
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
     {:ok, deployments} = K8s.Client.run(conn, operation)
+
+    resource_version = deployments["metadata"]["resourceVersion"]
+    IO.inspect(resource_version)
     result = Enum.map(deployments["items"], fn deployment -> %{tag: get_name_from_deployment(deployment), version: get_image_version_from_deployment(deployment)} end)
 
     {:reply, result, state}
@@ -81,7 +86,12 @@ defmodule Companion.K8sManager do
 
   def handle_info(%HTTPoison.AsyncChunk{:chunk => chunk, :id => watch_id}, %{watch_deployments_id: watch_id} = state) do
     {:ok, data} = Jason.decode(chunk)
-
+    IO.puts("##########################")
+    deployment = data["object"]
+    name = get_name_from_deployment(deployment)
+    version = get_image_version_from_deployment(deployment)
+    IO.puts("#{name}: #{version}")
+    #IO.inspect(data["object"])
     IO.puts("**************************")
     IO.puts("Type: #{data["type"]}")
     status = data["object"]["status"]
