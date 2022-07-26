@@ -28,8 +28,6 @@ defmodule Companion.K8sManager do
     {:ok, state}
   end
 
-
-
   defp get_deployments(connection, namespace) do
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
     {:ok, deployments_result} = K8s.Client.run(connection, operation)
