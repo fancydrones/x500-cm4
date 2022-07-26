@@ -23,13 +23,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: companion-strategy
+      app: companion-replicaset
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: companion-strategy
+        app: companion-replicaset
         app.kubernetes.io/name: companion-deployment
     spec:
       containers:
@@ -41,7 +41,7 @@ spec:
         - name: MAVLINK_CONNECTION
           value: udpout:router-service.rpiuav.svc.cluster.local:14550
         image: registry.gitlab.com/got.vision/rpiuav/companion:20220726.201
-        name: companion-strategy
+        name: companion
         ports:
         - containerPort: 4000
         volumeMounts:

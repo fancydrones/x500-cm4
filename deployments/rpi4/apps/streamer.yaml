@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: streamer-recreate-strategy
+      app: streamer-replicaset
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: streamer-recreate-strategy
+        app: streamer-replicaset
     spec:
       containers:
       - env:
@@ -27,7 +27,7 @@ spec:
         - name: VIDEO_PORT
           value: "8554"
         image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.177
-        name: streamer-recreate-strategy
+        name: streamer
         ports:
         - containerPort: 8554
         securityContext:
