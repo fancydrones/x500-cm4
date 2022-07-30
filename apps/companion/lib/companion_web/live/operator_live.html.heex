@@ -3,19 +3,17 @@
   <%= if length(@deployments) > 0 do %>
     <%= for deployment <- @deployments do %>
       <div style={deployment.backgrond_color}>
-        <b><%= deployment.name %></b>: <%= deployment.image_version %> (<%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %>)
+        <div>
+          <b><%= deployment.name %></b>: <%= deployment.image_version %> (<%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %>)
+        </div>
+        <div>
+          <button phx-click="restart_app" phx-value-app={deployment.name} >Restart</button>
+        </div>
       </div>
     <% end %>
   <% else %>
     <h3>No apps found</h3>
   <% end %>
-</section>
-<section class="phx-hero">
-  <h1>Restart apps:</h1>
-  <button phx-click="restart_router">Router</button>
-  <button phx-click="restart_streamer">Streamer</button>
-  <button phx-click="restart_announcer">Announcer</button>
-  <button phx-click="restart_companion">Companion</button>
 </section>
 <section class="phx-hero">
   <h1>Update Config:</h1>
@@ -28,8 +26,6 @@
         <%= textarea f, config.key, value: config.value %>
         <%= submit "Save" %>
       </.form>
-      
-      
     <% end %>
   <% else %>
     <h3>No configs found</h3>

@@ -33,34 +33,10 @@ defmodule CompanionWeb.OperatorLive do
     {:noreply, socket}
   end
 
-  def handle_event("restart_router", _, socket) do
-    Logger.info("Clicked restart Router")
+  def handle_event("restart_app", %{"app" => app}, socket) do
+    Logger.info("Clicked restart app: #{app}")
 
-    Companion.K8sManager.restart_deployment("router")
-
-    {:noreply, socket}
-  end
-
-  def handle_event("restart_streamer", _, socket) do
-    Logger.info("Clicked restart Streamer")
-
-    Companion.K8sManager.restart_deployment("streamer")
-
-    {:noreply, socket}
-  end
-
-  def handle_event("restart_announcer", _, socket) do
-    Logger.info("Clicked restart Announcer")
-
-    Companion.K8sManager.restart_deployment("announcer")
-
-    {:noreply, socket}
-  end
-
-  def handle_event("restart_companion", _, socket) do
-    Logger.info("Clicked restart Companion")
-
-    Companion.K8sManager.restart_deployment("companion")
+    Companion.K8sManager.restart_deployment(app)
 
     {:noreply, socket}
   end
@@ -95,6 +71,7 @@ defmodule CompanionWeb.OperatorLive do
           backgrond_color: get_color_from_count(d.ready_replicas, d.replicas_from_spec)
         }
       end)
+    |> Enum.sort_by(fn d -> d.name end)
   end
 
   defp get_color_from_count(ready_replicat, expected_replicas) do
