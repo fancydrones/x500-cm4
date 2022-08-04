@@ -69,4 +69,5 @@ config :phoenix, :plug_init_mode, :runtime
 
 config :companion,
   use_file: :true,
-  file_path: "~/k3s.yaml"
+  file_path: "~/k3s.yaml",
+  k8s_api_manager: Companion.SimulatedK8sApiManager # Use this to develop locally without constrains to k8s

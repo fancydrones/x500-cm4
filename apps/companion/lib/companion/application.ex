@@ -5,6 +5,8 @@ defmodule Companion.Application do
 
   use Application
 
+  require Logger
+
   @impl true
   def start(_type, _args) do
     children = [
@@ -16,7 +18,7 @@ defmodule Companion.Application do
       CompanionWeb.Endpoint,
       # Start a worker by calling: Companion.Worker.start_link(arg)
       # {Companion.Worker, arg}
-      Companion.K8sManager
+      Companion.K8sManager.get_api_manager()
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

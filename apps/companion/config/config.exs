@@ -32,6 +32,11 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :companion,
+  use_file: :true,
+  file_path: "~/k3s.yaml",
+  k8s_api_manager: Companion.K8sApiManager
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
