@@ -40,6 +40,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [x] Document zerotier
 - [x] Step-by-step guide
 - [x] Separate service for config
+- [ ] Publish documentation using Gitlab Pages: [https://about.gitlab.com/stages-devops-lifecycle/pages/](https://about.gitlab.com/stages-devops-lifecycle/pages/)
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation

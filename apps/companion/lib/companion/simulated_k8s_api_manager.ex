@@ -46,10 +46,17 @@ defmodule Companion.SimulatedK8sApiManager do
     {:noreply, state}
   end
 
-  def handle_cast({:restart_deployment, deployment_name}, state) do
+  def handle_cast({:restart_deployment, deployment_name}, %{deployments: deployments} = state) do
     Logger.info("Restart deployment: #{deployment_name}")
 
-    {:noreply, state}
+    deployments =
+      deployments
+      |> Enum.map(fn d -> if d.name == deployment_name, do: %{d | ready_replicas: 0}, else: d end)
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
+
+    Process.send_after(self(), {:enable_deployment, deployment_name}, 3000)
+    {:noreply, %{state | deployments: deployments}}
   end
 
   def handle_cast(:request_deployments, %{deployments: deployments} = state) do
@@ -57,28 +64,38 @@ defmodule Companion.SimulatedK8sApiManager do
     {:noreply, state}
   end
 
+  def handle_info({:enable_deployment, deployment_name}, %{deployments: deployments} = state) do
+    deployments =
+      deployments
+      |> Enum.map(fn d -> if d.name == deployment_name, do: %{d | ready_replicas: d.replicas_from_spec}, else: d end)
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
+
+    {:noreply, %{state | deployments: deployments}}
+  end
+
   defp get_fake_initial_deployments() do
     [
       %{
-        name: "Companion",
+        name: "companion",
         image_version: "20220801.123",
         replicas_from_spec: 1,
         ready_replicas: 1
       },
       %{
-        name: "Streamer",
+        name: "streamer",
         image_version: "20220801.123",
         replicas_from_spec: 1,
         ready_replicas: 1
       },
       %{
-        name: "Router",
+        name: "router",
         image_version: "20220801.123",
         replicas_from_spec: 1,
         ready_replicas: 1
       },
       %{
-        name: "Announcer",
+        name: "announcer",
         image_version: "20220801.123",
         replicas_from_spec: 1,
         ready_replicas: 1

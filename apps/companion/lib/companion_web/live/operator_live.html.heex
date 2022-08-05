@@ -8,8 +8,8 @@
               <h2><%= deployment.name %></h2>
           </header>
           <div class="content">
-              <p> Version: <%= deployment.image_version %> </p>
-              <p> Replicas: <%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %> </p>
+            <p class="card-paragraph"> Version: <%= deployment.image_version %> </p>
+            <p class="card-paragraph"> Replicas: <%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %> </p>
           </div>
             <button class="card-button" phx-click="restart_app" phx-value-app={deployment.name} >Restart</button>
         </article>

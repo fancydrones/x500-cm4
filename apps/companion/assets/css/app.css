@@ -134,6 +134,10 @@
   text-align: center;
 }
 
+.card-paragraph {
+  margin: 1rem;
+}
+
 .card-button {
   border: none;
   outline: 0;
@@ -146,4 +150,6 @@
   width: 100%;
   font-size: 18px;
   height: 50px;
+  margin-bottom: 0rem;
+  border-radius: 0rem;
 }
