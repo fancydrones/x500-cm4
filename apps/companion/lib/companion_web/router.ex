@@ -18,7 +18,7 @@ defmodule CompanionWeb.Router do
     pipe_through :browser
 
     #get "/", PageController, :index
-    live "/", OperatorLive
+    live "/", OverviewLive
     live "/config", ConfigLive
   end
 

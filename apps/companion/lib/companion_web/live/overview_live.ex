@@ -1,4 +1,4 @@
-defmodule CompanionWeb.OperatorLive do
+defmodule CompanionWeb.OverviewLive do
   use Phoenix.LiveView
   use Phoenix.HTML
 
