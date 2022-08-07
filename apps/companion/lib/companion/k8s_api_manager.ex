@@ -44,8 +44,6 @@ defmodule Companion.K8sApiManager do
     image_version = get_image_version_from_deployment(deployment)
     replicas_from_spec= deployment["spec"]["replicas"]
 
-
-
     status = deployment["status"]
     ready_replicas =
       case is_map(status) and Map.has_key?(status, "readyReplicas") do
@@ -145,8 +143,6 @@ defmodule Companion.K8sApiManager do
 
     {:noreply, state}
   end
-
-  #
 
   def handle_info(message, state) do
     Logger.warning("Receive unknown message: #{Kernel.inspect(message)}")
