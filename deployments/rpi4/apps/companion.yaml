@@ -47,6 +47,13 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/rancher/k3s/server/tls/server-ca.crt
           name: ca
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "0.25"
+          limits:
+            memory: "200Mi"
+            cpu: "0.5"
       serviceAccountName: rpimodifier
       volumes:
       - hostPath:

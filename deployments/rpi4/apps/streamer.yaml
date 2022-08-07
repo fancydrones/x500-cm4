@@ -35,6 +35,13 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "1"
+          limits:
+            memory: "2500Mi"
+            cpu: "2"
       hostNetwork: true
       volumes:
       - hostPath:

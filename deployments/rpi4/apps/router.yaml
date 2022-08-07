@@ -69,6 +69,13 @@ spec:
           name: main-conf
         - mountPath: /dev/serial0
           name: serial
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "0.25"
+          limits:
+            memory: "500Mi"
+            cpu: "0.5"
       hostNetwork: true
       volumes:
       - configMap:
