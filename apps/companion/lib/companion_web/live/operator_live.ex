@@ -6,8 +6,6 @@ defmodule CompanionWeb.OperatorLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    configs = Companion.K8sManager.get_configs()
-
     if connected?(socket) do
       Phoenix.PubSub.subscribe(Companion.PubSub, "deployment_updates")
       Companion.K8sManager.request_deployments()
@@ -16,40 +14,15 @@ defmodule CompanionWeb.OperatorLive do
     socket =
       socket
       |> assign(deployments: [])
-      |> assign(configs: configs)
     {:ok, socket}
   end
 
   @impl true
-  def handle_event("get_config", _, socket) do
-    Logger.info("Clicked restart Get Config")
-
-    configs = Companion.K8sManager.get_configs()
-
-    socket =
-      socket
-      |> assign(configs: configs)
-
-    {:noreply, socket}
-  end
-
   def handle_event("restart_app", %{"app" => app}, socket) do
     Logger.info("Clicked restart app: #{app}")
 
     Companion.K8sManager.restart_deployment(app)
 
-    {:noreply, socket}
-  end
-
-  def handle_event("save_config", %{"config" => update}, socket) do
-    {key, value} =
-      update
-      |> Map.to_list
-      |> List.first
-
-    Logger.info("Key: #{key} -- Value: #{value}")
-
-    Companion.K8sManager.update_config(key, value)
     {:noreply, socket}
   end
 
@@ -80,6 +53,32 @@ defmodule CompanionWeb.OperatorLive do
     else
       "background-color: green;"
     end
+  end
+
+  def render(assigns) do
+    ~H"""
+      <section class="phx-hero">
+        <h1>Apps:</h1>
+        <div class="cards">
+          <%= if length(@deployments) > 0 do %>
+            <%= for deployment <- @deployments do %>
+              <article class="card" style={deployment.backgrond_color}>
+                <header>
+                    <h2><%= deployment.name %></h2>
+                </header>
+                <div class="content">
+                  <p class="card-paragraph"> Version: <%= deployment.image_version %> </p>
+                  <p class="card-paragraph"> Replicas: <%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %> </p>
+                </div>
+                  <button class="card-button" phx-click="restart_app" phx-value-app={deployment.name} >Restart</button>
+              </article>
+            <% end %>
+          <% else %>
+            <h3>No apps found</h3>
+          <% end %>
+        </div>
+      </section>
+    """
   end
 
 end

@@ -14,7 +14,10 @@
       <section class="container">
         <nav>
           <ul>
-            <li><a href="https://gitlab.com/got.vision/rpiuav">RPiUAV documentation</a></li>
+            <li><%= live_redirect "Overview", to: Routes.live_path(@conn, CompanionWeb.OperatorLive) %></li>
+            <li><%= live_redirect "Config", to: Routes.live_path(@conn, CompanionWeb.ConfigLive) %></li>
+
+            <li><a href="https://gitlab.com/got.vision/rpiuav" target="_blank">RPiUAV documentation</a></li>
             <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
               <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
             <% end %>

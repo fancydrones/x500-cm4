@@ -19,6 +19,7 @@ defmodule CompanionWeb.Router do
 
     #get "/", PageController, :index
     live "/", OperatorLive
+    live "/config", ConfigLive
   end
 
   # Other scopes may use custom stacks.
