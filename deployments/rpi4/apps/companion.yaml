@@ -40,20 +40,20 @@ spec:
           value: GM4Nv3AsIrj36aK6y2NJYmuKZSKoJ9i5bjxaLSLTH+2A16LC69JzQzHe7X3m7YJR
         - name: MAVLINK_CONNECTION
           value: udpout:router-service.rpiuav.svc.cluster.local:14550
-        image: registry.gitlab.com/got.vision/rpiuav/companion:2022-08-07.235
+        image: registry.gitlab.com/got.vision/rpiuav/companion:2022-08-07.237
         name: companion
         ports:
         - containerPort: 4000
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 200Mi
+          requests:
+            cpu: "0.25"
+            memory: 50Mi
         volumeMounts:
         - mountPath: /var/lib/rancher/k3s/server/tls/server-ca.crt
           name: ca
-        resources:
-          requests:
-            memory: "50Mi"
-            cpu: "0.25"
-          limits:
-            memory: "200Mi"
-            cpu: "0.5"
       serviceAccountName: rpimodifier
       volumes:
       - hostPath:
