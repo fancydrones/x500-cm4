@@ -25,6 +25,17 @@ The setup is built on the foundation of [Dronecode Foundation](https://www.drone
 ## Other major components
 For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB recommended)](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) and the [Raspberry Pi HQ Camera](https://www.raspberrypi.com/products/raspberry-pi-high-quality-camera/) ([or v2](https://www.raspberrypi.com/products/camera-module-v2/)). For communication we are using LTE and [Zerotier](https://www.zerotier.com/) for "VPN" like connectivity. [Zerotier is free for up to 25 nodes](https://www.zerotier.com/pricing/), and resonably priced above that.
 
+## Companion computer
+To connect all the pieces, we have a Raspberry Pi 4 (RPi) acting as a bridge between the onboard autopilot, and the controller and pilot on the ground. The RPi connects to the autopilot using either Ethernet or UART, and connects to the ground controller using LTE (4G) and Zerotier.
+
+To make all work seamless, the Rpi runs a few apps to connect all the different pieces. Some runs natively (like Zerotier), while the rest are hosted as containers, on hosted inside a Kubernetes distribution called K3s.
+
+The Apps hosted are:
+- __Router:__ [The standard Mavlink Router](https://github.com/mavlink-router/mavlink-router) packaged inside a container. This sends the mavlink commands between the parties involved. Autopilot and ground controller being the most important ones.
+- __Streamer:__ A GStreamer based video streamer, for sending video from the onboard camera
+- __Announcer:__ Using Mavlink to announce the video stream. This way the video shows up automatically on the ground controller.
+- __Companion:__ Small web interface to modify the most common configurations. Can also be used to restart the different apps. Either if they misbehave, or you need to restart after changing config.
+
 ## TODOs
 - [x] Mavlink Router
 - [x] Video Announcer
@@ -40,6 +51,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [x] Document zerotier
 - [x] Step-by-step guide
 - [x] Separate service for config
+- [x] Set limit on cpu and memory for Apps (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
 - [ ] Publish documentation using Gitlab Pages: [https://about.gitlab.com/stages-devops-lifecycle/pages/](https://about.gitlab.com/stages-devops-lifecycle/pages/)
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
@@ -50,10 +62,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 - [ ] Consider k3s hardening
 - [ ] Try to avoid network=host for Streamer
 - [ ] Try to avoid network=host for Router
-- [ ] Set limit on cpu and memory for Streamer (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-- [ ] Set limit on cpu and memory for Router (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-- [ ] Set limit on cpu and memory for Announcer (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-- [ ] Set limit on cpu and memory for Companion (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
+
 
 ## Install software
 ### Step 1 - Install OS
