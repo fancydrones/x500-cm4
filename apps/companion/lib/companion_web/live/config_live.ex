@@ -55,9 +55,9 @@ defmodule CompanionWeb.ConfigLive do
           <%= for config <- @configs do %>
             <div class="config-card">
               <.form let={f} for={:config} phx-submit="save_config">
-                <%= label f, config.key %>
+                <p class="config-key-header"><%= config.key %></p>
                 <div class="config-value-container">
-                  <%= label f, config.value, class: "config-original" %>
+                  <p class="config-original"><%= config.value %></p>
                   <%= textarea f, config.key, value: config.value, class: "config-editbox" %>
                 </div>
                 <%= submit "Save" %>

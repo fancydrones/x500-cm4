@@ -169,6 +169,10 @@
   padding: 20px;
 }
 
+.config-key-header {
+  font-weight: bold;
+}
+
 .config-value-container {
   display: flex;
   flex-flow: row wrap;
