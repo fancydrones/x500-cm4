@@ -55,6 +55,7 @@ defmodule CompanionWeb.OverviewLive do
     end
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
       <section class="phx-hero">

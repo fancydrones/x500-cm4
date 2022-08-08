@@ -43,6 +43,7 @@ defmodule CompanionWeb.ConfigLive do
     {:noreply, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <section class="phx-hero">
@@ -50,13 +51,20 @@ defmodule CompanionWeb.ConfigLive do
       <button phx-click="get_config">Refresh Config</button>
       <%= if length(@configs) > 0 do %>
         <h2>All configs</h2>
-        <%= for config <- @configs do %>
-          <.form let={f} for={:config} phx-submit="save_config">
-            <%= label f, config.key %>
-            <%= textarea f, config.key, value: config.value %>
-            <%= submit "Save" %>
-          </.form>
-        <% end %>
+        <div class="config-cards-container">
+          <%= for config <- @configs do %>
+            <div class="config-card">
+              <.form let={f} for={:config} phx-submit="save_config">
+                <%= label f, config.key %>
+                <div class="config-value-container">
+                  <%= label f, config.value, class: "config-original" %>
+                  <%= textarea f, config.key, value: config.value, class: "config-editbox" %>
+                </div>
+                <%= submit "Save" %>
+              </.form>
+            </div>
+          <% end %>
+        </div>
       <% else %>
         <h2>No configs found</h2>
       <% end %>

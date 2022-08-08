@@ -153,3 +153,39 @@
   margin-bottom: 0rem;
   border-radius: 0rem;
 }
+
+.config-cards-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 20px;
+}
+
+.config-card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  background-color:#fcf8e3;
+  max-width: 700px;
+  padding: 20px;
+}
+
+.config-value-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.config-original {
+  white-space: pre-wrap;
+  text-align: left;
+  font-size: 1.3rem;
+  font-weight: unset;
+  inline-size: 250px;
+  overflow-wrap: anywhere;
+  margin-right: 10px;
+}
+
+.config-editbox {
+  inline-size: 300px;
+  height: auto;
+}
