@@ -57,11 +57,12 @@ The Apps hosted are:
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation
 - [ ] Document high level concept
-- [ ] Smaller image for STREAMER, if possible
-- [ ] Enable Origin check for Companion
-- [ ] Consider k3s hardening
-- [ ] Try to avoid network=host for Streamer
-- [ ] Try to avoid network=host for Router
+
+- [ ] Consider k3s hardening ([https://rancher.com/docs/k3s/latest/en/security/hardening_guide/](https://rancher.com/docs/k3s/latest/en/security/hardening_guide/))
+- ~~[ ] Enable Origin check for Companion~~ (not needed for now. Will only complicate setups)
+- ~~[ ] Smaller image for STREAMER, if possible~~ (GStreamer+Python will increase size)
+- ~~[ ] Try to avoid network=host for Streamer~~ (Will only allow ports between 30000 and 32767)
+- ~~[ ] Try to avoid network=host for Router~~ (Will only allow ports between 30000 and 32767)
 
 
 ## Install software
