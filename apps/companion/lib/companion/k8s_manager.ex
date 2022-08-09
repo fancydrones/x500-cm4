@@ -7,10 +7,6 @@ defmodule Companion.K8sManager do
     get_api_manager().update_config(key, value)
   end
 
-  def get_configs() do
-    get_api_manager().get_configs()
-  end
-
   def restart_deployment(deployment_name) do
     get_api_manager().restart_deployment(deployment_name)
   end
@@ -18,4 +14,10 @@ defmodule Companion.K8sManager do
   def request_deployments() do
     get_api_manager().request_deployments()
   end
+
+  def request_configs() do
+    get_api_manager().request_configs()
+  end
+
+
 end

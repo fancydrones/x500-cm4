@@ -11,19 +11,17 @@ defmodule Companion.SimulatedK8sApiManager do
 
   def init(_) do
     deployments = get_fake_initial_deployments()
+    configs = get_fake_configs()
 
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
 
-    state = %{namespace: @namespace, deployments: deployments}
+    state = %{namespace: @namespace, deployments: deployments, configs: configs}
     {:ok, state}
   end
 
   def update_config(key, value) do
     GenServer.cast(__MODULE__, {:update_config, key, value})
-  end
-
-  def get_configs() do
-    GenServer.call(__MODULE__, :get_configs)
   end
 
   def restart_deployment(deployment_name) do
@@ -34,16 +32,20 @@ defmodule Companion.SimulatedK8sApiManager do
     GenServer.cast(__MODULE__, :request_deployments)
   end
 
-  def handle_call(:get_configs, _from, state) do
-    Logger.info("Get ConfigMap from k8s")
-    result = get_fake_configs()
-
-      {:reply, result, state}
+  def request_configs() do
+    GenServer.cast(__MODULE__, :request_configs)
   end
 
-  def handle_cast({:update_config, key, value}, state) do
+  def handle_cast({:update_config, key, value}, %{configs: configs} = state) do
     Logger.info("Updating config : key: #{key} : value: #{value}")
-    {:noreply, state}
+
+    configs =
+      configs
+      |> Enum.map(fn c -> if c.key == key, do: %{c | value: value}, else: c end)
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
+
+    {:noreply, %{state | configs: configs}}
   end
 
   def handle_cast({:restart_deployment, deployment_name}, %{deployments: deployments} = state) do
@@ -63,6 +65,13 @@ defmodule Companion.SimulatedK8sApiManager do
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
     {:noreply, state}
   end
+
+  def handle_cast(:request_configs, %{configs: configs} = state) do
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
+    {:noreply, state}
+  end
+
+
 
   def handle_info({:enable_deployment, deployment_name}, %{deployments: deployments} = state) do
     deployments =

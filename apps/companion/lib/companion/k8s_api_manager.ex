@@ -14,11 +14,20 @@ defmodule Companion.K8sApiManager do
     {:ok, conn} = get_k8s_connection()
     namespace = get_namespace()
 
-    {reference, deployments} = start_watch_deployments(conn, namespace)
+    {reference_deployments, deployments} = start_watch_deployments(conn, namespace)
+    {reference_configs, configs} = start_watch_configs(conn, namespace)
 
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
 
-    state = %{connection: conn, namespace: namespace, watch_deployments_id: reference, deployments: deployments}
+    state = %{
+        connection: conn,
+        namespace: namespace,
+        watch_deployments_id: reference_deployments,
+        watch_configs_id: reference_configs,
+        deployments: deployments,
+        configs: configs
+      }
     {:ok, state}
   end
 
@@ -32,10 +41,8 @@ defmodule Companion.K8sApiManager do
   defp get_deployments(connection, namespace) do
     operation = K8s.Client.list("apps/v1", "Deployment", namespace: namespace)
     {:ok, deployments_result} = K8s.Client.run(connection, operation)
-
     resource_version = deployments_result["metadata"]["resourceVersion"]
     deployments = Enum.map(deployments_result["items"], fn deployment -> extract_deloyment_details(deployment) end)
-
     {resource_version, deployments}
   end
 
@@ -58,12 +65,41 @@ defmodule Companion.K8sApiManager do
     }
   end
 
-  def update_config(key, value) do
-    GenServer.cast(__MODULE__, {:update_config, key, value})
+  defp start_watch_configs(connection, namespace) do
+    operation = K8s.Client.get("v1", :configmap, [namespace: namespace, name: @default_configmap])
+    {resource_version, configs} = get_configs_from_k8s(connection, namespace)
+    {:ok, reference} = K8s.Client.watch(connection, operation, resource_version, [stream_to: self(), recv_timeout: :infinity])
+    {reference, configs}
   end
 
-  def get_configs() do
-    GenServer.call(__MODULE__, :get_configs)
+  defp get_configs_from_k8s(connection, namespace) do
+
+    configmap_name = @default_configmap
+
+    # Needs to use LIST to get updated resource version, and filter result from list.
+    # GET would be more precise, but return outdated resource version
+    operation = K8s.Client.list("v1", :configmap, [namespace: namespace])
+    {:ok, configmaps_result} = K8s.Client.run(connection, operation)
+    configmaps =
+      configmaps_result["items"]
+      |> Enum.filter(fn configmap -> configmap["metadata"]["name"] == configmap_name end)
+      |> Enum.map(fn configmap -> extract_configmap_details(configmap) end)
+    resource_version = configmaps_result["metadata"]["resourceVersion"]
+
+    result = List.first(configmaps)
+    {resource_version, result}
+  end
+
+  defp extract_configmap_details(configmap) do
+    configs = configmap["data"]
+
+    configs
+    |> Map.keys()
+    |> Enum.map(fn key -> %{key: key, value: configs[key]} end)
+  end
+
+  def update_config(key, value) do
+    GenServer.cast(__MODULE__, {:update_config, key, value})
   end
 
   def restart_deployment(deployment_name) do
@@ -74,18 +110,8 @@ defmodule Companion.K8sApiManager do
     GenServer.cast(__MODULE__, :request_deployments)
   end
 
-  def handle_call(:get_configs, _from, %{connection: conn, namespace: namespace} = state) do
-    Logger.info("Get ConfigMap from k8s")
-    operation = K8s.Client.get("v1", :configmap, [namespace: namespace, name: @default_configmap])
-    {:ok, configmap} = K8s.Client.run(conn, operation)
-
-    configs = configmap["data"]
-
-    result =
-      Map.keys(configs)
-      |> Enum.map(fn key -> %{key: key, value: configs[key]} end)
-
-      {:reply, result, state}
+  def request_configs() do
+    GenServer.cast(__MODULE__, :request_configs)
   end
 
   def handle_cast({:update_config, key, value}, %{connection: conn, namespace: namespace} = state) do
@@ -111,6 +137,12 @@ defmodule Companion.K8sApiManager do
     {:noreply, state}
   end
 
+  def handle_cast(:request_configs, %{configs: configs} = state) do
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
+    {:noreply, state}
+  end
+
+  # WATCH: Receive update for deployments
   def handle_info(%HTTPoison.AsyncChunk{:chunk => chunk, :id => watch_id}, %{watch_deployments_id: watch_id, deployments: deployments} = state) do
     {:ok, data} = Jason.decode(chunk)
     deployment = extract_deloyment_details(data["object"])
@@ -123,16 +155,19 @@ defmodule Companion.K8sApiManager do
     {:noreply, %{state | deployments: deployments}}
   end
 
+  # WATCH: OK subscription for deployments
   def handle_info(%HTTPoison.AsyncStatus{:code => 200, :id => watch_id}, %{watch_deployments_id: watch_id, } = state) do
-    Logger.debug("Watcher enabled OK")
+    Logger.debug("Watcher enabled OK for deployments")
     {:noreply, state}
   end
 
+  # WATCH: Receive headers for deployments
   def handle_info(%HTTPoison.AsyncHeaders{:headers => headers, :id => watch_id}, %{watch_deployments_id: watch_id} = state) do
-    Logger.debug("Watcher headers: #{Kernel.inspect(headers)}")
+    Logger.debug("Watcher headers for deployments: #{Kernel.inspect(headers)}")
     {:noreply, state}
   end
 
+  # WATCH: Subscription timed out for deployments. Will restart.
   def handle_info(%HTTPoison.AsyncEnd{:id => watch_id},%{watch_deployments_id: watch_id, connection: conn, namespace: namespace} = state) do
     Logger.debug("Watcher Ended. Will restart")
     {reference, deployments} = start_watch_deployments(conn, namespace)
@@ -140,6 +175,42 @@ defmodule Companion.K8sApiManager do
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
 
     state = %{state | watch_deployments_id: reference, deployments: deployments}
+
+    {:noreply, state}
+  end
+
+  ###
+  # WATCH: Receive update for configs
+  def handle_info(%HTTPoison.AsyncChunk{:chunk => chunk, :id => watch_id}, %{watch_configs_id: watch_id} = state) do
+    {:ok, data} = Jason.decode(chunk)
+    configs = extract_configmap_details(data["object"])
+    #type = data["type"]
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
+
+    {:noreply, %{state | configs: configs}}
+  end
+
+  # WATCH: OK subscription for configs
+  def handle_info(%HTTPoison.AsyncStatus{:code => 200, :id => watch_id}, %{watch_configs_id: watch_id, } = state) do
+    Logger.debug("Watcher for configs enabled OK")
+    {:noreply, state}
+  end
+
+  # WATCH: Receive headers for configs
+  def handle_info(%HTTPoison.AsyncHeaders{:headers => headers, :id => watch_id}, %{watch_configs_id: watch_id} = state) do
+    Logger.debug("Watcher headers for configs: #{Kernel.inspect(headers)}")
+    {:noreply, state}
+  end
+
+  # WATCH: Subscription timed out for configs. Will restart.
+  def handle_info(%HTTPoison.AsyncEnd{:id => watch_id},%{watch_configs_id: watch_id, connection: conn, namespace: namespace} = state) do
+    Logger.debug("Watcher Ended for configs. Will restart")
+    {reference, configs} = start_watch_configs(conn, namespace)
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
+
+    state = %{state | watch_configs_id: reference, configs: configs}
 
     {:noreply, state}
   end
