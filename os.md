@@ -10,15 +10,17 @@ The steps are:
 
 - 3. Start Imager, and choose OS, and select `Raspberry Pi OS (other)` and then `Raspberry Pi OS Lite (64-bit)`. Select the SD card you inserted under the button `Choose Storage`.
 
-- 4. Click on the Gear icon down to the right, and fill out the fields as shown in the image below. For added security you should always default to using SSH-keys. If this is impossible to you, or you prefer a password approach, then select `Use password authentication` instead. Set the username and password for you. And also set the WiFi details, if you are planning to connect to Wifi.
+- 4. __DO NOT CLICK WRITE YET!!!__
+
+- 5. Click on the Gear icon down to the right, and fill out the fields as shown in the image below. For added security you should always default to using SSH-keys. If this is impossible to you, or you prefer a password approach, then select `Use password authentication` instead. Set the username and password for you. And also set the WiFi details, if you are planning to connect to Wifi.
 ![](media/install_os.png)
 
-- 5. Press `WRITE`, and then confirm (and you password, if needed). Wait for the flashing to complete.
+- 6. Press `WRITE`, and then confirm (and you password, if needed). Wait for the flashing to complete.
 
-- 6. You can close down Raspberry Pi Imager now, and eject the SD card from you computer.
+- 7. You can close down Raspberry Pi Imager now, and eject the SD card from you computer.
 
-- 7. Insert SD card into the Raspberry Pi and power on. Also connect to the RPi using SSH or keyboard/monitor.
+- 8. Insert SD card into the Raspberry Pi and power on. Also connect to the RPi using SSH or keyboard/monitor.
 
-- 8. For the next operation you will need Internet connectivity for the RPi, to install the remaining part. This can either be the 4G USB dongle, or through WiFi, whichever is easiest for you. We will download up to 3GB, so make sure you have a good dataplan if using 4G. DO NOT use the wired Ethernet, as we will set a static IP for the interface to connect to the Pixhawk.
+- 9. For the next operation you will need Internet connectivity for the RPi, to install the remaining part. This can either be the 4G USB dongle, or through WiFi, whichever is easiest for you. We will download up to 3GB, so make sure you have a good dataplan if using 4G. DO NOT use the wired Ethernet, as we will set a static IP for the interface to connect to the Pixhawk.
 
-- 9. Follow instructions to install base software
+- 10. Follow instructions to install base software
