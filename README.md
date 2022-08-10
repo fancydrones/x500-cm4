@@ -91,7 +91,6 @@ Follow [these insstruction](os.md)
 ### Step 4 - specific software
     curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install/install_rpiuav.sh | sh -
 
-
 ### Step 5 - join Zerotier network
 Follow [instructions here](zerotier.md)
     
