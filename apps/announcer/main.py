@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import os
-from signal import signal, SIGINT, SIGTERM
+from signal import signal, SIGINT, SIGTERM, SIGKILL, SIGQUIT
 import logging
 from typing import Any
 from mavlinkcamera import MavlinkCameraManager
@@ -25,7 +25,7 @@ def run_service():
 def handler(signal_received, frame):
     global mavlink
     # Handle any cleanup here
-    logging.info('SIGINT, SIGTERM or CTRL-C detected. Exiting gracefully')
+    logging.info(str(signal_received) + ' detected. Exiting gracefully')
     mavlink.stop()
 
 
@@ -34,4 +34,6 @@ if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     signal(SIGINT, handler)
     signal(SIGTERM, handler)
+    signal(SIGKILL, handler)
+    signal(SIGQUIT, handler)
     run_service()
