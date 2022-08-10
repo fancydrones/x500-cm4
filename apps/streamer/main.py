@@ -3,13 +3,12 @@ import os
 from signal import signal, SIGINT, SIGTERM
 import logging
 import gi
+gi.require_version('Gst', '1.0')
+gi.require_version('GstRtspServer', '1.0')
 from gi.repository import Gst, GstRtspServer, GLib
 from typing import Any
 
 #Initializes the GStreamer library, setting up internal path lists, registering built-in elements, and loading standard plugins.
-gi.require_version('Gst', '1.0')
-gi.require_version('GstRtspServer', '1.0')
-
 Gst.init(None)
 
 service: Any = None
@@ -90,8 +89,8 @@ def run_service():
     else:
         video_port=8554
 
-    stream=GstServer(pipeline0=stream_pipeline0, pipeline1=stream_pipeline1, pipeline2=stream_pipeline2, port=video_port)
-    stream.run()
+    service=GstServer(pipeline0=stream_pipeline0, pipeline1=stream_pipeline1, pipeline2=stream_pipeline2, port=video_port)
+    service.run()
 
 
 def handler(signal_received, frame):
