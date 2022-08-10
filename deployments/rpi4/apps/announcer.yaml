@@ -39,7 +39,7 @@ spec:
               name: rpi4-config
         - name: MAVLINK20
           value: "1"
-        image: registry.gitlab.com/got.vision/rpiuav/announcer:2022-08-10.250
+        image: registry.gitlab.com/got.vision/rpiuav/announcer:2022-08-10.252
         name: announcer
         resources:
           limits:
