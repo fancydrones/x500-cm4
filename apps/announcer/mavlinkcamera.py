@@ -8,7 +8,7 @@ from threading import Event
 from pymavlink import mavutil
 from pymavlink.dialects.v20 import common
 from pymavlink.dialects.v20.common import CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM
-from pymavlink.dialects.v20.common import CAMERA_CAP_FLAGS_CAPTURE_VIDEO, CAMERA_CAP_FLAGS_HAS_BASIC_ZOOM
+#from pymavlink.dialects.v20.common import CAMERA_CAP_FLAGS_CAPTURE_VIDEO, CAMERA_CAP_FLAGS_HAS_BASIC_ZOOM
 MAV_CMD_REQUEST_VIDEO_START_STREAM = 2502
 MAV_CMD_REQUEST_VIDEO_STOP_STREAM = 2503
 MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION = 2504
@@ -94,7 +94,7 @@ class MavlinkCameraManager(threading.Thread):
         # grab v4l2 id equivalent of param_id
         v4l2_id = self.param_map[param_id]
         # read actual value of v4l2 control
-        #value = self.control.get_control_value(v4l2_id)
+        value = self.control.get_control_value(v4l2_id)
         logging.debug("read: ", param_id, " = ", value)
         # mav v4l2 type to xml type
         param_type = self.param_types[param_id]
@@ -117,8 +117,8 @@ class MavlinkCameraManager(threading.Thread):
         v4l2_id = self.param_map[param_id]
         logging.debug("setting ", param_id, param_type,  "to ", value)
         # Set value
-        #self.control.set_control_value(v4l2_id, value)
-        #value = self.control.get_control_value(v4l2_id)
+        self.control.set_control_value(v4l2_id, value)
+        value = self.control.get_control_value(v4l2_id)
         # Send new value to GCS
         self.master.mav.param_ext_ack_send(
             self.makestring(param_id.encode("utf-8"), 16),
@@ -220,9 +220,9 @@ class MavlinkCameraManager(threading.Thread):
                 if "NoneType" not in str(e):
                     logging.debug(e)
 
-            time.sleep(0.01)
+            time.sleep(0.1)
             hb += 1
-            if hb % 100 == 0:
+            if hb % 10 == 0:
                 self.send_heartbeat()
 
     def send_heartbeat(self):
