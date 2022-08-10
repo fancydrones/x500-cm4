@@ -21,7 +21,7 @@ The steps are:
 
 - 8. For the next operation you will need Internet connectivity for the RPi, to install the remaining part. This can either be the 4G USB dongle, or through WiFi, whichever is easiest for you. We will download up to 3GB, so make sure you have a good dataplan if using 4G. DO NOT use the wired Ethernet, as we will set a static IP for the interface to connect to the Pixhawk.
 
-- 9. Connected and logged in to the Raspberry Pi, you need to run the following command (This will install K3S and Zerotier, and also set a few settings for the OS.): `curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install.sh | sh -`
+- 9. Connected and logged in to the Raspberry Pi, you need to run the following command (This will install K3S and Zerotier, and also set a few settings for the OS.): `curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install/install_base.sh | sh -`
 
 - 10. Depending on you internet speed, this will take a few minutes to complete
 

@@ -13,6 +13,7 @@ sudo sed -i '$s/$/ cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
 #curl -sSL https://get.docker.com | sh
 
 # K3S
+sudo curl -o /etc/rancher/k3s/config.yaml https://gitlab.com/got.vision/rpiuav/-/raw/main/install/config.yaml
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 
 # Overlays
