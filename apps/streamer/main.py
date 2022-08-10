@@ -1,14 +1,18 @@
 #!/usr/bin/python3
 import os
+from signal import signal, SIGINT, SIGTERM, SIGKILL, SIGQUIT
 import logging
 import gi
 from gi.repository import Gst, GstRtspServer, GLib
+from typing import Any
 
 #Initializes the GStreamer library, setting up internal path lists, registering built-in elements, and loading standard plugins.
 gi.require_version('Gst', '1.0')
 gi.require_version('GstRtspServer', '1.0')
 
 Gst.init(None)
+
+service: Any = None
 
 class GstServer(GstRtspServer.RTSPServer):
     def __init__(self, pipeline0=None, pipeline1=None, pipeline2=None, port=8554, **properties):
@@ -61,10 +65,11 @@ class GstServer(GstRtspServer.RTSPServer):
         logging.info("RTSP server starting main loop")
         self.mainloop.run()
 
+    def stop(self):
+        self.mainloop.quit()
 
-if __name__ == '__main__':
-    logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
+def run_service():
+    global service
     if 'CAMERA_PIPELINE0' in os.environ:
         stream_pipeline0 = os.environ['CAMERA_PIPELINE0']
     else:
@@ -87,3 +92,20 @@ if __name__ == '__main__':
 
     stream=GstServer(pipeline0=stream_pipeline0, pipeline1=stream_pipeline1, pipeline2=stream_pipeline2, port=video_port)
     stream.run()
+
+
+def handler(signal_received, frame):
+    global service
+    # Handle any cleanup here
+    logging.info(str(signal_received) + ' detected. Exiting gracefully')
+    service.stop()
+
+
+if __name__ == '__main__':
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    signal(SIGINT, handler)
+    signal(SIGTERM, handler)
+    signal(SIGKILL, handler)
+    signal(SIGQUIT, handler)
+    run_service()
