@@ -5,10 +5,10 @@ import logging
 from typing import Any
 from mavlinkcamera import MavlinkCameraManager
 
-mavlink: Any = None
+service: Any = None
 
 def run_service():
-    global mavlink
+    global service
     stream_url = os.environ['CAMERA_URL']
     camera_id = int(os.environ['CAMERA_ID'])
     camera_name = os.environ['CAMERA_NAME']
@@ -17,16 +17,16 @@ def run_service():
     system_id = int(os.environ['SYSTEM_ID'])
     
 
-    mavlink = MavlinkCameraManager(rtspstream=stream_url, camera_id=camera_id, camera_name=camera_name, system_host=system_host, system_port=system_port, system_id=system_id)
-    mavlink.start()
-    mavlink.join()
+    service = MavlinkCameraManager(rtspstream=stream_url, camera_id=camera_id, camera_name=camera_name, system_host=system_host, system_port=system_port, system_id=system_id)
+    service.start()
+    service.join()
 
 
 def handler(signal_received, frame):
-    global mavlink
+    global service
     # Handle any cleanup here
     logging.info(str(signal_received) + ' detected. Exiting gracefully')
-    mavlink.stop()
+    service.stop()
 
 
 if __name__ == '__main__':
