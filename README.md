@@ -62,6 +62,11 @@ The Apps hosted are:
 - [ ] Try to avoid network=host for Router (Same as for streamer below)
 - [ ] Try to avoid "priviledged=true" for Streamer (must grant access to camera)
 - [ ] Try to avoid "priviledged=true" for Router (must grant access to serial port)
+- [ ] (Nice to have) Consider moving Announcer to Companion
+- [ ] (Nice to have) Improve Companion by connecting to Mavlink
+- [ ] (Nice to have) Show Autopilot Status on Companion
+- [ ] (Nice to have) Show Autopilot position on Companion
+- [ ] (Nice to have) Set important paramaters on Autopilot using Companion over Mavlink
 - ~~[ ] Enable Origin check for Companion~~ (not needed for now. Will only complicate setups)
 - ~~[ ] Smaller image for STREAMER, if possible~~ (GStreamer+Python will increase size)
 
