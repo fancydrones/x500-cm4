@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import os
-from signal import signal, SIGINT, SIGTERM, SIGQUIT
+from signal import signal, SIGINT, SIGTERM
 import logging
 from typing import Any
 from mavlinkcamera import MavlinkCameraManager
@@ -34,5 +34,4 @@ if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     signal(SIGINT, handler)
     signal(SIGTERM, handler)
-    signal(SIGQUIT, handler)
     run_service()

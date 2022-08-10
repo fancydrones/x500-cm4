@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import os
-from signal import signal, SIGINT, SIGTERM, SIGQUIT
+from signal import signal, SIGINT, SIGTERM
 import logging
 import gi
 from gi.repository import Gst, GstRtspServer, GLib
@@ -106,5 +106,4 @@ if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
     signal(SIGINT, handler)
     signal(SIGTERM, handler)
-    signal(SIGQUIT, handler)
     run_service()
