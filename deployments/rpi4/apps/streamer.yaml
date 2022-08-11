@@ -1,7 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamer-service
+  namespace: rpiuav
+spec:
+  ports:
+  - port: 8554
+    protocol: TCP
+    targetPort: 8554
+  selector:
+    app.kubernetes.io/name: streamer-deployment
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/name: streamer-deployment
     name: streamer
   name: streamer
   namespace: rpiuav
@@ -42,7 +56,7 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-      hostNetwork: true
+      #hostNetwork: true
       volumes:
       - hostPath:
           path: /run/udev
