@@ -31,6 +31,7 @@ spec:
   template:
     metadata:
       labels:
+        app.kubernetes.io/name: streamer-deployment
         app: streamer-replicaset
     spec:
       containers:
