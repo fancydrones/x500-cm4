@@ -1,2 +1,1 @@
 write-kubeconfig-mode: "0644"
-service-node-port-range: "1000-32767"
