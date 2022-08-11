@@ -8,7 +8,7 @@ spec:
   ports:
   - port: 8554
     protocol: TCP
-    targetPort: 8554
+    targetPort: 18554
     nodePort: 8554
   selector:
     app.kubernetes.io/name: streamer-deployment
@@ -46,7 +46,7 @@ spec:
         image: registry.gitlab.com/got.vision/rpiuav/streamer:2022-08-10.261
         name: streamer
         ports:
-        - containerPort: 8554
+        - containerPort: 18554
         resources:
           limits:
             cpu: "2"
@@ -59,7 +59,6 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-      #hostNetwork: true
       volumes:
       - hostPath:
           path: /run/udev
