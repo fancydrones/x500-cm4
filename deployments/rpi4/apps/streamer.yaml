@@ -4,10 +4,12 @@ metadata:
   name: streamer-service
   namespace: rpiuav
 spec:
+  type: NodePort
   ports:
   - port: 8554
     protocol: TCP
     targetPort: 8554
+    nodePort: 8554
   selector:
     app.kubernetes.io/name: streamer-deployment
 ---
