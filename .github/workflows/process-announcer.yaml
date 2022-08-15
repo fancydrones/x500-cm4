@@ -8,8 +8,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/announcer
   APP_CONTEXT: apps/announcer
-  #PLATFORMS: linux/amd64,linux/arm64
-  PLATFORMS: linux/arm64
+  PLATFORMS: linux/amd64,linux/arm64
   IMAGE_TITLE: Announcer
   IMAGE_DESCRIPTION: FancyDrones X500-RPi4 Announcer
   IMAGE_VENDOR: FancyDrones
