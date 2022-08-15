@@ -37,22 +37,10 @@ The Apps hosted are:
 - __Companion:__ Small web interface to modify the most common configurations. Can also be used to restart the different apps. Either if they misbehave, or you need to restart after changing config.
 
 ## TODOs
-- [x] Mavlink Router
-- [x] Video Announcer
-- [x] Servoes
-- [x] k3s
-- [x] Document BOM (Bill of Materials)
-- [x] Document power-button
-- [x] Document LED indicating running OS
-- [x] Document 6X network settings
-- [x] install.sh (only missing cgroup part)
-- [x] Document autoupdate OS
-- [x] Document install OS
-- [x] Document zerotier
-- [x] Step-by-step guide
-- [x] Separate service for config
-- [x] Set limit on cpu and memory for Apps (https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-- [ ] Publish documentation using Gitlab Pages: [https://about.gitlab.com/stages-devops-lifecycle/pages/](https://about.gitlab.com/stages-devops-lifecycle/pages/)
+- [ ] Use Kustomize to deploy in Github Actions
+- [ ] Update scripts to use Github
+- [ ] Remove refennces to Gitlab
+- [ ] Publish documentation using Github Pages
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation
