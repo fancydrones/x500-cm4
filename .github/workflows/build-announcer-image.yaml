@@ -16,6 +16,8 @@ jobs:
       packages: write
 
     steps:
+      - name: "build version"
+        run: echo "$(date '+%Y-%m-%d').$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
       - name: Checkout repository
         uses: actions/checkout@v3
 
