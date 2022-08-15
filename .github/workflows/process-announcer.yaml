@@ -9,6 +9,9 @@ env:
   IMAGE_NAME: ${{ github.repository }}/announcer
   APP_CONTEXT: apps/announcer
   PLATFORMS: linux/amd64,linux/arm64
+  IMAGE_TITLE: Announcer
+  IMAGE_DESCRIPTION: FancyDrones X500-RPi4 Announcer
+  IMAGE_VENDOR: FancyDrones
 
 jobs:
   build-and-push-image:
@@ -41,6 +44,11 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value={{date 'YYYYMMDD'}}-{{sha}}
+          labels: |
+            org.opencontainers.image.title=${{ env.IMAGE_TITLE }}
+            org.opencontainers.image.description=${{ env.IMAGE_DESCRIPTION }}
+            org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
+            org.opencontainers.image.version=${{date 'YYYYMMDD'}}-${{sha}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
