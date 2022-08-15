@@ -1,7 +1,5 @@
 FROM debian:bullseye-slim
 
-WORKDIR /src
-
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y curl gnupg
@@ -17,6 +15,8 @@ RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
 RUN apt-get install gir1.2-gst-rtsp-server-1.0 -y
 
 RUN apt-get install python3 python3-pip -y
+
+WORKDIR /src
 
 COPY requirements.txt requirements.txt
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
