@@ -1,4 +1,4 @@
-name: Reusable image processor
+name: Reusable image Create, publish and release
 
 on:
   workflow_call:

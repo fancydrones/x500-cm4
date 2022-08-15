@@ -1,4 +1,4 @@
-name: Announcer image
+name: Router image
 
 on:
   push:
@@ -10,8 +10,8 @@ jobs:
     with:
       platforms: linux/amd64,linux/arm64
       registry: ghcr.io
-      image_name: ${{ github.repository }}/announcer
-      app_context: apps/announcer
-      image_title: Announcer
-      image_description: FancyDrones X500-RPi4 Announcer
+      image_name: ${{ github.repository }}/router
+      app_context: apps/router
+      image_title: Router
+      image_description: FancyDrones X500-RPi4 Router
       image_vendor: FancyDrones
