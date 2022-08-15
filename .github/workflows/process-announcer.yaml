@@ -8,11 +8,11 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/announcer
   APP_CONTEXT: apps/announcer
-  PLATFORMS: linux/amd64,linux/arm64
+  #PLATFORMS: linux/amd64,linux/arm64
+  PLATFORMS: linux/arm64
   IMAGE_TITLE: Announcer
   IMAGE_DESCRIPTION: FancyDrones X500-RPi4 Announcer
   IMAGE_VENDOR: FancyDrones
-  IMAGE_TAG: 
 
 jobs:
   build-and-push-image:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Get image date tag
         id: tag
-        run: echo "::set-output name=datetag::$(date +'%Y%m%d')-${{ github.sha }}"
+        run: echo "::set-output name=datetag::$(date +'%Y%m%d')-${GITHUB_SHA::7}"
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
