@@ -1,4 +1,4 @@
-name: Create and publish the Announcer image
+name: Create, publish and release Announcer image
 
 on:
   push:
@@ -41,7 +41,6 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value={{date 'YYYYMMDD'}}-{{sha}}
-            type=sha,format=long
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3

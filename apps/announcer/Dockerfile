@@ -1,5 +1,9 @@
 FROM python:3-alpine
 
+LABEL "author"="Roy Veshovda"
+LABEL "company"="Fancy Drones"
+LABEL org.opencontainers.image.description Fancy Drones X500-RPi4 Announcer
+
 WORKDIR /src
 
 COPY requirements.txt requirements.txt
