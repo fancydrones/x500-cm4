@@ -12,6 +12,7 @@ env:
   IMAGE_TITLE: Announcer
   IMAGE_DESCRIPTION: FancyDrones X500-RPi4 Announcer
   IMAGE_VENDOR: FancyDrones
+  IMAGE_TAG: 
 
 jobs:
   build-and-push-image:
@@ -36,6 +37,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get image date tag
+        id: tag
+        run: echo "::set-output name=datetag::$(date +'%Y%m%d')-${{ github.sha }}"
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
@@ -43,12 +48,12 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value={{date 'YYYYMMDD'}}-{{sha}}
+            type=raw,value=${{ steps.tag.outputs.datetag }}
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_TITLE }}
             org.opencontainers.image.description=${{ env.IMAGE_DESCRIPTION }}
             org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
-            org.opencontainers.image.version=${{date 'YYYYMMDD'}}-${{sha}}
+            org.opencontainers.image.version=${{ steps.tag.outputs.datetag }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
