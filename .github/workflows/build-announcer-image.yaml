@@ -18,8 +18,6 @@ jobs:
       packages: write
 
     steps:
-      - name: "build version"
-        run: echo "$(date '+%Y-%m-%d').$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT"
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Set up QEMU
@@ -41,8 +39,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=schedule,pattern={{date 'YYYYMMDD'}},suffix=-{{sha}}
-            #type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value={{date 'YYYYMMDD'}}-{{sha}}
+            type=sha,format=long
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
