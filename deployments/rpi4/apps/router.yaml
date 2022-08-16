@@ -53,7 +53,7 @@ spec:
         app.kubernetes.io/name: router-deployment
     spec:
       containers:
-      - image: ghcr.io/fancydrones/x500-rpi4/router:tmp
+      - image: ghcr.io/fancydrones/x500-rpi4/router:20220816-18388ad
         name: router
         ports:
         - containerPort: 5760
@@ -62,6 +62,13 @@ spec:
         - containerPort: 14561
         - containerPort: 14562
         - containerPort: 14563
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 500Mi
+          requests:
+            cpu: "0.25"
+            memory: 100Mi
         securityContext:
           privileged: true
         volumeMounts:
@@ -69,13 +76,6 @@ spec:
           name: main-conf
         - mountPath: /dev/serial0
           name: serial
-        resources:
-          requests:
-            memory: "100Mi"
-            cpu: "0.25"
-          limits:
-            memory: "500Mi"
-            cpu: "0.5"
       hostNetwork: true
       volumes:
       - configMap:
