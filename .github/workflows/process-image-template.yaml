@@ -25,6 +25,9 @@ on:
         required: true
         type: string
 
+env:
+  KUSTOMIZE_VER: 4.5.7
+
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
@@ -74,5 +77,23 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
+  update-deployment:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Prepare Kustomize
+        run: |
+          echo "before"
+          curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+          tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: "Patch"
+        run: |
+          ls
+          tree
+          
 # TODO: Update deployment using kustomize
