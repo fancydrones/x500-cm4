@@ -1,9 +1,12 @@
-# Configure Flux
-## Install
-Create the initial flux-file using this command:
+# Flux
+Flux (v2) is a CD system to deploy new versions automatically. [More info can be found here.](https://fluxcd.io/)
 
-    kubectl apply -f https://gitlab.com/got.vision/rpiuav/-/raw/main/deployments/rpi4/flux-system/gotk-components.yaml?inline=false
+## Upgrade flux
+To install the newest version for flux cli, run the following command ([documentation](https://fluxcd.io/docs/installation/)):
+    curl -s https://fluxcd.io/install.sh | sudo bash
 
-    flux create source git flux-infra --url=https://gitlab.com/got.vision/rpiuav --branch=main --interval=1m
+## Upgrade Flux components
+Run the following command to generate a new version of gotk-components.yaml:
+    flux install --version=latest --export > gotk-component.yaml
 
-    flux create kustomization rpi4 --source=flux-infra --path="./deployments/rpi4" --prune=true --interval=5m
+
