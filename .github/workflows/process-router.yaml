@@ -3,6 +3,8 @@ name: Router image
 on:
   push:
     branches: ['main']
+    paths:
+      - 'apps/router/**'
 
 jobs:
   process-image:

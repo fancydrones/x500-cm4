@@ -3,6 +3,8 @@ name: Companion image
 on:
   push:
     branches: ['main']
+    paths:
+      - 'apps/companion/**'
 
 jobs:
   process-image:

@@ -37,12 +37,10 @@ The Apps hosted are:
 - __Companion:__ Small web interface to modify the most common configurations. Can also be used to restart the different apps. Either if they misbehave, or you need to restart after changing config.
 
 ## TODOs
-- [x] Use Kustomize to deploy in Github Actions
-- [x] Update scripts to use Github
-- [x] Remove refences to Gitlab
 - [ ] Update Streamer to support AMD64 aarch
-- [ ] Scope workflows to updates in relevant paths only
+- [x] Scope workflows to updates in relevant paths only
 - [ ] Publish documentation using Github Pages
+- [ ] Move documentation to use Github Pages (/docs)
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation
@@ -57,9 +55,6 @@ The Apps hosted are:
 - [ ] (Nice to have) Show Autopilot Status on Companion
 - [ ] (Nice to have) Show Autopilot position on Companion
 - [ ] (Nice to have) Set important paramaters on Autopilot using Companion over Mavlink
-- [x] Add License
-- [x] Figure out how to upgrade gotk-components.yaml
-- [ ] Move documentation to use Github Pages (/docs)
 - [ ] Update docker-compose to be able to develop locally
 - ~~[ ] Enable Origin check for Companion~~ (not needed for now. Will only complicate setups)
 - ~~[ ] Smaller image for STREAMER, if possible~~ (GStreamer+Python will increase size)

@@ -3,6 +3,8 @@ name: Streamer image
 on:
   push:
     branches: ['main']
+    paths:
+      - 'apps/streamer/**'
 
 jobs:
   process-image:

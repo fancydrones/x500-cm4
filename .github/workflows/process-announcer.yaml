@@ -3,6 +3,8 @@ name: Announcer image
 on:
   push:
     branches: ['main']
+    paths:
+      - 'apps/anouncer/**'
 
 jobs:
   process-image:
