@@ -16,8 +16,8 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: streamer-deployment
         app: streamer-replicaset
+        app.kubernetes.io/name: streamer-deployment
     spec:
       containers:
       - env:
@@ -28,7 +28,7 @@ spec:
               name: rpi4-config
         - name: VIDEO_PORT
           value: "8554"
-        image: ghcr.io/fancydrones/x500-rpi4/streamer:tmp
+        image: ghcr.io/fancydrones/x500-rpi4/streamer:20220816-18388ad
         name: streamer
         ports:
         - containerPort: 8554
