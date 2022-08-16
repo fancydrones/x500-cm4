@@ -38,7 +38,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    outputs:
+      version_tag: ${{ steps.tag.outputs.datetag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -82,6 +83,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   update-deployment:
+    needs: build-and-push-image
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -92,14 +94,13 @@ jobs:
         run: |
           echo "before"
           curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
-          tar -xvzf kustomize.tar.gz && sudo chmod +x ./kustomize
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          tar -xvzf kustomize.tar.gz && chmod +x ./kustomize
       - name: "Patch"
         run: |
-          tree
           ./kustomize create
-          ./kustomize edit set image ${{ inputs.registry }}/${{ inputs.image_name }}:temp
+          echo ${{ inputs.registry }}
+          echo ${{ inputs.image_name }}
+          ./kustomize edit set image ${{ inputs.registry }}/${{ inputs.image_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
           ./kustomize edit add resource $APPS_PATH/announcer.yaml
           ./kustomize build . > x.yaml
           cat x.yaml

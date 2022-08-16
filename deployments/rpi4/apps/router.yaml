@@ -53,7 +53,7 @@ spec:
         app.kubernetes.io/name: router-deployment
     spec:
       containers:
-      - image: registry.gitlab.com/got.vision/rpiuav/router:2022-07-27.223
+      - image: ghcr.io/fancydrones/x500-rpi4/router:tmp
         name: router
         ports:
         - containerPort: 5760
