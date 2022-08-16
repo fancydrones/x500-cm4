@@ -96,7 +96,5 @@ jobs:
           git config user.email github-actions@github.com
           git add .
           git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}"
-          git pull –-rebase=true
+          git pull --rebase=true
           git push
-          
-# TODO: Update deployment using kustomize
