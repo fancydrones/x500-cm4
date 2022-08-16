@@ -12,7 +12,7 @@ on:
 
 env:
   KUSTOMIZE_VER: 4.5.7
-  APPS_PATH: deployments/rpi4/apps
+  APPS_PATH: deployments/apps
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
   IMAGE_CONTEXT: X500-RPi4
