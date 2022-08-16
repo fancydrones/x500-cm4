@@ -57,8 +57,9 @@ The Apps hosted are:
 - [ ] (Nice to have) Show Autopilot Status on Companion
 - [ ] (Nice to have) Show Autopilot position on Companion
 - [ ] (Nice to have) Set important paramaters on Autopilot using Companion over Mavlink
-- [ ] Add License
-- [ ] Figure out how to upgrade gotk-components.yaml
+- [x] Add License
+- [x] Figure out how to upgrade gotk-components.yaml
+- [ ] Move documentation to use Github Pages (/docs)
 - ~~[ ] Enable Origin check for Companion~~ (not needed for now. Will only complicate setups)
 - ~~[ ] Smaller image for STREAMER, if possible~~ (GStreamer+Python will increase size)
 
