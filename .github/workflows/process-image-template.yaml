@@ -82,6 +82,7 @@ jobs:
           tar -xvzf kustomize.tar.gz && chmod +x ./kustomize
       - name: "Patch"
         run: |
+          rm kustomization.yaml -f
           ./kustomize create
           ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
           ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}.yaml
@@ -90,7 +91,6 @@ jobs:
           mv x.yaml $APPS_PATH/${{ inputs.app_name }}.yaml
           rm kustomization.yaml
       - name: Commit update
-        uses: actions/checkout@v3
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com

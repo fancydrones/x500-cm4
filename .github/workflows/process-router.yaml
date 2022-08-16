@@ -10,9 +10,4 @@ jobs:
     uses: ./.github/workflows/process-image-template.yaml
     with:
       platforms: linux/amd64,linux/arm64
-      registry: ghcr.io
-      image_name: ${{ github.repository }}/router
-      app_context: apps/router
-      image_title: Router
-      image_description: FancyDrones X500-RPi4 Router
-      image_vendor: FancyDrones
+      app_name: router

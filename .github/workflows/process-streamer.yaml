@@ -10,9 +10,4 @@ jobs:
     uses: ./.github/workflows/process-image-template.yaml
     with:
       platforms: linux/arm64
-      registry: ghcr.io
-      image_name: ${{ github.repository }}/streamer
-      app_context: apps/streamer
-      image_title: Streamer
-      image_description: FancyDrones X500-RPi4 Streamer
-      image_vendor: FancyDrones
+      app_name: streamer

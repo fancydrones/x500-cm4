@@ -10,9 +10,4 @@ jobs:
     uses: ./.github/workflows/process-image-template.yaml
     with:
       platforms: linux/amd64,linux/arm64
-      registry: ghcr.io
-      image_name: ${{ github.repository }}/companion
-      app_context: apps/companion
-      image_title: Companion
-      image_description: FancyDrones X500-RPi4 Companion
-      image_vendor: FancyDrones
+      app_name: companion
