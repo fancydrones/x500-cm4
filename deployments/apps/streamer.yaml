@@ -28,7 +28,7 @@ spec:
               name: rpi4-config
         - name: VIDEO_PORT
           value: "8554"
-        image: ghcr.io/fancydrones/x500-rpi4/streamer:20220816-e7a8a3f
+        image: ghcr.io/fancydrones/x500-rpi4/streamer:20220816-821f0a3
         name: streamer
         ports:
         - containerPort: 8554
