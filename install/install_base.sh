@@ -9,12 +9,9 @@ sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
 # Need to append the lines to allow K3S to work properly
 sudo sed -i '$s/$/ cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
 
-# Docker
-#curl -sSL https://get.docker.com | sh
-
 # K3S
 sudo mkdir -p /etc/rancher/k3s
-sudo curl -o /etc/rancher/k3s/config.yaml https://gitlab.com/got.vision/rpiuav/-/raw/main/install/config.yaml
+sudo curl -o /etc/rancher/k3s/config.yaml https://raw.githubusercontent.com/fancydrones/x500-rpi4/main/install/config.yaml
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 
 # Overlays
@@ -50,6 +47,3 @@ sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
 
 # Prepare K3S for flux
 sudo sh -c "echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> /etc/profile"
-
-# Copy initial mavlink-router.conf
-curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/deployments/rpi4/apps/mavlink-router.conf?inline=false > mavlink-router.conf

@@ -10,7 +10,7 @@ spec:
   ref:
     branch: main
   timeout: 1m0s
-  url: https://gitlab.com/got.vision/rpiuav
+  url: https://github.com/fancydrones/x500-rpi4
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -19,7 +19,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m0s
-  path: ./deployments/rpi4
+  path: ./deployments
   prune: true
   sourceRef:
     kind: GitRepository
