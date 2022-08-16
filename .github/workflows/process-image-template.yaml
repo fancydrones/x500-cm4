@@ -12,6 +12,9 @@ on:
       app_context:
         required: true
         type: string
+      app_name:
+        required: true
+        type: string
       image_name:
         required: true
         type: string
@@ -27,6 +30,7 @@ on:
 
 env:
   KUSTOMIZE_VER: 4.5.7
+  APPS_PATH: deployments/rpi4/apps
 
 jobs:
   build-and-push-image:
@@ -88,12 +92,17 @@ jobs:
         run: |
           echo "before"
           curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
-          tar -xvzf kustomize.tar.gz && mv kustomize /usr/bin/kustomize && chmod +x /usr/bin/kustomize
+          tar -xvzf kustomize.tar.gz && sudo chmod +x ./kustomize
           git config user.name github-actions
           git config user.email github-actions@github.com
       - name: "Patch"
         run: |
-          ls
           tree
+          ./kustomize create
+          ./kustomize edit set image ${{ inputs.registry }}/${{ inputs.image_name }}:temp
+          ./kustomize edit add resource $APPS_PATH/announcer.yaml
+          ./kustomize build . > x.yaml
+          cat x.yaml
+          mv x.yaml $APPS_PATH/${{ inputs.app_name }}.yaml
           
 # TODO: Update deployment using kustomize

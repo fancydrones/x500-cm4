@@ -12,6 +12,7 @@ jobs:
       registry: ghcr.io
       image_name: ${{ github.repository }}/announcer
       app_context: apps/announcer
+      app_name: announcer
       image_title: Announcer
       image_description: FancyDrones X500-RPi4 Announcer
       image_vendor: FancyDrones
