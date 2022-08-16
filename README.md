@@ -37,9 +37,9 @@ The Apps hosted are:
 - __Companion:__ Small web interface to modify the most common configurations. Can also be used to restart the different apps. Either if they misbehave, or you need to restart after changing config.
 
 ## TODOs
-- [ ] Use Kustomize to deploy in Github Actions
-- [ ] Update scripts to use Github
-- [ ] Remove refences to Gitlab
+- [x] Use Kustomize to deploy in Github Actions
+- [x] Update scripts to use Github
+- [x] Remove refences to Gitlab
 - [ ] Update Streamer to support AMD64 aarch
 - [ ] Scope workflows to updates in relevant paths only
 - [ ] Publish documentation using Github Pages
@@ -60,6 +60,7 @@ The Apps hosted are:
 - [x] Add License
 - [x] Figure out how to upgrade gotk-components.yaml
 - [ ] Move documentation to use Github Pages (/docs)
+- [ ] Update docker-compose to be able to develop locally
 - ~~[ ] Enable Origin check for Companion~~ (not needed for now. Will only complicate setups)
 - ~~[ ] Smaller image for STREAMER, if possible~~ (GStreamer+Python will increase size)
 
@@ -76,13 +77,13 @@ Or use config file for installation: [https://rancher.com/docs/k3s/latest/en/ins
 Follow [these insstruction](os.md)
 
 ### Step 2 - base software
-    curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install/install_base.sh | sh -
+    curl -s https://raw.githubusercontent.com/fancydrones/x500-rpi4/main/install/install_base.sh | sh -
 
 ### Step 3 - reboot
     sudo reboot
 
 ### Step 4 - specific software
-    curl -s https://gitlab.com/got.vision/rpiuav/-/raw/main/install/install_rpiuav.sh | sh -
+    curl -s https://raw.githubusercontent.com/fancydrones/x500-rpi4/main/install/install_rpiuav.sh | sh -
 
 ### Step 5 - join Zerotier network
 Follow [instructions here](zerotier.md)
