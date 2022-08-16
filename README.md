@@ -39,7 +39,9 @@ The Apps hosted are:
 ## TODOs
 - [ ] Use Kustomize to deploy in Github Actions
 - [ ] Update scripts to use Github
-- [ ] Remove refennces to Gitlab
+- [ ] Remove refences to Gitlab
+- [ ] Update Streamer to support AMD64 aarch
+- [ ] Scope workflows to updates in relevant paths only
 - [ ] Publish documentation using Github Pages
 - [ ] Document use of pan/tilt servoes
 - [ ] Document 3D model for pant/tilt setup
