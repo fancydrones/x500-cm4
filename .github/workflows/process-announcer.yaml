@@ -4,7 +4,7 @@ on:
   push:
     branches: ['main']
     paths:
-      - 'apps/anouncer/**'
+      - 'apps/announcer/**'
 
 jobs:
   process-image:
