@@ -28,7 +28,7 @@ For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB
 ## Companion computer
 To connect all the pieces, we have a Raspberry Pi 4 (RPi) acting as a bridge between the onboard autopilot, and the controller and pilot on the ground. The RPi connects to the autopilot using either Ethernet or UART, and connects to the ground controller using LTE (4G) and Zerotier.
 
-To make all work seamless, the Rpi runs a few apps to connect all the different pieces. Some runs natively (like Zerotier), while the rest are hosted as containers, on hosted inside a Kubernetes distribution called K3s.
+To make all work seamless, the Rpi runs a few apps to connect all the different pieces. Some runs natively (like Zerotier), while the rest are hosted as containers, and hosted inside a Kubernetes distribution called K3s.
 
 The Apps hosted are:
 - __Router:__ [The standard Mavlink Router](https://github.com/mavlink-router/mavlink-router) packaged inside a container. This sends the mavlink commands between the parties involved. Autopilot and ground controller being the most important ones.
