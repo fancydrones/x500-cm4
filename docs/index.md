@@ -51,7 +51,6 @@ Follow [these insstruction](os.md)
 
 ### Step 5 - join Zerotier network
 Follow [instructions here](zerotier.md)
-    
 
 ## Details
 - [Gimbal](gimbal/README.md)
