@@ -1,4 +1,5 @@
 # Bill of Materials (BOM)
+
 | Component       | Type                    | Vendor        | Amount  | Currency  | Price   | Sum     | Link  |
 | ---             | ---                     | ---           | ---     | ---       | ---     | ---     | ---   |
 | Frameset        | X500 V2 ARF Kit         | Holybro       | 1       | USD       | 249     | 249     | https://shop.holybro.com/x500-v2-kit_p1288.html |
