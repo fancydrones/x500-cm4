@@ -31,7 +31,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v1
       - name: Install MKDocs
-        run: pip install mkdocs-material
+        run: |
+          pip install mkdocs-material
+          pip install mkdocs-glightbox
       - name: Build static site
         run: mkdocs build #needs config to build to _site.
       - name: Upload artifact
