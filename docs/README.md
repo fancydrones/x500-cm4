@@ -36,27 +36,6 @@ The Apps hosted are:
 - __Announcer:__ Using Mavlink to announce the video stream. This way the video shows up automatically on the ground controller.
 - __Companion:__ Small web interface to modify the most common configurations. Can also be used to restart the different apps. Either if they misbehave, or you need to restart after changing config.
 
-## Install software
-### Step 1 - Install OS
-Follow [these insstruction](os.md)
-
-### Step 2 - base software
-    curl -s https://raw.githubusercontent.com/fancydrones/x500-rpi4/main/install/install_base.sh | sh -
-
-### Step 3 - reboot
-    sudo reboot
-
-### Step 4 - specific software
-    curl -s https://raw.githubusercontent.com/fancydrones/x500-rpi4/main/install/install_rpiuav.sh | sh -
-
-### Step 5 - join Zerotier network
-Follow [instructions here](zerotier.md)
-
 ## Details
 - [Gimbal](gimbal/README.md)
 
-## Shutdown button
-Connect [GND](https://pinout.xyz/pinout/ground#) and [GPIO 3](https://pinout.xyz/pinout/pin5_gpio3#) between a button. Final step is to add `dtoverlay=gpio-shutdown,gpio_pin=3` to the end of the file `/boot/config.txt` (install.sh will do this for you). A quick reboot later, and you can shut doen the OS by clicking the button. Mark that the RPi will not power down, and hence, still consume a bit of power. But the OS will be cleanly shut down, to prevent currupted files. This in combination with a status LED will make sure your RPi will operate for a long time.
-
-## Staus LED
-Connect the short leg of the LED to an resistor of about 480OHM, and the other side of the resistor to [GND](https://pinout.xyz/pinout/ground#). The long leg of the LED you connect to [GPIO 17](https://pinout.xyz/pinout/pin11_gpio17#). Also add `dtoverlay=gpio-led,gpio=17,trigger=default-on,label=statusled0` to the end of the file `/boot/config.txt` (install.sh will do this for you). Reboot, and you will have en external LED, that can be much easier for the operator to see than the fixed on RPi.

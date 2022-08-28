@@ -12,7 +12,13 @@ docs_dir: docs
 
 # Navigation
 nav:
-  - Overview: README.md 
+  - Overview: README.md
+  - BOM: bom.md
+  - Software:
+    - Install Software: software.md
+    - OS: os.md
+    - Zerotier: zerotier.md
+  - Gimbal: gimbal/README.md
 
 ## DO NOT CHANGE BELOW THIS LINE
 # Theme
