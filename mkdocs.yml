@@ -1,0 +1,74 @@
+# Project information
+site_name: Fancydrones X500 RPi4
+site_url: https://fancydrones.github.io/x500-rpi4/
+site_author: Fancydrones // Roy Veshovda
+site_dir: _site
+
+# Repository
+#repo_name: Testing MKDocs
+repo_url: https://github.com/fancydrones/x500-rpi4
+edit_uri: edit/main/docs
+docs_dir: docs
+
+# Navigation
+nav:
+  - Overview: README.md 
+
+## DO NOT CHANGE BELOW THIS LINE
+# Theme
+theme:
+  name: material
+  icon:
+    logo: material/library
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.expand
+    - navigation.tracking
+  palette:
+    scheme: default
+    primary: blue
+    accent: blue
+
+# Plugins
+plugins:
+  - search
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  # - def_list
+  # - footnotes
+  # - meta
+  - md_in_html
+  # - toc:
+  #     permalink: true
+  # - pymdownx.arithmatex:
+  #     generic: true
+  # - pymdownx.betterem:
+  #     smart_enable: all
+  # - pymdownx.caret
+  # - pymdownx.critic
+  # - pymdownx.details
+  # - pymdownx.emoji:
+  #     emoji_index: !!python/name:materialx.emoji.twemoji
+  #     emoji_generator: !!python/name:materialx.emoji.to_svg
+  # - pymdownx.highlight
+  # - pymdownx.inlinehilite
+  # - pymdownx.keys
+  # - pymdownx.mark
+  # - pymdownx.smartsymbols
+  # - pymdownx.snippets:
+  #     check_paths: true
+  # - pymdownx.superfences:
+  #     custom_fences:
+  #       - name: mermaid
+  #         class: mermaid
+  #         format: !!python/name:pymdownx.superfences.fence_code_format
+  # - pymdownx.tabbed
+  # - pymdownx.tasklist:
+  #     custom_checkbox: true
+  # - pymdownx.tilde
+
