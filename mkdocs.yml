@@ -5,7 +5,6 @@ site_author: Fancydrones // Roy Veshovda
 site_dir: _site
 
 # Repository
-#repo_name: Testing MKDocs
 repo_url: https://github.com/fancydrones/x500-rpi4
 edit_uri: edit/main/docs
 docs_dir: docs
