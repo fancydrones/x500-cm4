@@ -53,8 +53,6 @@ markdown_extensions:
       permalink: true
   - tables
   - meta
-  - mdx_math:
-      enable_dollar_delimiter: True
   - codehilite
   - pymdownx.arithmatex:
       generic: true
