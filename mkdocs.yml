@@ -12,7 +12,7 @@ docs_dir: docs
 
 # Navigation
 nav:
-  - Overview: README.md
+  - Intro: README.md
   - BOM: bom.md
   - Software:
     - Install Software: software.md
@@ -25,7 +25,7 @@ nav:
 theme:
   name: material
   icon:
-    logo: material/library
+    logo: material/helicopter
   features:
     - navigation.tabs
     - navigation.instant
@@ -45,4 +45,16 @@ markdown_extensions:
   - abbr
   - admonition
   - attr_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg

@@ -35,7 +35,3 @@ The Apps hosted are:
 - __Streamer:__ A GStreamer based video streamer, for sending video from the onboard camera
 - __Announcer:__ Using Mavlink to announce the video stream. This way the video shows up automatically on the ground controller.
 - __Companion:__ Small web interface to modify the most common configurations. Can also be used to restart the different apps. Either if they misbehave, or you need to restart after changing config.
-
-## Details
-- [Gimbal](gimbal/README.md)
-
