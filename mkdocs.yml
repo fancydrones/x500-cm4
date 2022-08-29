@@ -6,7 +6,6 @@ site_dir: _site
 
 # Repository
 repo_url: https://github.com/fancydrones/x500-rpi4
-edit_uri: edit/main/docs
 docs_dir: docs
 
 # Navigation
@@ -31,9 +30,22 @@ theme:
     - navigation.expand
     - navigation.tracking
   palette:
-    scheme: default
-    primary: blue
-    accent: blue
+    # Documented here: https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#color-palette-toggle
+    # Palette toggle for light mode
+    - scheme: default
+      primary: green
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: green
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
 
 # Plugins
 plugins:
