@@ -10,7 +10,8 @@ docs_dir: docs
 
 # Navigation
 nav:
-  - Intro: README.md
+  - Home: https://fancydrones.github.io
+  - X500-RPi4: README.md
   - BOM: bom.md
   - Software:
     - Install Software: software.md
