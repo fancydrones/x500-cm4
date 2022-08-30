@@ -54,6 +54,7 @@ plugins:
 
 # Extensions
 markdown_extensions:
+  - privacy
   - abbr
   - admonition
   - attr_list
