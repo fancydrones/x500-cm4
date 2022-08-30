@@ -51,10 +51,10 @@ theme:
 plugins:
   - search
   - glightbox
+  - privacy
 
 # Extensions
 markdown_extensions:
-  - privacy
   - abbr
   - admonition
   - attr_list
