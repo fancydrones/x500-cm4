@@ -103,6 +103,6 @@ extra_javascript:
 
 extra:
   social:
-    - icon: fontawesome/brands/github
+    - icon: material/helicopter
       link: https://fancydrones.github.io
       name: Fancydrones Designs
