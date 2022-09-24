@@ -9,7 +9,7 @@ WORKDIR /app
 # set build ENV
 ENV MIX_ENV="prod"
 
-RUN MIX --version
+RUN mix --version
 
 # install hex + rebar
 RUN mix local.hex --force && mix local.rebar --force
