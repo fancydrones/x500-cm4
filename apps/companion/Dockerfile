@@ -1,5 +1,5 @@
 #FROM bitwalker/alpine-elixir:1.14 as build
-FROM elixir:1.13.4-otp-25-alpine as build
+FROM elixir:1.13.4-alpine as build
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
@@ -15,12 +15,13 @@ RUN mix do local.hex --force, local.rebar --force
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
+#RUN mix deps.get --force
 RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
 
 # copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
+RUN mkdir config
 COPY config/config.exs config/${MIX_ENV}.exs config/
 RUN mix deps.compile
 
