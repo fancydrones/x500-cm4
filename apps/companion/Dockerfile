@@ -1,5 +1,5 @@
-FROM bitwalker/alpine-elixir:1.14 as build
-#FROM elixir:1.13-alpine as build
+#FROM bitwalker/alpine-elixir:1.14 as build
+FROM elixir:1.13.4-otp-25-alpine as build
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
