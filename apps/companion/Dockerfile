@@ -1,4 +1,4 @@
-FROM elixir:1.13-alpine as build
+FROM elixir:1.14-alpine as build
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
