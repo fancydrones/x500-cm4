@@ -1,4 +1,4 @@
-FROM elixir:1.14-alpine as build
+FROM elixir:1.13-alpine as build
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
@@ -9,10 +9,8 @@ WORKDIR /app
 # set build ENV
 ENV MIX_ENV="prod"
 
-#RUN mix --version
-
 # install hex + rebar
-#RUN mix local.hex --force && mix local.rebar --force
+RUN mix local.hex --force && mix local.rebar --force
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
