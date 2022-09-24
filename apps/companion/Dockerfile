@@ -1,6 +1,4 @@
-#FROM elixir:1.14-alpine as build
 FROM bitwalker/alpine-elixir:1.14 as build
-
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
@@ -12,7 +10,6 @@ WORKDIR /app
 ENV MIX_ENV="prod"
 
 # install hex + rebar
-#RUN mix local.hex --force --if-missing && mix local.rebar --force --if-missing
 RUN mix do local.hex --force, local.rebar --force
 
 # install mix dependencies
