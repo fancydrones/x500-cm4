@@ -42,19 +42,19 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.APP_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=${{ steps.tag.outputs.datetag }}
           labels: |
-            org.opencontainers.image.title=${{ inputs.app_name }}
+            org.opencontainers.image.title=${{ env.APP_NAME }}
             org.opencontainers.image.description=${{ env.IMAGE_VENDOR }} ${{ env.IMAGE_CONTEXT }} ${{ env.APP_NAME }}
             org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
             org.opencontainers.image.version=${{ steps.tag.outputs.datetag }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: apps/${{ inputs.app_name }}
+          context: apps/${{ env.APP_NAME }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -75,17 +75,17 @@ jobs:
         run: |
           rm kustomization.yaml -f
           ./kustomize create
-          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
-          ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}.yaml
+          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.APP_NAME }}:${{ needs.build-and-push-image.outputs.version_tag }}
+          ./kustomize edit add resource $APPS_PATH/${{ env.APP_NAME }}.yaml
           ./kustomize build . > x.yaml
           cat x.yaml
-          mv x.yaml $APPS_PATH/${{ inputs.app_name }}.yaml
+          mv x.yaml $APPS_PATH/${{ env.APP_NAME }}.yaml
           rm kustomization.yaml
       - name: Commit update
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}"
+          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.APP_NAME }}:${{ needs.build-and-push-image.outputs.version_tag }}"
           git pull --rebase=true
           git push
