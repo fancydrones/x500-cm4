@@ -6,6 +6,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
   IMAGE_CONTEXT: X500-RPi4
+  APP_NAME: companion
 
 on:
   push:
@@ -47,7 +48,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.datetag }}
           labels: |
             org.opencontainers.image.title=${{ inputs.app_name }}
-            org.opencontainers.image.description=${{ env.IMAGE_VENDOR }} ${{ env.IMAGE_CONTEXT }} ${{ inputs.app_name }}
+            org.opencontainers.image.description=${{ env.IMAGE_VENDOR }} ${{ env.IMAGE_CONTEXT }} ${{ env.APP_NAME }}
             org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
             org.opencontainers.image.version=${{ steps.tag.outputs.datetag }}
       - name: Build and push Docker image
