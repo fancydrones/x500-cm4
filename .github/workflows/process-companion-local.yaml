@@ -1,0 +1,90 @@
+name: Companion image - Self hosted
+
+env:
+  KUSTOMIZE_VER: 4.5.7
+  APPS_PATH: deployments/apps
+  REGISTRY: ghcr.io
+  IMAGE_VENDOR: FancyDrones
+  IMAGE_CONTEXT: X500-RPi4
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'apps/companion/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+jobs:
+  build-and-push-image:
+    runs-on: [self-hosted]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version_tag: ${{ steps.tag.outputs.datetag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get image date tag
+        id: tag
+        run: echo "::set-output name=datetag::$(date +'%Y%m%d')-${GITHUB_SHA::7}"
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.tag.outputs.datetag }}
+          labels: |
+            org.opencontainers.image.title=${{ inputs.app_name }}
+            org.opencontainers.image.description=${{ env.IMAGE_VENDOR }} ${{ env.IMAGE_CONTEXT }} ${{ inputs.app_name }}
+            org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
+            org.opencontainers.image.version=${{ steps.tag.outputs.datetag }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: apps/${{ inputs.app_name }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+  update-deployment:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Prepare Kustomize
+        run: |
+          echo "before"
+          curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+          tar -xvzf kustomize.tar.gz && chmod +x ./kustomize
+      - name: "Patch"
+        run: |
+          rm kustomization.yaml -f
+          ./kustomize create
+          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
+          ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}.yaml
+          ./kustomize build . > x.yaml
+          cat x.yaml
+          mv x.yaml $APPS_PATH/${{ inputs.app_name }}.yaml
+          rm kustomization.yaml
+      - name: Commit update
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}"
+          git pull --rebase=true
+          git push
