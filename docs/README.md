@@ -16,7 +16,9 @@ And the handcontroller like this:
 
 [More pictures can be found here.](pictures.md)
 
-The different components on the drone are [connected like this](physical.md)
+The different components on the drone are [connected like this](physical.md).
+
+Which including the software [logically looks like this](logical.md).
 
 ## Dronecode ecosystem
 The setup is built on the foundation of [Dronecode Foundation](https://www.dronecode.org/), which means that the following projects are used:
