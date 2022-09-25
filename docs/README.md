@@ -16,6 +16,8 @@ And the handcontroller like this:
 
 [More pictures can be found here.](pictures.md)
 
+The different components on the drone are [connected like this](physical.md)
+
 ## Dronecode ecosystem
 The setup is built on the foundation of [Dronecode Foundation](https://www.dronecode.org/), which means that the following projects are used:
 - [Pixhawk](https://pixhawk.org/) for autopilot hardware
