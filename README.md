@@ -5,14 +5,8 @@ Documentation can be found at [https://fancydrones.github.io/x500-rpi4](https://
 
 
 ## TODOs
-- [ ] Update Streamer to support AMD64 aarch
-- [x] Scope workflows to updates in relevant paths only
-- [x] Publish documentation using Github Pages
-- [x] Move documentation to use Github Pages (/docs)
 - [ ] Document use of pan/tilt servoes
-- [ ] Document 3D model for pant/tilt setup
 - [ ] Document hardware installation
-- [ ] Document high level concept
 - [ ] Consider k3s hardening ([https://rancher.com/docs/k3s/latest/en/security/hardening_guide/](https://rancher.com/docs/k3s/latest/en/security/hardening_guide/))
 - [ ] Try to avoid network=host for Router (see Nodeport range below)
 - [ ] Try to avoid network=host for Streamer (see Nodeport range below)
@@ -24,6 +18,11 @@ Documentation can be found at [https://fancydrones.github.io/x500-rpi4](https://
 - [ ] (Nice to have) Show Autopilot position on Companion
 - [ ] (Nice to have) Set important paramaters on Autopilot using Companion over Mavlink
 - [ ] Update docker-compose to be able to develop locally
+- [x] Scope workflows to updates in relevant paths only
+- [x] Publish documentation using Github Pages
+- [x] Move documentation to use Github Pages (/docs)
+- [x] Document 3D model for pant/tilt setup
+- [x] Document high level concept
 - ~~[ ] Enable Origin check for Companion~~ (not needed for now. Will only complicate setups)
 - ~~[ ] Smaller image for STREAMER, if possible~~ (GStreamer+Python will increase size)
 
