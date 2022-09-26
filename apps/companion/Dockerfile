@@ -1,4 +1,4 @@
-FROM bitwalker/alpine-elixir:1.14 as build
+#FROM bitwalker/alpine-elixir:1.14 as build
 FROM elixir:1.13.4-otp-25-alpine as build
 
 # install build dependencies
@@ -51,7 +51,7 @@ RUN mix release
 
 # prepare release image
 FROM alpine:latest AS app
-RUN apk update && apk add --no-cache openssl ncurses-libs bind-tools
+RUN apk update && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc
 WORKDIR /app
 RUN chown nobody:nobody /app
 USER nobody:nobody
