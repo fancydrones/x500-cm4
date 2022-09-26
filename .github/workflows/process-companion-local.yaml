@@ -40,9 +40,11 @@ jobs:
           ec2-image-id: ami-08abeba77f36b09d9
           ec2-instance-type: c6g.medium
           subnet-id: subnet-a84aa3c1
-          security-group-id: sg-0fddbb613d6d6f032
+          security-group-id: sg-0f89c2c5f2a177690
   build-and-push-image:
     runs-on: [self-hosted]
+    needs:
+      - start-runner
     permissions:
       contents: read
       packages: write
