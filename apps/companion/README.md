@@ -63,3 +63,5 @@ ClusterRoleBinding - connecting servceiAccount and ClusterRole
 
 ## To restart
     curl -X PATCH "$KUBE_API/apis/apps/v1/namespaces/rpiuav/deployments/router?fieldManager=rpi-modifier" -k -H "Authorization: Bearer $JWT_TOKEN" -H "Content-Type: application/strategic-merge-patch+json" -d '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2022-07-16T15:05:00+02:00"}}}}}'
+
+

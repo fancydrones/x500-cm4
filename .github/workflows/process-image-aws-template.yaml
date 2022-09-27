@@ -48,7 +48,7 @@ jobs:
           subnet-id: subnet-0f989b8a041768b41
           security-group-id: sg-0f89c2c5f2a177690
   build-and-push-image:
-    runs-on: [self-hosted]
+    runs-on: ${{ needs.start-runner.outputs.label }} #Need this to make sure each builder gets only one app
     needs:
       - start-runner
     permissions:
