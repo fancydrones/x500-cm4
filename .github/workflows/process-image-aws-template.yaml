@@ -1,0 +1,137 @@
+name: Reusable image AWS Create, publish and release
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+
+env:
+  KUSTOMIZE_VER: 4.5.7
+  APPS_PATH: deployments/apps
+  REGISTRY: ghcr.io
+  IMAGE_VENDOR: FancyDrones
+  IMAGE_CONTEXT: X500-RPi4
+  
+jobs:
+  start-runner:
+    name: Start self-hosted EC2 runner
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ami-08abeba77f36b09d9
+          ec2-instance-type: c6g.medium
+          subnet-id: subnet-0f989b8a041768b41
+          security-group-id: sg-0f89c2c5f2a177690
+  build-and-push-image:
+    runs-on: [self-hosted]
+    needs:
+      - start-runner
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version_tag: ${{ steps.tag.outputs.datetag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Get image date tag
+        id: tag
+        run: echo "::set-output name=datetag::$(date +'%Y%m%d')-${GITHUB_SHA::7}"
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.tag.outputs.datetag }}
+          labels: |
+            org.opencontainers.image.title=${{ inputs.app_name }}
+            org.opencontainers.image.description=${{ env.IMAGE_VENDOR }} ${{ env.IMAGE_CONTEXT }} ${{ inputs.app_name }}
+            org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
+            org.opencontainers.image.version=${{ steps.tag.outputs.datetag }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: apps/${{ inputs.app_name }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+  update-deployment:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Prepare Kustomize
+        run: |
+          echo "before"
+          curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+          tar -xvzf kustomize.tar.gz && chmod +x ./kustomize
+      - name: "Patch"
+        run: |
+          rm kustomization.yaml -f
+          ./kustomize create
+          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
+          ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}.yaml
+          ./kustomize build . > x.yaml
+          cat x.yaml
+          mv x.yaml $APPS_PATH/${{ inputs.app_name }}.yaml
+          rm kustomization.yaml
+      - name: Commit update
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}"
+          git pull --rebase=true
+          git push
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner
+      - build-and-push-image
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}

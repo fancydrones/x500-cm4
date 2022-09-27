@@ -11,8 +11,6 @@ on:
   
 jobs:
   process-image:
-    uses: ./.github/workflows/process-image-template.yaml
+    uses: ./.github/workflows/process-image-aws-template.yaml
     with:
-      #platforms: linux/amd64,linux/arm64
-      platforms: linux/arm64
       app_name: companion
