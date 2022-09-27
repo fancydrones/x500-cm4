@@ -52,7 +52,6 @@ ClusterRole - set on permissions
 ServiceAccount - account that can be attached to a deployment
 ClusterRoleBinding - connecting servceiAccount and ClusterRole
 
-
 ## To Edit
 
     kubectl patch configmap/rpi4-config -n rpiuav -p '{"data":{"ANNOUNCER_SYSTEM_ID":"1"}}'
@@ -61,7 +60,6 @@ ClusterRoleBinding - connecting servceiAccount and ClusterRole
     JWT_TOKEN=$(kubectl -n rpiuav create token rpimodifier)
     curl $KUBE_API/api/v1/namespaces/rpiuav/configmaps/rpi4-config -k -H "Authorization: Bearer $JWT_TOKEN"
     curl -X PATCH "$KUBE_API/api/v1/namespaces/rpiuav/configmaps/rpi4-config?fieldManager=rpi-modifier" -k -H "Authorization: Bearer $JWT_TOKEN" -H "Content-Type: application/strategic-merge-patch+json" -d '{"data":{"ANNOUNCER_SYSTEM_ID":"1234"}}'
-
 
 ## To restart
     curl -X PATCH "$KUBE_API/apis/apps/v1/namespaces/rpiuav/deployments/router?fieldManager=rpi-modifier" -k -H "Authorization: Bearer $JWT_TOKEN" -H "Content-Type: application/strategic-merge-patch+json" -d '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"2022-07-16T15:05:00+02:00"}}}}}'
