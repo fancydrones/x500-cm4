@@ -11,7 +11,7 @@ on:
   
 jobs:
   process-image:
-    uses: ./.github/workflows/process-image-template.yaml
+    uses: ./.github/workflows/process-image-aws-template.yaml
     with:
-      platforms: linux/arm64
       app_name: streamer
+    secrets: inherit
