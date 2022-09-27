@@ -14,3 +14,4 @@ jobs:
     uses: ./.github/workflows/process-image-aws-template.yaml
     with:
       app_name: companion
+    secrets: inherit
