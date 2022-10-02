@@ -22,6 +22,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
   IMAGE_CONTEXT: X500-RPi4
+  AWS_EC2_IMAGE_ID: ami-08abeba77f36b09d9
+  AWS_EC2_INSTANCE_TYPE: c6gd.xlarge
+  AWS_SUBNET_ID: subnet-0f989b8a041768b41
+  AWS_SECURITY_GROUP: sg-0f89c2c5f2a177690
   
 jobs:
   start-runner:
@@ -43,10 +47,10 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-08abeba77f36b09d9
-          ec2-instance-type: c6g.medium
-          subnet-id: subnet-0f989b8a041768b41
-          security-group-id: sg-0f89c2c5f2a177690
+          ec2-image-id: ${{ env.AWS_EC2_IMAGE_ID }}
+          ec2-instance-type: ${{ env.AWS_EC2_INSTANCE_TYPE }}
+          subnet-id: ${{ env.AWS_SUBNET_ID }}
+          security-group-id: ${{ env.AWS_SECURITY_GROUP }}
   build-and-push-image:
     runs-on: ${{ needs.start-runner.outputs.label }} #Need this to make sure each builder gets only one app
     needs:
