@@ -80,7 +80,7 @@ spec:
       initContainers:
       - name: init-myservice
         image: busybox:1.34
-        command: ['sh', '-c', 'echo initContainer will delay startup by 30s! && sleep 30 && echo exiting']
+        command: ['sh', '-c', 'echo initContainer will delay startup by 5s! && sleep 5 && echo exiting']
       volumes:
       - configMap:
           items:
