@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   streamer:
-    image: registry.gitlab.com/got.vision/rpiuav/streamer:1.0.15
+    image: ghcr.io/fancydrones/x500-rpi4/streamer:20221002-f3a1710
     ports:
     - 8554:8554
     volumes:
@@ -19,14 +19,16 @@ services:
           v4l2h264enc output-io-mode=2 extra-controls="controls,repeat_sequence_header=1,video_bitrate_mode=1,h264_profile=3,video_bitrate=3000000" ! 
           video/x-h264,profile=main,level=(string)4 ! 
           queue max-size-buffers=1 name=q_enc ! 
-          h264parse ! 
-          rtph264pay config-interval=1 name=pay0 pt=96
+          h264parse ! rtph264pay config-interval=1 name=pay0 pt=96
+      - VIDEO_PORT=8554
   router:
-    image: registry.gitlab.com/got.vision/rpiuav/router:1.0.15
+    image: ghcr.io/fancydrones/x500-rpi4/router:20221109-90362cf
     ports:
     - 5760:5760
     - 14560:14560
     - 14561:14561
+    - 14562:14562
+    - 14563:14563
     network_mode: host
     privileged: true
     restart: always
@@ -34,11 +36,11 @@ services:
     - ./mavlink-router.conf:/etc/mavlink-router/main.conf
     - /dev/serial0:/dev/serial0
   announcer:
-    image: registry.gitlab.com/got.vision/rpiuav/announcer:1.0.15
+    image: ghcr.io/fancydrones/x500-rpi4/announcer:20221109-3cdc41c
     network_mode: host
     restart: always
     environment:
-      - CAMERA_URL=rtsp://10.177.177.3:8554/video0
+      - CAMERA_URL=rtsp://10.10.10.99:8554/video0
       - CAMERA_ID=100
       - CAMERA_NAME=Main
       - SYSTEM_HOST=127.0.0.1
