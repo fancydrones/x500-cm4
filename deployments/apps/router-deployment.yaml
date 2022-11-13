@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/name: router-deployment
     spec:
       containers:
-      - image: ghcr.io/fancydrones/x500-rpi4/router:20221109-90362cf
+      - image: ghcr.io/fancydrones/x500-rpi4/router:20221113-e78e8bd
         name: router
         ports:
         - containerPort: 5760
@@ -44,9 +44,12 @@ spec:
           name: serial0
       hostNetwork: true
       initContainers:
-      - name: init-myservice
+      - command:
+        - sh
+        - -c
+        - echo initContainer will delay startup by 20s! && sleep 20 && echo exiting
         image: busybox:1.34
-        command: ['sh', '-c', 'echo initContainer will delay startup by 20s! && sleep 20 && echo exiting']
+        name: init-myservice
       volumes:
       - configMap:
           items:
