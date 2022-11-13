@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: streamer-deployment
+    name: streamer
+  name: streamer
+  namespace: rpiuav
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamer-replicaset
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: streamer-replicaset
+        app.kubernetes.io/name: streamer-deployment
+    spec:
+      containers:
+      - env:
+        - name: CAMERA_PIPELINE0
+          valueFrom:
+            configMapKeyRef:
+              key: STREAMER_CAMERA_PIPELINE0
+              name: rpi4-config
+        - name: VIDEO_PORT
+          value: "8554"
+        image: ghcr.io/fancydrones/x500-rpi4/streamer:20221113-640bb0d
+        name: streamer
+        ports:
+        - containerPort: 8554
+        resources:
+          limits:
+            cpu: "2"
+            memory: 2500Mi
+          requests:
+            cpu: "1"
+            memory: 500Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /run/udev
+          name: udev
+      hostNetwork: true
+      volumes:
+      - hostPath:
+          path: /run/udev
+        name: udev
