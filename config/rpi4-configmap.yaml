@@ -12,7 +12,7 @@ data:
     [General]
     # Print traffic statistics to stdout
     # Default: <false>
-    #ReportStats = false
+    ReportStats=false
 
     # Logging verbosity (stderr)
     # Valid values: <error>, <warning>, <info> or <debug>
@@ -21,7 +21,7 @@ data:
 
     #Mavlink-router serves on this TCP port
     TcpServerPort=5760
-    ReportStats=false
+    
     MavlinkDialect=auto
 
     [UartEndpoint FlightControllerSerial]
