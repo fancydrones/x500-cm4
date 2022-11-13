@@ -41,9 +41,9 @@ spec:
         - mountPath: /etc/mavlink-router
           name: main-conf
         - mountPath: /dev/serial0
-          name: serial
+          name: serial0
         - mountPath: /dev/serial1
-          name: serial
+          name: serial1
       hostNetwork: true
       initContainers:
       - name: init-myservice
