@@ -114,7 +114,7 @@ jobs:
           rm kustomization.yaml -f
           ./kustomize create
           ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
-          ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}.yaml
+          ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}-deployment.yaml
           ./kustomize build . > x.yaml
           cat x.yaml
           mv x.yaml $APPS_PATH/${{ inputs.app_name }}.yaml
