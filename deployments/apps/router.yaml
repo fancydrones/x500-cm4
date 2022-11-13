@@ -76,6 +76,8 @@ spec:
           name: main-conf
         - mountPath: /dev/serial0
           name: serial
+        - mountPath: /dev/serial1
+          name: serial
       hostNetwork: true
       initContainers:
       - name: init-myservice
@@ -90,4 +92,7 @@ spec:
         name: main-conf
       - hostPath:
           path: /dev/serial0
-        name: serial
+        name: serial0
+      - hostPath:
+          path: /dev/serial1
+        name: serial1
