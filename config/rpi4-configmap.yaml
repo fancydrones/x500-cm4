@@ -10,6 +10,15 @@ data:
   STREAMER_CAMERA_PIPELINE0: libcamerasrc ! video/x-raw,width=1280,height=720,format=NV12,colorimetry=bt601,interlace-mode=progressive ! videoflip video-direction=180 ! videorate ! video/x-raw,framerate=30/1 ! v4l2convert ! v4l2h264enc output-io-mode=2 extra-controls="controls,repeat_sequence_header=1,video_bitrate_mode=1,h264_profile=3,video_bitrate=3000000" ! video/x-h264,profile=main,level=(string)4 ! queue max-size-buffers=1 name=q_enc ! h264parse ! rtph264pay config-interval=1 name=pay0 pt=96
   ROUTER_CONFIG: |
     [General]
+    # Print traffic statistics to stdout
+    # Default: <false>
+    #ReportStats = false
+
+    # Logging verbosity (stderr)
+    # Valid values: <error>, <warning>, <info> or <debug>
+    # Default: <info>
+    #DebugLogLevel = info
+
     #Mavlink-router serves on this TCP port
     TcpServerPort=5760
     ReportStats=false
@@ -20,7 +29,7 @@ data:
     Baud = 921600
 
     [UdpEndpoint FlightControllerUDP]
-    Mode = Eavesdropping
+    Mode = Server
     Address = 0.0.0.0
     Port = 14555
 
