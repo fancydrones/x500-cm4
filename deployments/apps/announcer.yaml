@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: announcer
+  name: announcer
+  namespace: rpiuav
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: announcer-replicaset
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: announcer-replicaset
+    spec:
+      containers:
+      - env:
+        - name: CAMERA_URL
+          valueFrom:
+            configMapKeyRef:
+              key: ANNOUNCER_CAMERA_URL
+              name: rpi4-config
+        - name: CAMERA_ID
+          value: "100"
+        - name: CAMERA_NAME
+          value: Front
+        - name: SYSTEM_HOST
+          value: router-service.rpiuav.svc.cluster.local
+        - name: SYSTEM_PORT
+          value: "14560"
+        - name: SYSTEM_ID
+          valueFrom:
+            configMapKeyRef:
+              key: ANNOUNCER_SYSTEM_ID
+              name: rpi4-config
+        - name: MAVLINK20
+          value: "1"
+        image: ghcr.io/fancydrones/x500-rpi4/announcer:20221113-640bb0d
+        name: announcer
+        resources:
+          limits:
+            cpu: "1"
+            memory: 500Mi
+          requests:
+            cpu: "0.5"
+            memory: 200Mi
