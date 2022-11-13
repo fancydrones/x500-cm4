@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: router
+  name: router
+  namespace: rpiuav
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router-replicaset
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: router-replicaset
+        app.kubernetes.io/name: router-deployment
+    spec:
+      containers:
+      - image: ghcr.io/fancydrones/x500-rpi4/router:20221113-640bb0d
+        name: router
+        ports:
+        - containerPort: 5760
+        - containerPort: 14550
+        - containerPort: 14560
+        - containerPort: 14561
+        - containerPort: 14562
+        - containerPort: 14563
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 500Mi
+          requests:
+            cpu: "0.25"
+            memory: 100Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/mavlink-router
+          name: main-conf
+        - mountPath: /dev/serial0
+          name: serial0
+      hostNetwork: true
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - echo initContainer will delay startup by 20s! && sleep 20 && echo exiting
+        image: busybox:1.34
+        name: init-myservice
+      volumes:
+      - configMap:
+          items:
+          - key: ROUTER_CONFIG
+            path: main.conf
+          name: rpi4-config
+        name: main-conf
+      - hostPath:
+          path: /dev/serial0
+        name: serial0
