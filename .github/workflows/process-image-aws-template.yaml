@@ -21,7 +21,7 @@ env:
   APPS_PATH: deployments/apps
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
-  IMAGE_CONTEXT: X500-RPi4
+  IMAGE_CONTEXT: X500-CM4
   AWS_EC2_IMAGE_ID: ami-08abeba77f36b09d9
   AWS_EC2_INSTANCE_TYPE: c6g.medium
   AWS_SUBNET_ID: subnet-0f989b8a041768b41

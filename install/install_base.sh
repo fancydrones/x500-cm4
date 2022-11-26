@@ -11,7 +11,7 @@ sudo sed -i '$s/$/ cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
 
 # K3S
 sudo mkdir -p /etc/rancher/k3s
-sudo curl -o /etc/rancher/k3s/config.yaml https://raw.githubusercontent.com/fancydrones/x500-rpi4/main/install/config.yaml
+sudo curl -o /etc/rancher/k3s/config.yaml https://raw.githubusercontent.com/fancydrones/x500-cm4/main/install/config.yaml
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 
 # Overlays

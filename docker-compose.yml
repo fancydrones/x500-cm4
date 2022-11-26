@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   streamer:
-    image: ghcr.io/fancydrones/x500-rpi4/streamer:20221002-f3a1710
+    image: ghcr.io/fancydrones/x500-cm4/streamer:20221002-f3a1710
     ports:
     - 8554:8554
     volumes:
@@ -22,7 +22,7 @@ services:
           h264parse ! rtph264pay config-interval=1 name=pay0 pt=96
       - VIDEO_PORT=8554
   router:
-    image: ghcr.io/fancydrones/x500-rpi4/router:20221109-90362cf
+    image: ghcr.io/fancydrones/x500-cm4/router:20221109-90362cf
     ports:
     - 5760:5760
     - 14560:14560
@@ -36,7 +36,7 @@ services:
     - ./mavlink-router.conf:/etc/mavlink-router/main.conf
     - /dev/serial0:/dev/serial0
   announcer:
-    image: ghcr.io/fancydrones/x500-rpi4/announcer:20221109-3cdc41c
+    image: ghcr.io/fancydrones/x500-cm4/announcer:20221109-3cdc41c
     network_mode: host
     restart: always
     environment:

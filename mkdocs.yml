@@ -1,16 +1,16 @@
 # Project information
 site_name: Fancydrones X500 RPi4
-site_url: https://fancydrones.github.io/x500-rpi4/
+site_url: https://fancydrones.github.io/x500-cm4/
 site_author: Fancydrones // Roy Veshovda
 site_dir: _site
 
 # Repository
-repo_url: https://github.com/fancydrones/x500-rpi4
+repo_url: https://github.com/fancydrones/x500-cm4
 docs_dir: docs
 
 # Navigation
 nav:
-  - X500-RPi4: README.md
+  - X500-CM4: README.md
   - BOM: bom.md
   - Software:
     - Install Software: software.md

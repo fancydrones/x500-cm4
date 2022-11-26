@@ -15,7 +15,7 @@ env:
   APPS_PATH: deployments/apps
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
-  IMAGE_CONTEXT: X500-RPi4
+  IMAGE_CONTEXT: X500-CM4
 
 jobs:
   build-and-push-image:
