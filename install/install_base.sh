@@ -21,6 +21,14 @@ sudo sh -c "echo 'enable_uart=1' >> /boot/config.txt"
 #sudo sh -c "echo 'dtoverlay=gpio-led,gpio=17,trigger=default-on,label=statusled0' >> /boot/config.txt"
 sudo sh -c "echo 'dtoverlay=imx477' >> /boot/config.txt"
 
+# Protect Kernel Defaults
+sudo sh -c "echo 'vm.panic_on_oom=0' >> /etc/sysctl.d/90-kubelet.conf"
+sudo sh -c "echo 'vm.overcommit_memory=1' >> /etc/sysctl.d/90-kubelet.conf"
+sudo sh -c "echo 'kernel.panic=10' >> /etc/sysctl.d/90-kubelet.conf"
+sudo sh -c "echo 'kernel.panic_on_oops=1' >> /etc/sysctl.d/90-kubelet.conf"
+sudo sh -c "echo 'kernel.keys.root_maxbytes=25000000' >> /etc/sysctl.d/90-kubelet.conf"
+
+sudo sysctl -p /etc/sysctl.d/90-kubelet.conf
 
 # Zerotier
 curl -s https://install.zerotier.com | sudo bash
