@@ -5,3 +5,4 @@ resources:
 - modify-and-restart-role.yaml
 - modifier-role-binding.yaml
 - k3s-system-upgrade-controller.yaml
+- k3s-upgrade-plan.yaml
