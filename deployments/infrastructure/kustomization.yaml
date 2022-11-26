@@ -4,4 +4,3 @@ resources:
 - modifier-service-account.yaml
 - modify-and-restart-role.yaml
 - modifier-role-binding.yaml
-- k3s-system-upgrade/kustomization.yaml
