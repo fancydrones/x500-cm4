@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
 - namespace.yaml
 - serviceaccount.yaml
-- clusterrolebinding.yaml.yaml
-- configmap.yaml.yaml
-- deployment.yaml.yaml
+- clusterrolebinding.yaml
+- configmap.yaml
+- deployment.yaml
 #- upgrade-plan.yaml
