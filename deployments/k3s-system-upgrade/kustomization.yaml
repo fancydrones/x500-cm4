@@ -6,4 +6,4 @@ resources:
 - clusterrolebinding.yaml
 - configmap.yaml
 - deployment.yaml
-#- upgrade-plan.yaml
+- upgrade-plan.yaml
