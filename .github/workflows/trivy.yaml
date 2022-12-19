@@ -1,0 +1,69 @@
+name: Trivy Container Security Scan
+
+on:
+  schedule:
+    # Scan the image once a day
+    - cron: 30 1 * * *
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scan-companion-image:
+    permissions:
+      contents: write # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Find current image
+        run: |
+          pwd
+          ls
+          IM=$(cat ./deployments/apps/announcer-deployment.yaml | grep "image:" | cut -d ':' -f 2-3)
+          echo $IM
+
+      # - name: Run Trivy vulnerability scanner
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: baxpipelinesacr.azurecr.io/bax-build-agent:latest
+      #     format: sarif
+      #     output: trivy-results.sarif
+      #   env:
+      #     TRIVY_USERNAME: baxpipelinesacr
+      #     TRIVY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v2
+      #   if: always()
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
+
+  # scan-deploy-image:
+  #   permissions:
+  #     contents: write # for actions/checkout to fetch code
+  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+
+  #     - name: Run Trivy vulnerability scanner
+  #       uses: aquasecurity/trivy-action@master
+  #       with:
+  #         image-ref: baxpipelinesacr.azurecr.io/bax-deploy-agent:latest
+  #         format: sarif
+  #         output: trivy-results.sarif
+  #       env:
+  #         TRIVY_USERNAME: baxpipelinesacr
+  #         TRIVY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
+  #     - name: Upload Trivy scan results to GitHub Security tab
+  #       uses: github/codeql-action/upload-sarif@v2
+  #       if: always()
+  #       with:
+  #         sarif_file: 'trivy-results.sarif'
