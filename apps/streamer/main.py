@@ -22,8 +22,8 @@ class GstServer(GstRtspServer.RTSPServer):
         self.pipeline2 = pipeline2
         self.set_service(str(port))
         self.mainloop = None
-        #Gst.debug_set_active(True)
-        #Gst.debug_set_default_threshold(3)
+        Gst.debug_set_active(True)
+        Gst.debug_set_default_threshold(3)
 
     def run(self):
         logging.info("RTSP server starting")
