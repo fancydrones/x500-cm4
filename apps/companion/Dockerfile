@@ -51,8 +51,7 @@ RUN mix release
 
 # prepare release image
 FROM alpine:latest AS app
-#RUN apk update && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc
-RUN apk update && apk add --no-cache libressl ncurses-libs bind-tools libstdc++ libgcc
+RUN apk update && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc libssl1.1
 WORKDIR /app
 RUN chown nobody:nobody /app
 USER nobody:nobody
