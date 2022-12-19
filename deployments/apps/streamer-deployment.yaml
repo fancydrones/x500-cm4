@@ -28,6 +28,8 @@ spec:
               name: rpi4-config
         - name: VIDEO_PORT
           value: "8554"
+        - name: LIBCAMERA_LOG_LEVELS
+          value: "*:DEBUG"
         image: ghcr.io/fancydrones/x500-cm4/streamer:20221219-0402974
         name: streamer
         ports:
