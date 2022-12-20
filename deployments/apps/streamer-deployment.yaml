@@ -46,8 +46,18 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
+        - mountPath: /dev
+          name: dev
+        - mountPath: /run/dbus
+          name: dbus
       hostNetwork: true
       volumes:
       - hostPath:
           path: /run/udev
         name: udev
+      - hostPath:
+          path: /dev
+        name: dev
+      - hostPath:
+          path: /run/dbus/
+        name: dbus
