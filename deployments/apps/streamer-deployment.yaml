@@ -50,14 +50,24 @@ spec:
           name: dev
         - mountPath: /run/dbus
           name: dbus
+        - mountPath: /usr
+          name: usr
+        - mountPath: /lib
+          name: lib
       hostNetwork: true
       volumes:
       - hostPath:
           path: /run/udev
         name: udev
       - hostPath:
-          path: /dev
+          path: /dev/
         name: dev
       - hostPath:
           path: /run/dbus/
         name: dbus
+      - hostPath:
+          path: /usr/
+        name: usr
+      - hostPath:
+          path: /lib/
+        name: lib
