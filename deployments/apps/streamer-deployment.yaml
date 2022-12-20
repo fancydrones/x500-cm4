@@ -30,7 +30,7 @@ spec:
           value: "8554"
         - name: LIBCAMERA_LOG_LEVELS
           value: '*:DEBUG'
-        image: ghcr.io/fancydrones/x500-cm4/streamer:20221220-cd14bdd
+        image: ghcr.io/fancydrones/x500-cm4/streamer:20221220-30e0a3d
         name: streamer
         ports:
         - containerPort: 8554
