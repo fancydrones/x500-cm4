@@ -68,6 +68,8 @@ spec:
       - hostPath:
           path: /usr/
         name: usr
+        readOnly: true
       - hostPath:
           path: /lib/
         name: lib
+        readOnly: true
