@@ -8,7 +8,7 @@ RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" > /etc/apt/s
 RUN curl "https://archive.raspberrypi.org/debian/raspberrypi.gpg.key" | apt-key add -
 
 RUN apt-get update && apt-get upgrade -y
-#RUN apt-get install -y libcamera-dev
+RUN apt-get install -y libcamera-dev
 
 RUN apt-get install -y git
 RUN apt-get install -y meson
