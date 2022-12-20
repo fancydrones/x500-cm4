@@ -8,25 +8,25 @@ RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" > /etc/apt/s
 RUN curl "https://archive.raspberrypi.org/debian/raspberrypi.gpg.key" | apt-key add -
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y libcamera-dev
+RUN apt-get install -y libcamera-dev libcamera-apps
 
-RUN apt-get install -y git
-RUN apt-get install -y meson
-RUN apt-get install -y g++
-RUN apt-get install -y cmake
-RUN apt-get install -y libxml2-dev libxslt-dev python3-dev
-RUN apt-get install -y libyaml-dev python3-yaml python3-ply python3-jinja2
+# RUN apt-get install -y git
+# RUN apt-get install -y meson
+# RUN apt-get install -y g++
+# RUN apt-get install -y cmake
+# RUN apt-get install -y libxml2-dev libxslt-dev python3-dev
+# RUN apt-get install -y libyaml-dev python3-yaml python3-ply python3-jinja2
 
-RUN apt-get install -y libdw-dev libunwind-dev
+# RUN apt-get install -y libdw-dev libunwind-dev
 
-RUN apt-get install -y libudev-dev
-RUN apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-RUN apt-get install -y libevent-dev libdrm-dev libjpeg-dev libsdl2-dev
+# RUN apt-get install -y libudev-dev
+# RUN apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+# RUN apt-get install -y libevent-dev libdrm-dev libjpeg-dev libsdl2-dev
 
-RUN git clone https://git.libcamera.org/libcamera/libcamera.git
-WORKDIR /libcamera
-RUN meson build
-RUN ninja -C build install
+# RUN git clone https://git.libcamera.org/libcamera/libcamera.git
+# WORKDIR /libcamera
+# RUN meson build
+# RUN ninja -C build install
 
 RUN apt-get install libgstrtspserver-1.0-0 libgstreamer1.0-0 -y
 RUN apt-get install libcairo2-dev libxt-dev libgirepository1.0-dev -y
