@@ -28,9 +28,7 @@ spec:
               name: rpi4-config
         - name: VIDEO_PORT
           value: "8554"
-        - name: LIBCAMERA_LOG_LEVELS
-          value: '*:DEBUG'
-        image: ghcr.io/fancydrones/x500-cm4/streamer:20221220-30e0a3d
+        image: ghcr.io/fancydrones/x500-cm4/streamer:20221220-cd14bdd
         name: streamer
         ports:
         - containerPort: 8554
@@ -46,15 +44,9 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-        - mountPath: /dev/shm
-          name: tmp
       hostNetwork: true
       volumes:
       - hostPath:
           path: /run/udev
         name: udev
         readOnly: true
-      - emptyDir:
-          medium: Memory
-          sizeLimit: 64Mi
-        name: tmp
