@@ -41,19 +41,19 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-        - mountPath: /rtsp-simple-server.yml
-          name: rtsp-simple-server
-          subPath: rtsp-simple-server.yml
+        # - mountPath: /rtsp-simple-server.yml
+        #   name: rtsp-simple-server
+        #   subPath: rtsp-simple-server.yml
       hostNetwork: true
       volumes:
       - hostPath:
           path: /run/udev/
         name: udev
         readOnly: true
-      - configMap:
-          #defaultMode: 420
-          items:
-          - key: STREAMER_CONFIG
-            path: rtsp-simple-server.yml
-          name: rtsp-simple-server
-        name: rpi4-config
+      # - configMap:
+      #     #defaultMode: 420
+      #     items:
+      #     - key: STREAMER_CONFIG
+      #       path: rtsp-simple-server.yml
+      #     name: rtsp-simple-server
+      #   name: rpi4-config
