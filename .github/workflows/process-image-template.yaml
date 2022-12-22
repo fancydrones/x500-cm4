@@ -23,8 +23,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      version_tag: ${{ steps.tag.outputs.datetag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -43,7 +41,10 @@ jobs:
 
       - name: Get image date tag
         id: tag
-        run: echo "::set-output name=datetag::$(date +'%Y%m%d')-${GITHUB_SHA::7}"
+        run: |
+          datetag=$(date +'%Y%m%d')-${GITHUB_SHA::7}
+          echo $datetag
+          echo "datetag=$datetag" >> $GITHUB_ENV
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -52,12 +53,12 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ steps.tag.outputs.datetag }}
+            type=raw,value=${{ env.datetag }}
           labels: |
             org.opencontainers.image.title=${{ inputs.app_name }}
             org.opencontainers.image.description=${{ env.IMAGE_VENDOR }} ${{ env.IMAGE_CONTEXT }} ${{ inputs.app_name }}
             org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
-            org.opencontainers.image.version=${{ steps.tag.outputs.datetag }}
+            org.opencontainers.image.version=${{ env.datetag }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
