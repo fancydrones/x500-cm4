@@ -27,6 +27,8 @@ spec:
         name: streamer
         ports:
         - containerPort: 8554
+        - containerPort: 8888
+        - containerPort: 8889
         resources:
           limits:
             cpu: "2"
