@@ -1,4 +1,4 @@
-name: Companion image
+name: Companion image - testing
 
 on:
   # Allows you to run this workflow manually from the Actions tab
