@@ -36,8 +36,8 @@ spec:
           requests:
             cpu: "1"
             memory: 500Mi
-        # securityContext:
-        #   privileged: true
+        securityContext:
+          privileged: true
         volumeMounts:
         - mountPath: /run/udev
           name: udev
