@@ -41,12 +41,12 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-        - mountPath: /
+        - mountPath: /rtsp-simple-server.yml
           name: main-conf
       hostNetwork: true
       volumes:
       - hostPath:
-          path: /run/udev
+          path: /run/udev/
         name: udev
         readOnly: true
       - configMap:
