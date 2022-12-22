@@ -45,13 +45,12 @@ spec:
           name: main-conf
       hostNetwork: true
       volumes:
+      - hostPath:
+          path: /run/udev
+        name: udev
       - configMap:
           items:
           - key: STREAMER_CONFIG
             path: rtsp-simple-server.yml
           name: rpi4-config
         name: main-conf
-      - hostPath:
-          path: /run/udev
-        name: udev
-        #readOnly: true
