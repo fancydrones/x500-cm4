@@ -41,11 +41,13 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
+          readOnly: true
         - mountPath: /dev/shm
           name: temp
         - name: cam-conf
           mountPath: /rtsp-simple-server.yml # This should be your final destination
           subPath: rtsp-simple-server.yml
+          readOnly: true
       hostNetwork: true
       volumes:
       - hostPath:
