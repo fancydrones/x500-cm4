@@ -46,6 +46,9 @@ spec:
         # - mountPath: /rtsp-simple-server.yml
         #   name: rtsp-simple-server
         #   subPath: rtsp-simple-server.yml
+        - name: cam-conf
+          mountPath: /etc/cfg/rtsp-simple-server.yml # This should be your final destination
+          subPath: rtsp-simple-server.yml
       hostNetwork: true
       volumes:
       - hostPath:
@@ -61,3 +64,9 @@ spec:
       #       path: rtsp-simple-server.yml
       #     name: rtsp-simple-server
       #   name: rpi4-config
+      - name: cam-conf # To access this volume, this name must be used inside volumeMounts of the container
+        configMap:
+          name: rpi4-config
+          items:
+            - key: STREAMER_CONFIG  # Name of the item we had used inside our ConfigMap (under data:)
+              path: rtsp-simple-server.yml
