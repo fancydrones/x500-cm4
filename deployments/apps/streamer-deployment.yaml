@@ -48,6 +48,7 @@ spec:
       - hostPath:
           path: /run/udev
         name: udev
+        readOnly: true
       - configMap:
           items:
           - key: STREAMER_CONFIG
