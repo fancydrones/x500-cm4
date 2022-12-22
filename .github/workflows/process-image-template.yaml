@@ -45,7 +45,6 @@ jobs:
         id: tag
         run: |
           datetag=$(date +'%Y%m%d')-${GITHUB_SHA::7}
-          echo $datetag
           echo "datetag=$datetag" >> $GITHUB_ENV
           echo "datetag=$datetag" >> $GITHUB_OUTPUT
       - name: Extract metadata (tags, labels) for Docker
