@@ -35,18 +35,18 @@ defmodule Companion.MixProject do
       #{:mavlink_util, git: "https://github.com/beamuav/elixir_mavlink_util.git"},
       {:phoenix, "~> 1.6.15"},
       {:phoenix_html, "~> 3.2"},
-      {:phoenix_live_reload, "~> 1.3", only: :dev},
+      {:phoenix_live_reload, "~> 1.4", only: :dev},
       {:phoenix_live_view, "~> 0.18.3"},
       {:floki, ">= 0.34.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.7.2"},
-      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.6", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.4"},
       {:httpoison, "~> 1.8"},
       {:plug_cowboy, "~> 2.6"},
-      {:k8s, "~> 1.1.10"}
+      {:k8s, "~> 1.2"}
     ]
   end
 
