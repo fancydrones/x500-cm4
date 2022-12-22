@@ -6,6 +6,9 @@ on:
       app_name:
         required: true
         type: string
+      platforms: # Only for compatability
+        required: false
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
