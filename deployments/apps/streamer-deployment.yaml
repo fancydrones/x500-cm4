@@ -52,4 +52,4 @@ spec:
       - hostPath:
           path: /run/udev
         name: udev
-        readOnly: true
+        #readOnly: true
