@@ -55,6 +55,7 @@ spec:
       - name: temp
         emptyDir: {}
       - name: cam-conf
+        readOnly: true
         configMap:
           name: rpi4-config
           items:
