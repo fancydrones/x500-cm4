@@ -42,8 +42,6 @@ spec:
         - mountPath: /run/udev
           name: udev
         - mountPath: /rtsp-simple-server.yml
-          name: main-conf
-        - mountPath: /rtsp-simple-server.yml
           name: rtsp-simple-server.yml
           subPath: rtsp-simple-server.yml
       hostNetwork: true
