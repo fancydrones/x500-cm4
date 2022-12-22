@@ -41,6 +41,8 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
+        - mountPath: /dev/shm
+          name: temp
         # - mountPath: /rtsp-simple-server.yml
         #   name: rtsp-simple-server
         #   subPath: rtsp-simple-server.yml
@@ -50,6 +52,8 @@ spec:
           path: /run/udev/
         name: udev
         readOnly: true
+      - name: temp
+        emptyDir: {}
       # - configMap:
       #     #defaultMode: 420
       #     items:
