@@ -21,9 +21,14 @@ spec:
     spec:
       containers:
       - env:
-        - name: RTSP_PATHS_CAM_SOURCE
-          value: "rpiCamera"
-        image: aler9/rtsp-simple-server:v0.21.0-rpi
+        - name: CAMERA_PIPELINE0
+          valueFrom:
+            configMapKeyRef:
+              key: STREAMER_CAMERA_PIPELINE0
+              name: rpi4-config
+        - name: VIDEO_PORT
+          value: "8554"
+        image: ghcr.io/fancydrones/x500-cm4/streamer:20221220-dd72a45
         name: streamer
         ports:
         - containerPort: 8554
@@ -39,16 +44,8 @@ spec:
         volumeMounts:
         - mountPath: /run/udev
           name: udev
-        - mountPath: /
-          name: main-conf
       hostNetwork: true
       volumes:
-      - configMap:
-          items:
-          - key: STREAMER_CONFIG
-            path: rtsp-simple-server.yml
-          name: rpi4-config
-        name: main-conf
       - hostPath:
           path: /run/udev
         name: udev
