@@ -1,7 +1,14 @@
-# RPiUAV
-This repository aims at giving step by step instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and can be replaced as this hopefully improves going forward.
+# :helicopter: RPiUAV
 
-# High level
+## :dart: Goal
+
+[Pixhawk](https://pixhawk.org/) and [Dronecode](https://www.dronecode.org/) are very powerful and mature platforms and eco-systems, but they lack the final wrapping to make a complete UAV system. This repository aims at providing this final wrapping, and making it as easy as possible to get started.
+
+## :book: TL;DR
+
+This repository aims at giving step by step instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and might be replaced as this hopefully improves shortly.
+
+# :sunrise_over_mountains: High level
 You build you own UAV using the recommended BOM here, and this repo provides you with software. The idea is to give you a cheap camera sensor in the sky that is not tied into any random eco system, but instead based on open source sortware and relatively cheap hardware (which hopefully also is available to buy). Should you deviate too much from the [recommended BOM](bom.md), you might have to either clone this repo and host everything yourself (which is not too hard to do), or convince the maintainer to include another deployment (which is OK if the setup is not too exotic).
 
 The operator will connect to the UAV using his/hers phone, and the UAV will be connected using LTE. Any direct IP based radio/link can also be used, but a separate configuration will be needed.
