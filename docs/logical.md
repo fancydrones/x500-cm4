@@ -1,4 +1,5 @@
 # Logically
+
 Logically the system looks like this:
 
 ```mermaid

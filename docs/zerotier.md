@@ -1,7 +1,9 @@
 # Configure Zerotier
+
 So the goal of this configuration is to build a new Zerotier Network, and join the UAV and handcontroller to the network. In the process we need to follow a convention for IP addresses for both UAV and handcontroller, to ensure connectivity. Should you decide to deviate from the recommended addresses, you will have to change configurations for MAVLink Router, and Video Streamer. Having said that, it is possible to have more than one UAV in the same network, and control severeal UAVs from the same handcontroller.
 
 ## Steps to build network
+
 - 1. Go to [my.zerotier.com](https://my.zerotier.com/) to log in or sign up for an account. The setup here suggest that this is the only network and only one UAV in the network.
 
 - 2. Click `Create A Network` and click into the network.
@@ -14,17 +16,16 @@ So the goal of this configuration is to build a new Zerotier Network, and join t
 
 When done, the settings should look like the picture below.
 
-![](media/zerotier_network.png)
-
-
+![zerotier network](media/zerotier_network.png)
 
 ## Steps to join UAV
+
 - 1. Make sure you have noted the Network ID from the building of the network.
 
 - 2. Log in to the UAV and type `sudo zerotier-cli join XXXXX` Where XXXXX is the Network ID from above. The response should be `200 join OK`.
 
 - 3. Go back to your network in [my.zerotier.com](https://my.zerotier.com/). Collapse all regions, and expand the `Members` region. You should now have a line looking something like ther picture below. Note the dotted vertical line, which indicates this is a new request from a node to join the network:
-![](media/zerotier_new_member.png)
+![zerotier new member](media/zerotier_new_member.png)
 
 - 4. The next step is to approve the node. Tick the box under `Auth?`, and a few moments later the vertical line should turn solid and green
 
@@ -36,10 +37,10 @@ When done, the settings should look like the picture below.
 
 The page should now show like this:
 
-![](media/zerotier_uav.png)
-
+![zerotier uav](media/zerotier_uav.png)
 
 ## Steps to join handcontroller
+
 - 1. Make sure you have noted the Network ID from the building of the network.
 
 - 2. Make sure the phone is an Android device, as QGroundcontrol is very outdated on iOS. Search for and install the app called `ZeroTier One` in the `Play Store`. And then start the app.
@@ -56,8 +57,9 @@ The page should now show like this:
 
 When done the portal should look something like this:
 
-![](media/zerotier_gcs.png)
+![zerotier gcs](media/zerotier_gcs.png)
 
 
 ## Verify
+
 Go to the UAV console and type `ip a`. A network starting with the letter `z` should be listed, with the address `10.10.10.2`. Next type `ping 10.10.10.70` to verify you can connect from UAV to the handcontroller. The response should give you how long time the ping took (Ctrl+C to stop).

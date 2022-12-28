@@ -1,9 +1,11 @@
 # Install Operating System
+
 Currently we will be using the original [Raspberry Pi OS (64 bits version)](https://www.raspberrypi.com/software/). In the future we might switch to [DietPi](https://dietpi.com/), for a simpler installation process.
 
 You will need to have an SD card reader, and a possibility to connect to the Raspberry Pi, and finally a way for the Raspberry Pi to connect to the internet (USB 4G dongle is OK). As for connecting to the RPi you can use a monitor plus keyboard, of connect to the RPi using SSH.
 
 The steps are:
+
 - 1. Download and install Raspberry Pi Imager for your computer (different instructions based on you OS). [General instructions can be found here.](https://www.raspberrypi.com/software/) If you are experienced in this field, it is of course OK to download image directly, and use Balena Etcher or Rufus to flash the SD card. The simplest solution is, however, to use [Raspberry Pi Imager](https://www.raspberrypi.com/software/), which is what the following instructions will be based on.
 
 - 2. With an SD card reader plugged into you computer, insert the SD card.
@@ -13,7 +15,7 @@ The steps are:
 - 4. __DO NOT CLICK WRITE YET!!!__
 
 - 5. Click on the Gear icon down to the right, and fill out the fields as shown in the image below. For added security you should always default to using SSH-keys. If this is impossible to you, or you prefer a password approach, then select `Use password authentication` instead. Set the username and password for you. And also set the WiFi details, if you are planning to connect to Wifi.
-![](media/install_os.png)
+![install os](media/install_os.png)
 
 - 6. Press `WRITE`, and then confirm (and you password, if needed). Wait for the flashing to complete.
 
