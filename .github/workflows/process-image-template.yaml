@@ -28,6 +28,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Cache build
+        id: cache-elixir-build
+        uses: actions/cache@v3
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-elixir-build
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
         with:
