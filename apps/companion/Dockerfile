@@ -4,7 +4,8 @@ FROM elixir:1.14.2 as build
 
 # install build dependencies
 #RUN apk update && apk add --no-cache build-base git linux-headers
-RUN apt update && apt install -y build-essential git linux-headers
+RUN apt-get update -y && apt-get install -y build-essential git \
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
 WORKDIR /app
