@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: metrics-rb
+  namespace: rpiuav
+subjects:
+- kind: ServiceAccount
+  name: rpimodifier
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: metrics-role
+  apiGroup: ""
