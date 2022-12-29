@@ -15,4 +15,3 @@ jobs:
     with:
       app_name: announcer
       platforms: linux/arm64
-    secrets: inherit

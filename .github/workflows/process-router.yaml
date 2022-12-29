@@ -15,4 +15,3 @@ jobs:
     with:
       app_name: router
       platforms: linux/arm64
-    secrets: inherit

@@ -1,4 +1,4 @@
-name: Companion image
+name: Companion image - testing
 
 on:
   push:
@@ -11,8 +11,7 @@ on:
   
 jobs:
   process-image:
-    uses: ./.github/workflows/process-image-aws-template.yaml
+    uses: ./.github/workflows/process-image-template.yaml
     with:
       app_name: companion
       platforms: linux/arm64
-    secrets: inherit
