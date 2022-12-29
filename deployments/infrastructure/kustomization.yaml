@@ -4,5 +4,5 @@ resources:
 - modifier-service-account.yaml
 - modify-and-restart-role.yaml
 - modifier-role-binding.yaml
-#- metrics-role.yaml
-#- metrics-rb.yaml
+- metrics-role.yaml
+- metrics-rb.yaml
