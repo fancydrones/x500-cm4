@@ -17,7 +17,7 @@
             <li><%= live_redirect "Overview", to: Routes.live_path(@conn, CompanionWeb.OverviewLive) %></li>
             <li><%= live_redirect "Config", to: Routes.live_path(@conn, CompanionWeb.ConfigLive) %></li>
 
-            <li><a href="https://github.com/fancydrones/x500-cm4" target="_blank">RPiUAV documentation</a></li>
+            <li><a href="https://fancydrones.github.io/x500-cm4/" target="_blank">Documentation</a></li>
             <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
               <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
             <% end %>
