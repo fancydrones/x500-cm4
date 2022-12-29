@@ -16,9 +16,8 @@
           <ul>
             <li><%= live_redirect "Overview", to: Routes.live_path(@conn, CompanionWeb.OverviewLive) %></li>
             <li><%= live_redirect "Config", to: Routes.live_path(@conn, CompanionWeb.ConfigLive) %></li>
-
+            <li><a href="http://10.10.10.2:8888/cam/" target="_blank">Camera</a></li>
             <li><a href="https://fancydrones.github.io/x500-cm4/" target="_blank">Documentation</a></li>
-            <li><a href="10.10.10.2:8888/cam/" target="_blank">Camera preview</a></li>
             <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
               <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
             <% end %>
