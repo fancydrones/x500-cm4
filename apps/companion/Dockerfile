@@ -4,12 +4,14 @@
 #   - https://hub.docker.com/_/alpine?tab=tags&page=1&name=3.17.0 - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.14.2-erlang-25.2-alpine-3.17.0
-
 ARG ELIXIR_VERSION=1.14.2
 ARG OTP_VERSION=25.2
 ARG ALPINE_VERSION=3.17.0
 
-FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION} as build
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION}"
+ARG RUNNER_IMAGE="alpine:${ALPINE_VERSION}"
+
+FROM ${BUILDER_IMAGE} as build
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
@@ -64,7 +66,9 @@ RUN mix release
 
 
 # prepare release image
-FROM alpine:${ALPINE_VERSION} AS app
+FROM ${RUNNER_IMAGE} AS app
+# set runner ENV
+ENV MIX_ENV="prod"
 RUN apk update && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc libssl1.1
 WORKDIR /app
 RUN chown nobody:nobody /app
