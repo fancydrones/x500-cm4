@@ -8,6 +8,10 @@
 
 This repository aims at giving step by step instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and might be replaced as this hopefully improves shortly.
 
+## :warning: What this repo is not
+
+This repo is not a [Lego](https://www.lego.com) or [Ikea](https://www.ikea.com/) style documentation, holding your hand every step of the way. This is a noble goal to have, to get the documentation up to that level. This might happen one day, but I am sorry to report that today is not that day. :sweat_smile:
+
 ## :compass: High level
 
 You build you own UAV using the recommended BOM here, and this repo provides you with software. The idea is to give you a cheap camera sensor in the sky that is not tied into any random eco system, but instead based on open source sortware and relatively cheap hardware (which hopefully also is available to buy). Should you deviate too much from the [recommended BOM](bom.md), you might have to either clone this repo and host everything yourself (which is not too hard to do), or convince the maintainer to include another deployment (which is OK if the setup is not too exotic).
