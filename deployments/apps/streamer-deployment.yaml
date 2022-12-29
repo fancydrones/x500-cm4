@@ -1,3 +1,5 @@
+# Find latest image here: https://hub.docker.com/r/aler9/rtsp-simple-server/tags?page=1&name=rpi
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:

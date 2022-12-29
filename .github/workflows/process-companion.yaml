@@ -1,4 +1,4 @@
-name: Companion image - testing
+name: Companion image
 
 on:
   push:
