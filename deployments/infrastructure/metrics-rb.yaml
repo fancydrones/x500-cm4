@@ -8,6 +8,6 @@ subjects:
   name: rpimodifier
   apiGroup: ""
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: metrics-role
   apiGroup: ""
