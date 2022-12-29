@@ -59,7 +59,7 @@ defmodule CompanionWeb.OverviewLive do
   def render(assigns) do
     ~H"""
       <section class="phx-hero">
-        <h1>Apps:</h1>
+        <h1>Apps currently deployed:</h1>
         <div class="cards">
           <%= if length(@deployments) > 0 do %>
             <%= for deployment <- @deployments do %>
