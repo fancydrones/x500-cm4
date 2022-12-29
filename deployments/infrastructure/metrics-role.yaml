@@ -3,6 +3,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: metrics-role
 rules:
-- apiGroups: ["", "metrics.k8s.io"]
+- apiGroups: ["metrics.k8s.io"]
   resources: ["nodes", "pods"]
   verbs: ["get", "list", "watch"]
