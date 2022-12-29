@@ -3,7 +3,8 @@
 FROM elixir:1.14.2 as build
 
 # install build dependencies
-RUN apk update && apk add --no-cache build-base git linux-headers
+#RUN apk update && apk add --no-cache build-base git linux-headers
+RUN apt update && apt install -y --no-cache build-base git linux-headers
 
 # prepare build dir
 WORKDIR /app
