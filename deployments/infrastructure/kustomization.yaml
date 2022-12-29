@@ -5,4 +5,4 @@ resources:
 - modify-and-restart-role.yaml
 - modifier-role-binding.yaml
 - metrics-role.yaml
-- metrics-rb.yaml
+#- metrics-rb.yaml
