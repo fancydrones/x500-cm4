@@ -16,3 +16,10 @@
 | Charger - for 4S                    | Elefun        | NOK 895    | [Link](https://www.elefun.no/p/prod.aspx?v=46578)                                                                            |
 | Security bag - for battery          | Elefun        | NOK 149    | [Link](https://www.elefun.no/p/prod.aspx?v=29944)                                                                            |
 | Cables (2x) - for battery           | Elefun        | NOK 69     | [Link](https://www.elefun.no/p/prod.aspx?v=51154)                                                                            |
+
+## Camera Gimbal
+
+| Component                   | Vendor  | Price     | Link                                                                                               |
+| ---                         | ---     | ---       | ---                                                                                                |
+| BaseCam SBGC32Tiny (rev. C) | Basecam | EUR 204   | [Link](https://shop.basecamelectronics.com/product/simplebgc-32bit-tiny-i2c-2-imu-set-revision-c/) |
+| T-Motor GB2208 (x2)         | 3DXR    | GBP 21,58 | [Link](https://www.3dxr.co.uk/camera-fpv-c57/gimbals-c214/t-motor-gb2208-gimbal-motor-p3234)       |
