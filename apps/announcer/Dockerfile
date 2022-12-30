@@ -17,7 +17,7 @@ RUN apk update && apk add --no-cache gcc \
         &&  rm -rf /var/cache/apk/*
 
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --upgrade -r requirements-1.txt
+RUN pip install --no-cache-dir --upgrade --target=/src/dependencies -r requirements-1.txt
 
 FROM python:3-alpine
 WORKDIR /src
