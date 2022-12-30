@@ -3,6 +3,7 @@ site_name: Fancydrones X500 RPi4
 site_url: https://fancydrones.github.io/x500-cm4/
 site_author: Fancydrones // Roy Veshovda
 site_dir: _site
+edit_uri: 'blob/main/docs/'
 
 # Repository
 repo_url: https://github.com/fancydrones/x500-cm4
