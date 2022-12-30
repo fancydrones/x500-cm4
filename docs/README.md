@@ -24,7 +24,7 @@ The operator will connect to the UAV using his/hers phone, and the UAV will be c
 
 The UAV should look something like this:
 
-![uav](media/uav_4.jpeg)
+![uav](media/uav_2.png)
 
 And the handcontroller like this:
 
