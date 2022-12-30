@@ -4,7 +4,7 @@ The different components are connected like this:
 
 ```mermaid
 flowchart TD
-    PIX[Pixhawk] ---|Ethernet| RPI(Raspberry Pi)
+    PIX[Pixhawk] ---|Ethernet or UART| RPI(Raspberry Pi)
     RPI --- C(Camera)
     PIX --- GPS[GPS]
     PIX --- |pwm| D[Gimbal Controller]
