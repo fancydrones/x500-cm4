@@ -46,7 +46,7 @@ The setup is built on the foundation of [Dronecode Foundation](https://www.drone
 
 ## :gear: Other major components
 
-For onboard computer the setup is build around [Raspberry Pi 4 (Model B, min 4GB recommended)](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) and the [Raspberry Pi HQ Camera](https://www.raspberrypi.com/products/raspberry-pi-high-quality-camera/) ([or v2](https://www.raspberrypi.com/products/camera-module-v2/)). For communication we are using LTE and [Zerotier](https://www.zerotier.com/) for "VPN" like connectivity. [Zerotier is free for up to 25 nodes](https://www.zerotier.com/pricing/), and resonably priced above that.
+For onboard computer the setup is build around [Raspberry Pi Compute Module 4](https://www.raspberrypi.com/products/compute-module-4) and the [Raspberry Pi HQ Camera](https://www.raspberrypi.com/products/raspberry-pi-high-quality-camera/) ([or v2](https://www.raspberrypi.com/products/camera-module-v2/)). For communication we are using LTE and [Zerotier](https://www.zerotier.com/) for "VPN" like connectivity. [Zerotier is free for up to 25 nodes](https://www.zerotier.com/pricing/), and resonably priced above that.
 
 ## :computer: Companion computer
 
