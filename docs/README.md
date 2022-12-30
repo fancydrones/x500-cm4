@@ -6,7 +6,15 @@
 
 ## :book: TL;DR
 
-This repository aims at giving instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and might be replaced as this hopefully improves shortly.
+This repository aims at giving instructs from zero to a fully operational UAV connected using a mobile phone and 4G/5G, by using available (ish) components and software. Some of the components selected are affected by the chip shortage (2022), and might be replaced as this hopefully improves shortly. This repository should make it easy to get up and running with a complete camera drone, and to keep it up to date at all time.
+
+## :rocket: Motivation
+
+Main motivations for this repo:
+
+- Bring all the pieces together to make a complete system.
+- Make it as easy as possible to get started.
+- Make it easy to keep the system up to date.
 
 ## :rotating_light: Disclaimer
 
