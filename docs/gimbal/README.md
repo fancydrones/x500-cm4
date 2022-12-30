@@ -27,6 +27,6 @@ Pixhawk has defined a [standard for payloads](https://pixhawk.org/standards/#pay
 
 ## Example
 
-Fully assemmbeled gimbal:
+Fully (almost) assembled gimbal:
 
-TODO: Add image
+![Fully assembled gimbal](assembeled-gimbal.png)
