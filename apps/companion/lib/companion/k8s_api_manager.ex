@@ -3,6 +3,7 @@ defmodule Companion.K8sApiManager do
 
   @default_namespace "rpiuav"
   @default_configmap "rpi4-config"
+  @metrics_interval 60000
 
   require Logger
 
@@ -17,6 +18,9 @@ defmodule Companion.K8sApiManager do
     {reference_deployments, deployments} = start_watch_deployments(conn, namespace)
     {reference_configs, configs} = start_watch_configs(conn, namespace)
 
+    node_metrics = start_simple_watch_node_metrics(conn)
+    pod_metrics = start_simple_watch_pod_metrics(conn, namespace)
+
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
     Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
 
@@ -26,7 +30,9 @@ defmodule Companion.K8sApiManager do
         watch_deployments_id: reference_deployments,
         watch_configs_id: reference_configs,
         deployments: deployments,
-        configs: configs
+        configs: configs,
+        node_metrics: node_metrics,
+        pod_metrics: pod_metrics
       }
     {:ok, state}
   end
@@ -46,6 +52,30 @@ defmodule Companion.K8sApiManager do
     {resource_version, deployments}
   end
 
+  defp start_simple_watch_node_metrics(connection) do
+    Process.send_after(self(), {:publish_node_metrics}, 2000)
+    get_node_metrics(connection)
+  end
+
+  defp start_simple_watch_pod_metrics(connection, namespace) do
+    Process.send_after(self(), {:publish_pod_metrics}, 2000)
+    get_pod_metrics(connection, namespace)
+  end
+
+  defp get_node_metrics(connection) do
+    operation = K8s.Client.list("metrics.k8s.io/v1beta1", "nodes")
+
+    {:ok, node_metrics_result} = K8s.Client.run(connection, operation)
+    Enum.map(node_metrics_result["items"], fn node_metric -> extract_node_metric_details(node_metric) end)
+  end
+
+  defp get_pod_metrics(connection, namespace) do
+    operation = K8s.Client.list("metrics.k8s.io/v1beta1", "pods", [namespace: namespace])
+
+    {:ok, pod_metrics_result} = K8s.Client.run(connection, operation)
+    Enum.map(pod_metrics_result["items"], fn pod_metric -> extract_pod_metric_details(pod_metric) end)
+  end
+
   defp extract_deloyment_details(deployment) do
     name = get_name_from_deployment(deployment)
     image_version = get_image_version_from_deployment(deployment)
@@ -62,6 +92,50 @@ defmodule Companion.K8sApiManager do
       image_version: image_version,
       replicas_from_spec: replicas_from_spec,
       ready_replicas: ready_replicas
+    }
+  end
+
+  defp extract_node_metric_details(node_metrics) do
+    Logger.debug(inspect(node_metrics), tag: "Node Metrics")
+    name = node_metrics["metadata"]["name"]
+    timestamp = node_metrics["timestamp"]
+    cpu = node_metrics["usage"]["cpu"]
+    memory = node_metrics["usage"]["memory"]
+    %{
+      name: name,
+      timestamp: timestamp,
+      cpu: cpu,
+      memory: memory
+    }
+  end
+
+  defp extract_pod_metric_details(pod_metrics) do
+    name = pod_metrics["metadata"]["name"]
+    namespace = pod_metrics["metadata"]["namespace"]
+    timestamp = pod_metrics["timestamp"]
+    containers = extract_all_container_metrics_for_pod(pod_metrics)
+
+    %{
+      name: name,
+      namespace: namespace,
+      timestamp: timestamp,
+      containers: containers
+    }
+  end
+
+  defp extract_all_container_metrics_for_pod(pod_metrics) do
+    pod_metrics["containers"]
+    |> Enum.map(fn container -> extract_container_metric_details(container) end)
+  end
+
+  defp extract_container_metric_details(container) do
+    name = container["name"]
+    cpu = container["usage"]["cpu"]
+    memory = container["usage"]["memory"]
+    %{
+      name: name,
+      cpu: cpu,
+      memory: memory
     }
   end
 
@@ -114,6 +188,14 @@ defmodule Companion.K8sApiManager do
     GenServer.cast(__MODULE__, :request_configs)
   end
 
+  def request_node_metrics() do
+    GenServer.cast(__MODULE__, :request_node_metrics)
+  end
+
+  def request_pod_metrics() do
+    GenServer.cast(__MODULE__, :request_pod_metrics)
+  end
+
   def handle_cast({:update_config, key, value}, %{connection: conn, namespace: namespace} = state) do
     Logger.info("Updating config : key: #{key} : value: #{value}")
     body = %{data: %{key => value}}
@@ -139,6 +221,16 @@ defmodule Companion.K8sApiManager do
 
   def handle_cast(:request_configs, %{configs: configs} = state) do
     Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
+    {:noreply, state}
+  end
+
+  def handle_cast(:request_node_metrics, %{node_metrics: node_metrics} = state) do
+    Phoenix.PubSub.broadcast(Companion.PubSub, "node_metrics_updates", {:node_metrics, node_metrics})
+    {:noreply, state}
+  end
+
+  def handle_cast(:request_pod_metrics, %{pod_metrics: pod_metrics} = state) do
+    Phoenix.PubSub.broadcast(Companion.PubSub, "pod_metrics_updates", {:pod_metrics, pod_metrics})
     {:noreply, state}
   end
 
@@ -212,6 +304,20 @@ defmodule Companion.K8sApiManager do
 
     state = %{state | watch_configs_id: reference, configs: configs}
 
+    {:noreply, state}
+  end
+
+  def handle_info({:publish_node_metrics}, %{connection: conn} = state) do
+    node_metrics = get_node_metrics(conn)
+    Phoenix.PubSub.broadcast(Companion.PubSub, "node_metrics_updates", {:node_metrics, node_metrics})
+    Process.send_after(self(), {:publish_node_metrics}, @metrics_interval)
+    {:noreply, state}
+  end
+
+  def handle_info({:publish_pod_metrics}, %{connection: conn, namespace: namespace} = state) do
+    pod_metrics = get_pod_metrics(conn, namespace)
+    Phoenix.PubSub.broadcast(Companion.PubSub, "pod_metrics_updates", {:pod_metrics, pod_metrics})
+    Process.send_after(self(), {:publish_pod_metrics}, @metrics_interval)
     {:noreply, state}
   end
 

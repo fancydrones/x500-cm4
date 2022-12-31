@@ -19,5 +19,11 @@ defmodule Companion.K8sManager do
     get_api_manager().request_configs()
   end
 
+  def request_node_metrics() do
+    get_api_manager().request_node_metrics()
+  end
 
+  def request_pod_metrics() do
+    get_api_manager().request_pod_metrics()
+  end
 end

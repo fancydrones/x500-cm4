@@ -8,7 +8,11 @@ defmodule CompanionWeb.OverviewLive do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Phoenix.PubSub.subscribe(Companion.PubSub, "deployment_updates")
+      Phoenix.PubSub.subscribe(Companion.PubSub, "node_metrics_updates")
+      Phoenix.PubSub.subscribe(Companion.PubSub, "pod_metrics_updates")
       Companion.K8sManager.request_deployments()
+      Companion.K8sManager.request_node_metrics()
+      Companion.K8sManager.request_pod_metrics()
     end
 
     socket =
@@ -32,6 +36,18 @@ defmodule CompanionWeb.OverviewLive do
     socket =
       socket
       |> assign(deployments: convert_deployments(deployments))
+    {:noreply, socket}
+  end
+
+  def handle_info({:node_metrics, node_metrics}, socket) do
+    Logger.debug("Web got node metrics: #{inspect(node_metrics)}")
+    # TODO: Implement
+    {:noreply, socket}
+  end
+
+  def handle_info({:pod_metrics, pod_metrics}, socket) do
+    Logger.debug("Web got pod metrics: #{inspect(pod_metrics)}")
+    # TODO: Implement
     {:noreply, socket}
   end
 

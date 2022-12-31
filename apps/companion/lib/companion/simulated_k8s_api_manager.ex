@@ -2,6 +2,7 @@ defmodule Companion.SimulatedK8sApiManager do
   use GenServer
 
   @namespace "rpiuav"
+  @metrics_interval 5000
 
   require Logger
 
@@ -12,11 +13,16 @@ defmodule Companion.SimulatedK8sApiManager do
   def init(_) do
     deployments = get_fake_initial_deployments()
     configs = get_fake_configs()
+    node_metrics = get_fake_node_metrics()
+    pod_metrics = get_fake_pod_metrics()
 
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
     Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
 
-    state = %{namespace: @namespace, deployments: deployments, configs: configs}
+    start_simple_watch_node_metrics()
+    start_simple_watch_pod_metrics()
+
+    state = %{namespace: @namespace, deployments: deployments, configs: configs, node_metrics: node_metrics, pod_metrics: pod_metrics}
     {:ok, state}
   end
 
@@ -34,6 +40,22 @@ defmodule Companion.SimulatedK8sApiManager do
 
   def request_configs() do
     GenServer.cast(__MODULE__, :request_configs)
+  end
+
+  def request_node_metrics() do
+    GenServer.cast(__MODULE__, :request_node_metrics)
+  end
+
+  def request_pod_metrics() do
+    GenServer.cast(__MODULE__, :request_pod_metrics)
+  end
+
+  defp start_simple_watch_node_metrics() do
+    Process.send_after(self(), {:publish_node_metrics}, 1000)
+  end
+
+  defp start_simple_watch_pod_metrics() do
+    Process.send_after(self(), {:publish_pod_metrics}, 2000)
   end
 
   def handle_cast({:update_config, key, value}, %{configs: configs} = state) do
@@ -66,12 +88,20 @@ defmodule Companion.SimulatedK8sApiManager do
     {:noreply, state}
   end
 
+  def handle_cast(:request_node_metrics, %{node_metrics: node_metrics} = state) do
+    Phoenix.PubSub.broadcast(Companion.PubSub, "node_metrics_updates", {:node_metrics, node_metrics})
+    {:noreply, state}
+  end
+
+  def handle_cast(:request_pod_metrics, %{pod_metrics: pod_metrics} = state) do
+    Phoenix.PubSub.broadcast(Companion.PubSub, "pod_metrics_updates", {:pod_metrics, pod_metrics})
+    {:noreply, state}
+  end
+
   def handle_cast(:request_configs, %{configs: configs} = state) do
     Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
     {:noreply, state}
   end
-
-
 
   def handle_info({:enable_deployment, deployment_name}, %{deployments: deployments} = state) do
     deployments =
@@ -81,6 +111,73 @@ defmodule Companion.SimulatedK8sApiManager do
     Phoenix.PubSub.broadcast(Companion.PubSub, "deployment_updates", {:deployments, deployments})
 
     {:noreply, %{state | deployments: deployments}}
+  end
+
+  def handle_info({:publish_node_metrics}, state) do
+    node_metrics = get_fake_node_metrics()
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "node_metrics_updates", {:node_metrics, node_metrics})
+
+    Process.send_after(self(), {:publish_node_metrics}, @metrics_interval)
+
+    {:noreply, state}
+  end
+
+  def handle_info({:publish_pod_metrics}, state) do
+    pod_metrics = get_fake_pod_metrics()
+
+    Phoenix.PubSub.broadcast(Companion.PubSub, "pod_metrics_updates", {:pod_metrics, pod_metrics})
+
+    Process.send_after(self(), {:publish_pod_metrics}, @metrics_interval)
+
+    {:noreply, state}
+  end
+
+  defp get_fake_node_metrics() do
+    [
+      %{
+        cpu: "696272799n",
+        memory: "1242600Ki",
+        name: "rpiuav",
+        timestamp: "2022-12-31T10:53:39Z"
+      }
+    ]
+  end
+
+  defp get_fake_pod_metrics() do
+    [
+      %{
+        containers: [
+          %{cpu: "6104966n", memory: "27796Ki", name: "announcer"}
+        ],
+        name: "announcer-86bbdb5777-rdxrl",
+        namespace: "rpiuav",
+        timestamp: "2022-12-31T10:53:39Z"
+      },
+      %{
+        containers: [
+          %{cpu: "2270820n", memory: "98132Ki", name: "companion"}
+        ],
+        name: "companion-7898757d4c-tfrff",
+        namespace: "rpiuav",
+        timestamp: "2022-12-31T10:53:38Z"
+      },
+      %{
+        containers: [
+          %{cpu: "12261355n", memory: "620Ki", name: "router"}
+        ],
+        name: "router-6bf49fbc67-92w7s",
+        namespace: "rpiuav", timestamp: "2022-12-31T10:53:41Z"
+      },
+      %{
+        containers: [
+          %{cpu: "147128484n", memory: "15208Ki", name: "streamer"}
+        ],
+        name: "streamer-7db957864f-bqlnf",
+        namespace: "rpiuav",
+        timestamp: "2022-12-31T10:53:40Z"
+      }
+    ]
   end
 
   defp get_fake_initial_deployments() do
@@ -169,8 +266,16 @@ defmodule Companion.SimulatedK8sApiManager do
             """
       },
       %{
-        key: "STREAMER_CAMERA_PIPELINE0",
-        value: "libcamerasrc ! video/x-raw,width=1280,height=720,format=NV12,colorimetry=bt601,interlace-mode=progressive ! videoflip video-direction=180 ! videorate ! video/x-raw,framerate=30/1 ! v4l2convert ! v4l2h264enc output-io-mode=2 extra-controls=\"controls,repeat_sequence_header=1,video_bitrate_mode=1,h264_profile=3,video_bitrate=3000000\" ! video/x-h264,profile=main,level=(string)4 ! queue max-size-buffers=1 name=q_enc ! h264parse ! rtph264pay config-interval=1 name=pay0 pt=96"
+        key: "STREAMER_CONFIG",
+        value: """
+                paths:
+                  cam:
+                    source: rpiCamera
+                    rpiCameraWidth: 1280
+                    rpiCameraHeight: 720
+                    rpiCameraVFlip: true
+                    rpiCameraHFlip: true
+                """
       }
     ]
   end
