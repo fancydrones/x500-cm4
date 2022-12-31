@@ -25,7 +25,7 @@ COPY *.py ./
 COPY requirements-2.txt requirements-2.txt
 COPY --from=pythonBuilder /src .
 ENV PYTHONPATH="${PYTHONPATH}:/src/dependencies"
-RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir --upgrade -r requirements-2.txt
 
 ENV MAVLINK20=1
