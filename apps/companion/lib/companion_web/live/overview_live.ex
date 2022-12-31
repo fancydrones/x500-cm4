@@ -17,7 +17,7 @@ defmodule CompanionWeb.OverviewLive do
 
     socket =
       socket
-      |> assign(deployments: [])
+      |> assign(deployments: [], nodes: [])
     {:ok, socket}
   end
 
@@ -41,7 +41,9 @@ defmodule CompanionWeb.OverviewLive do
 
   def handle_info({:node_metrics, node_metrics}, socket) do
     Logger.debug("Web got node metrics: #{inspect(node_metrics)}")
-    # TODO: Implement
+    socket =
+      socket
+      |> assign(nodes: convert_node(node_metrics))
     {:noreply, socket}
   end
 
@@ -49,6 +51,56 @@ defmodule CompanionWeb.OverviewLive do
     Logger.debug("Web got pod metrics: #{inspect(pod_metrics)}")
     # TODO: Implement
     {:noreply, socket}
+  end
+
+  defp convert_node(node_metrics) do
+    Enum.map(node_metrics, fn n -> %{
+          name: n.name,
+          cpu: scale_cpu(n.cpu),
+          memory: scale_memory(n.memory),
+          timestamp: n.timestamp
+        }
+      end)
+    |> Enum.sort_by(fn d -> d.name end)
+  end
+
+  defp scale_cpu(cpu) do
+    l = String.length(cpu)
+    {cpu, unit} = String.split_at(cpu, l - 1)
+    String.to_integer(cpu) * get_unit_muliplier(unit) |> Float.round(2) |> to_string()
+  end
+
+  defp scale_memory(memory) do
+    l = String.length(memory)
+    {memory, unit} = String.split_at(memory, l - 2)
+    print_unit = "Gi"
+    value = String.to_integer(memory) * get_unit_muliplier(unit) / get_unit_muliplier(print_unit) |> Float.round(2) |> to_string()
+    value <> print_unit
+  end
+
+  defp get_unit_muliplier(unit) do
+    case unit do
+      "n" -> 0.000000001
+      "u" -> 0.000001
+      "m" -> 0.001
+      "k" -> 1000
+      "M" -> 1000000
+      "G" -> 1000000000
+      "T" -> 1000000000000
+      "P" -> 1000000000000000
+      "E" -> 1000000000000000000
+      "Z" -> 1000000000000000000000
+      "Y" -> 1000000000000000000000000
+      "Ki" -> 1024
+      "Mi" -> 1048576
+      "Gi" -> 1073741824
+      "Ti" -> 1099511627776
+      "Pi" -> 1125899906842624
+      "Ei" -> 1152921504606846976
+      "Zi" -> 1180591620717411303424
+      "Yi" -> 1208925819614629174706176
+      _ -> 1
+    end
   end
 
   defp convert_deployments(deployments) do
@@ -87,11 +139,32 @@ defmodule CompanionWeb.OverviewLive do
                   <p class="card-paragraph"> Version: <%= deployment.image_version %> </p>
                   <p class="card-paragraph"> Replicas: <%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %> </p>
                 </div>
-                  <button class="card-button" phx-click="restart_app" phx-value-app={deployment.name} >Restart</button>
+                <button class="card-button" phx-click="restart_app" phx-value-app={deployment.name} >Restart</button>
               </article>
             <% end %>
           <% else %>
             <h3>No apps found</h3>
+          <% end %>
+        </div>
+      </section>
+      <section class="phx-hero">
+        <h1>Nodes:</h1>
+        <div class="cards">
+          <%= if length(@nodes) > 0 do %>
+            <%= for node <- @nodes do %>
+              <article class="card" style="background-color: blue;">
+                <header>
+                    <h2><%= node.name %></h2>
+                </header>
+                <div class="content" style="color: white;">
+                  <p class="card-paragraph"> CPU: <%= node.cpu %> </p>
+                  <p class="card-paragraph"> Memory: <%= node.memory %> </p>
+                  <p class="card-paragraph" style="font-size: small;">(<%= node.timestamp %>)</p>
+                </div>
+              </article>
+            <% end %>
+          <% else %>
+            <h3>No nodes found</h3>
           <% end %>
         </div>
       </section>
