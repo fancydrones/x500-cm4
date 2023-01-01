@@ -80,6 +80,7 @@ defmodule Companion.K8sApiManager do
     name = get_name_from_deployment(deployment)
     image_version = get_image_version_from_deployment(deployment)
     replicas_from_spec= deployment["spec"]["replicas"]
+    selector = deployment["spec"]["selector"]["matchLabels"]
 
     status = deployment["status"]
     ready_replicas =
@@ -91,7 +92,8 @@ defmodule Companion.K8sApiManager do
       name: name,
       image_version: image_version,
       replicas_from_spec: replicas_from_spec,
-      ready_replicas: ready_replicas
+      ready_replicas: ready_replicas,
+      selector: selector
     }
   end
 
@@ -114,12 +116,14 @@ defmodule Companion.K8sApiManager do
     namespace = pod_metrics["metadata"]["namespace"]
     timestamp = pod_metrics["timestamp"]
     containers = extract_all_container_metrics_for_pod(pod_metrics)
+    labels = pod_metrics["metadata"]["labels"]
 
     %{
       name: name,
       namespace: namespace,
       timestamp: timestamp,
-      containers: containers
+      containers: containers,
+      labels: labels
     }
   end
 

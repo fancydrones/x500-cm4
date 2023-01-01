@@ -109,7 +109,8 @@ defmodule CompanionWeb.OverviewLive do
           image_version: d.image_version,
           replicas_from_spec: d.replicas_from_spec,
           ready_replicas: d.ready_replicas,
-          backgrond_color: get_color_from_count(d.ready_replicas, d.replicas_from_spec)
+          backgrond_color: get_color_from_count(d.ready_replicas, d.replicas_from_spec),
+          selector: d.selectornmkjh
         }
       end)
     |> Enum.sort_by(fn d -> d.name end)

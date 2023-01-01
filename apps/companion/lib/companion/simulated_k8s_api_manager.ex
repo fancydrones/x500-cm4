@@ -152,7 +152,8 @@ defmodule Companion.SimulatedK8sApiManager do
         ],
         name: "announcer-86bbdb5777-rdxrl",
         namespace: "rpiuav",
-        timestamp: "2022-12-31T10:53:39Z"
+        timestamp: "2022-12-31T10:53:39Z",
+        labels: %{"app" => "announcer-replicaset"}
       },
       %{
         containers: [
@@ -160,14 +161,16 @@ defmodule Companion.SimulatedK8sApiManager do
         ],
         name: "companion-7898757d4c-tfrff",
         namespace: "rpiuav",
-        timestamp: "2022-12-31T10:53:38Z"
+        timestamp: "2022-12-31T10:53:38Z",
+        labels: %{"app" => "companion-replicaset"}
       },
       %{
         containers: [
           %{cpu: "12261355n", memory: "620Ki", name: "router"}
         ],
         name: "router-6bf49fbc67-92w7s",
-        namespace: "rpiuav", timestamp: "2022-12-31T10:53:41Z"
+        namespace: "rpiuav", timestamp: "2022-12-31T10:53:41Z",
+        labels: %{"app" => "router-replicaset"}
       },
       %{
         containers: [
@@ -175,7 +178,8 @@ defmodule Companion.SimulatedK8sApiManager do
         ],
         name: "streamer-7db957864f-bqlnf",
         namespace: "rpiuav",
-        timestamp: "2022-12-31T10:53:40Z"
+        timestamp: "2022-12-31T10:53:40Z",
+        labels: %{"app" => "streamer-replicaset"}
       }
     ]
   end
@@ -186,25 +190,29 @@ defmodule Companion.SimulatedK8sApiManager do
         name: "companion",
         image_version: "20220801.123",
         replicas_from_spec: 1,
-        ready_replicas: 1
+        ready_replicas: 1,
+        selector: %{"app" => "companion-replicaset"}
       },
       %{
         name: "streamer",
         image_version: "20220801.123",
         replicas_from_spec: 1,
-        ready_replicas: 1
+        ready_replicas: 1,
+        selector: %{"app" => "streamer-replicaset"}
       },
       %{
         name: "router",
         image_version: "20220801.123",
         replicas_from_spec: 1,
-        ready_replicas: 1
+        ready_replicas: 1,
+        selector: %{"app" => "router-replicaset"}
       },
       %{
         name: "announcer",
         image_version: "20220801.123",
         replicas_from_spec: 1,
-        ready_replicas: 1
+        ready_replicas: 1,
+        selector: %{"app" => "announcer-replicaset"}
       },
     ]
   end
