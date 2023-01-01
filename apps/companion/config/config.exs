@@ -37,6 +37,8 @@ config :companion,
   file_path: "~/k3s.yaml",
   k8s_api_manager: Companion.K8sApiManager
 
+config :mavlink, dialect: Common, connections: []
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
