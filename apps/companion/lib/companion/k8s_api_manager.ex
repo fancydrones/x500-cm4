@@ -98,7 +98,6 @@ defmodule Companion.K8sApiManager do
   end
 
   defp extract_node_metric_details(node_metrics) do
-    Logger.debug(inspect(node_metrics), tag: "Node Metrics")
     name = node_metrics["metadata"]["name"]
     timestamp = node_metrics["timestamp"]
     cpu = node_metrics["usage"]["cpu"]

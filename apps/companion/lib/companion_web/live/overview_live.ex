@@ -17,7 +17,7 @@ defmodule CompanionWeb.OverviewLive do
 
     socket =
       socket
-      |> assign(deployments: [], nodes: [])
+      |> assign(deployments: [], nodes: [], pods_metrics: [])
     {:ok, socket}
   end
 
@@ -31,26 +31,58 @@ defmodule CompanionWeb.OverviewLive do
   end
 
   @impl true
-  def handle_info({:deployments, deployments}, socket) do
+  def handle_info({:deployments, deployments}, %{assigns: %{pods_metrics: pods_metrics}} = socket) do
     Logger.debug("Web got updated deployments")
+    new_deployments = convert_deployments(deployments)
+    new_deployments = add_metrics_to_deployments(new_deployments, pods_metrics)
+
     socket =
       socket
-      |> assign(deployments: convert_deployments(deployments))
+      |> assign(deployments: new_deployments)
+
     {:noreply, socket}
   end
 
   def handle_info({:node_metrics, node_metrics}, socket) do
-    Logger.debug("Web got node metrics: #{inspect(node_metrics)}")
+    Logger.debug("Web got node metrics")
     socket =
       socket
       |> assign(nodes: convert_node(node_metrics))
     {:noreply, socket}
   end
 
-  def handle_info({:pod_metrics, pod_metrics}, socket) do
-    Logger.debug("Web got pod metrics: #{inspect(pod_metrics)}")
-    # TODO: Implement
+  def handle_info({:pod_metrics, pod_metrics}, %{assigns: %{deployments: deployments}} = socket) do
+    Logger.debug("Web got pod metrics")
+    new_deployments = add_metrics_to_deployments(deployments, pod_metrics)
+
+    socket =
+      socket
+      |> assign(pod_metrics: pod_metrics)
+      |> assign(deployments: new_deployments)
     {:noreply, socket}
+  end
+
+  defp add_metrics_to_deployments([], _pod_metrics), do: []
+  defp add_metrics_to_deployments(deployments, []), do: deployments
+
+  defp add_metrics_to_deployments(deployments, pod_metrics) do
+    deployments
+    |> Enum.map(fn d ->
+      case Enum.find(pod_metrics, fn p -> d.selector["app"] == p.labels["app"] end) do
+        nil -> d
+        p ->
+          case Enum.find(p.containers, fn c -> c.name == d.name end) do
+            nil -> d
+            c ->
+              %{
+                d
+                | cpu: scale_cpu(c.cpu),
+                  memory: scale_memory(c.memory, "Mi"),
+                  timestamp: p.timestamp
+              }
+          end
+      end
+    end)
   end
 
   defp convert_node(node_metrics) do
@@ -67,13 +99,12 @@ defmodule CompanionWeb.OverviewLive do
   defp scale_cpu(cpu) do
     l = String.length(cpu)
     {cpu, unit} = String.split_at(cpu, l - 1)
-    String.to_integer(cpu) * get_unit_muliplier(unit) |> Float.round(2) |> to_string()
+    String.to_integer(cpu) * get_unit_muliplier(unit) |> Float.round(3) |> to_string()
   end
 
-  defp scale_memory(memory) do
+  defp scale_memory(memory, print_unit \\ "Gi") do
     l = String.length(memory)
     {memory, unit} = String.split_at(memory, l - 2)
-    print_unit = "Gi"
     value = String.to_integer(memory) * get_unit_muliplier(unit) / get_unit_muliplier(print_unit) |> Float.round(2) |> to_string()
     value <> print_unit
   end
@@ -110,7 +141,10 @@ defmodule CompanionWeb.OverviewLive do
           replicas_from_spec: d.replicas_from_spec,
           ready_replicas: d.ready_replicas,
           backgrond_color: get_color_from_count(d.ready_replicas, d.replicas_from_spec),
-          selector: d.selectornmkjh
+          selector: d.selector,
+          cpu: "",
+          memory: "",
+          timestamp: ""
         }
       end)
     |> Enum.sort_by(fn d -> d.name end)
@@ -139,6 +173,9 @@ defmodule CompanionWeb.OverviewLive do
                 <div class="content">
                   <p class="card-paragraph"> Version: <%= deployment.image_version %> </p>
                   <p class="card-paragraph"> Replicas: <%= deployment.ready_replicas %>/<%= deployment.replicas_from_spec %> </p>
+                  <p class="card-paragraph"> CPU: <%= deployment.cpu %> </p>
+                  <p class="card-paragraph"> Memory: <%= deployment.memory %> </p>
+                  <p class="card-paragraph" style="font-size: small;">(<%= deployment.timestamp %>)</p>
                 </div>
                 <button class="card-button" phx-click="restart_app" phx-value-app={deployment.name} >Restart</button>
               </article>
