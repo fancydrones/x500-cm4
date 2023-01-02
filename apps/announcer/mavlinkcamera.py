@@ -232,7 +232,7 @@ class MavlinkCameraManager(threading.Thread):
             mavutil.mavlink.MAV_AUTOPILOT_GENERIC,
             0,
             mavutil.mavlink.MAV_STATE_STANDBY,
-            2
+            3
         )
 
     def makestring(self, string, size):
