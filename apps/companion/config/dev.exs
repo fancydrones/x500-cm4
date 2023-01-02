@@ -72,3 +72,7 @@ config :companion,
   file_path: "~/k3s.yaml",
   k8s_api_manager: Companion.SimulatedK8sApiManager # Use this to develop locally without constrains to k8s
   #k8s_api_manager: Companion.K8sApiManager # Use this to develop locally towards actual k8s instance
+
+#config :xmavlink, connections: ["tcpout:10.10.10.2:5760"]
+#config :xmavlink, connections: ["udpin:10.10.10.99:14565"]
+#config :xmavlink, connections: ["udpin:10.10.10.2:14563"]
