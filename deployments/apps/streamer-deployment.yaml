@@ -25,7 +25,7 @@ spec:
       - env:
         - name: RTSP_PATHS_CAM_SOURCE
           value: "rpiCamera"
-        image: aler9/rtsp-simple-server:v0.21.0-rpi
+        image: aler9/rtsp-simple-server:v0.22.2-rpi
         name: streamer
         ports:
         - containerPort: 8554
