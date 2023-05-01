@@ -3,7 +3,7 @@ name: update-flux
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 5 * * 7" # https://crontab.guru/#0_5_*_*_7 - “At 05:00 on Sunday.”
+    - cron: "0 5 * * 0" # https://crontab.guru/#0_5_*_*_0 - “At 05:00 on Sunday.”
 
 permissions:
   contents: write
