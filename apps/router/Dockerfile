@@ -21,7 +21,7 @@ RUN ninja -C build
 # Run stage
 FROM alpine:3
 WORKDIR /mavlink-router
-RUN apk update && apk add --no-cache libstdc++
+RUN apk update && apk upgrade && apk add --no-cache libstdc++
 
 # # Copy binary from builder
 COPY --from=builder /mavlink-router/build/src/mavlink-routerd .
