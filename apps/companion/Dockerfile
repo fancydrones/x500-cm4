@@ -69,7 +69,7 @@ RUN mix release
 FROM ${RUNNER_IMAGE} AS app
 # set runner ENV
 ENV MIX_ENV="prod"
-RUN apk update && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc libssl1.1
+RUN apk update && apk upgrade && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc libssl1.1
 WORKDIR /app
 RUN chown nobody:nobody /app
 USER nobody:nobody

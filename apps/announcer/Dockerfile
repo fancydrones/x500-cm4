@@ -21,6 +21,7 @@ RUN pip install --no-cache-dir --upgrade --target=/src/dependencies -r requireme
 
 FROM python:3-alpine
 WORKDIR /src
+RUN apk update && apk upgrade
 COPY *.py ./
 COPY requirements-2.txt requirements-2.txt
 COPY --from=pythonBuilder /src .
