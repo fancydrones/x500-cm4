@@ -51,7 +51,7 @@ defmodule CompanionWeb.ConfigLive do
         <div class="config-cards-container">
           <%= for config <- @configs do %>
             <div class="config-card">
-              <.form let={f} for={:config} phx-submit="save_config">
+              <.form let={f} for={%{}} as={:config} phx-submit="save_config">
                 <p class="config-key-header"><%= config.key %></p>
                 <div class="config-value-container">
                   <p class="config-original"><%= config.value %></p>
