@@ -5,7 +5,6 @@ metadata:
   name: flux-infra
   namespace: flux-system
 spec:
-  gitImplementation: go-git
   interval: 1m0s
   ref:
     branch: main
