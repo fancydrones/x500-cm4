@@ -5,17 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content={csrf_token_value()}>
-    <%= live_title_tag assigns[:page_title] || "Companion", suffix: " · RPiUAV" %>
-    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
-    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
+    <.live_title suffix=" · Phoenix Framework">
+      <%= assigns[:page_title] || "Companion" %>
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
   </head>
   <body>
     <header>
       <section class="container">
         <nav>
           <ul>
-            <li><%= live_redirect "Overview", to: Routes.live_path(@conn, CompanionWeb.OverviewLive) %></li>
-            <li><%= live_redirect "Config", to: Routes.live_path(@conn, CompanionWeb.ConfigLive) %></li>
+            <li><.link href={~p"/"}>Overview</.link></li>
+            <li><.link href={~p"/config"}>Config</.link></li>
             <li><a href="http://10.10.10.2:8888/cam/" target="_blank">Camera</a></li>
             <li><a href="https://fancydrones.github.io/x500-cm4/" target="_blank">Documentation</a></li>
             <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
@@ -23,7 +26,7 @@
             <% end %>
           </ul>
         </nav>
-        <img height="40px" src={Routes.static_path(@conn, "/images/camera-drone.svg")}/>
+        <img src={~p"/images/camera-drone.svg"} height="40" />
       </section>
     </header>
     <%= @inner_content %>

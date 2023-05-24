@@ -24,7 +24,7 @@ defmodule CompanionWeb.ConnCase do
       import Phoenix.ConnTest
       import CompanionWeb.ConnCase
 
-      alias CompanionWeb.Router.Helpers, as: Routes
+      use CompanionWeb, :verified_routes
 
       # The default endpoint for testing
       @endpoint CompanionWeb.Endpoint

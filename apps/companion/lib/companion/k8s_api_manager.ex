@@ -278,7 +278,7 @@ defmodule Companion.K8sApiManager do
 
   def handle_info({:configmap_watch, %{"type" => "MODIFIED", "object" => object} = message}, state) do
     Logger.debug("Received configmap watch message: #{inspect(message)}")
-    configs = extract_configmap_details(message["object"])
+    configs = extract_configmap_details(object)
     Phoenix.PubSub.broadcast(Companion.PubSub, "config_updates", {:configs, configs})
     {:noreply, %{state | configs: configs}}
   end
