@@ -33,21 +33,21 @@ defmodule Companion.MixProject do
   defp deps do
     [
       {:xmavlink_util, "~> 0.4"},
-      {:phoenix, "~> 1.7.2"},
+      {:phoenix, "~> 1.7.6"},
       {:phoenix_html, "~> 3.3.1"},
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
-      {:phoenix_live_view, "~> 0.18.18"},
+      {:phoenix_live_view, "~> 0.19.3"},
       {:phoenix_view, "~> 2.0.2"},
-      {:floki, ">= 0.34.2", only: :test},
-      {:phoenix_live_dashboard, "~> 0.7.2"},
-      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:floki, ">= 0.34.3", only: :test},
+      {:phoenix_live_dashboard, "~> 0.8.0"},
+      {:esbuild, "~> 0.7.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6.1"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.22.1"},
-      {:jason, "~> 1.4"},
+      {:gettext, "~> 0.22.3"},
+      {:jason, "~> 1.4.1"},
       #{:httpoison, "~> 2.1"},
       {:plug_cowboy, "~> 2.6.1"},
-      {:k8s, "~> 2.2"}
+      {:k8s, "~> 2.3"}
     ]
   end
 
