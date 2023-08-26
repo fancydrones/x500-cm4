@@ -4,9 +4,9 @@
 #   - https://hub.docker.com/_/alpine?tab=tags&page=1&name=3.18.0 - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.14.2-erlang-25.2-alpine-3.17.0
-ARG ELIXIR_VERSION=1.14.5
-ARG OTP_VERSION=25.3.2.1
-ARG ALPINE_VERSION=3.18.0
+ARG ELIXIR_VERSION=1.15.4
+ARG OTP_VERSION=25.3.2.5
+ARG ALPINE_VERSION=3.18.2
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION}"
 ARG RUNNER_IMAGE="alpine:${ALPINE_VERSION}"

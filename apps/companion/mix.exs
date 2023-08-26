@@ -5,7 +5,7 @@ defmodule Companion.MixProject do
     [
       app: :companion,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -34,20 +34,19 @@ defmodule Companion.MixProject do
     [
       {:xmavlink_util, "~> 0.4"},
       {:phoenix, "~> 1.7.6"},
-      {:phoenix_html, "~> 3.3.1"},
+      {:phoenix_html, "~> 3.3.2"},
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
-      {:phoenix_live_view, "~> 0.19.3"},
+      {:phoenix_live_view, "~> 0.19.5"},
       {:phoenix_view, "~> 2.0.2"},
       {:floki, ">= 0.34.3", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.0"},
+      {:phoenix_live_dashboard, "~> 0.8.1"},
       {:esbuild, "~> 0.7.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6.1"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.22.3"},
       {:jason, "~> 1.4.1"},
-      #{:httpoison, "~> 2.1"},
       {:plug_cowboy, "~> 2.6.1"},
-      {:k8s, "~> 2.3"}
+      {:k8s, "~> 2.4.1"}
     ]
   end
 
