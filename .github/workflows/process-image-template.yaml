@@ -33,7 +33,7 @@ jobs:
         with:
           platforms: ${{ inputs.platforms }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: ${{ inputs.platforms }}
       - name: Log in to the Container registry
