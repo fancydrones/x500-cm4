@@ -27,13 +27,13 @@ jobs:
       version_tag: ${{ env.datetag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: ${{ inputs.platforms }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: ${{ inputs.platforms }}
       - name: Log in to the Container registry
@@ -63,7 +63,7 @@ jobs:
             org.opencontainers.image.version=${{ env.datetag }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: apps/${{ inputs.app_name }}
           platforms: ${{ inputs.platforms }}
@@ -79,7 +79,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Prepare Kustomize
         run: |
           echo "before"
