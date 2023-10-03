@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Find current image
         run: |
           IMAGE_COMPANION=$(cat ./deployments/apps/companion-deployment.yaml | grep "image: ghcr.io" | cut -d ':' -f 2-3)
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Find current image
         run: |
           IMAGE_ANNOUNCER=$(cat ./deployments/apps/announcer-deployment.yaml | grep "image: ghcr.io" | cut -d ':' -f 2-3)
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Find current image
         run: |
           IMAGE_ROUTER=$(cat ./deployments/apps/router-deployment.yaml | grep "image: ghcr.io" | cut -d ':' -f 2-3)
@@ -101,7 +101,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
   #     - name: Find current image
   #       run: |
   #         IMAGE_STREAMER=$(cat ./deployments/apps/streamer-deployment.yaml | grep "image: aler9" | cut -d ':' -f 2-3)
