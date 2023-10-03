@@ -38,7 +38,7 @@ jobs:
       - name: Build static site
         run: mkdocs build #needs config to build to _site.
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
 
   # Deployment job
   deploy:
