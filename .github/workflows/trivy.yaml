@@ -33,6 +33,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
         env:
           platforms: linux/arm64
+          platform: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         if: always()
