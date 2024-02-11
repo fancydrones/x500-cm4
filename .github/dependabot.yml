@@ -13,3 +13,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "mix" # Elixir companion
+    directory: "/apps/companion"
+    schedule:
+      interval: "weekly"
