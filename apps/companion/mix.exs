@@ -36,7 +36,7 @@ defmodule Companion.MixProject do
       {:phoenix, "~> 1.7.6"},
       {:phoenix_html, "~> 3.3.2"},
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
-      {:phoenix_live_view, "~> 0.19.5"},
+      {:phoenix_live_view, "~> 0.20.5"},
       {:phoenix_view, "~> 2.0.2"},
       {:floki, ">= 0.34.3", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.1"},
