@@ -40,12 +40,12 @@ defmodule Companion.MixProject do
       {:phoenix_view, "~> 2.0.2"},
       {:floki, ">= 0.34.3", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.1"},
-      {:esbuild, "~> 0.7.1", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6.1"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.24.0"},
       {:jason, "~> 1.4.1"},
-      {:plug_cowboy, "~> 2.6.1"},
+      {:plug_cowboy, "~> 2.7.0"},
       {:k8s, "~> 2.4.1"}
     ]
   end
