@@ -34,7 +34,7 @@ defmodule Companion.MixProject do
     [
       {:xmavlink_util, "~> 0.4"},
       {:phoenix, "~> 1.7.6"},
-      {:phoenix_html, "~> 3.3.2"},
+      {:phoenix_html, "~> 4.0.0"},
       {:phoenix_live_reload, "~> 1.4.1", only: :dev},
       {:phoenix_live_view, "~> 0.20.5"},
       {:phoenix_view, "~> 2.0.2"},
