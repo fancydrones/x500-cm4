@@ -1,6 +1,8 @@
 defmodule CompanionWeb.ConfigLive do
   use Phoenix.LiveView
-  use Phoenix.HTML
+  import Phoenix.HTML
+  import Phoenix.HTML.Form
+  use PhoenixHTMLHelpers
 
   require Logger
 
