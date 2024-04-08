@@ -46,7 +46,7 @@ defmodule Companion.MixProject do
       {:gettext, "~> 0.24.0"},
       {:jason, "~> 1.4.1"},
       {:plug_cowboy, "~> 2.7.0"},
-      {:k8s, "~> 2.5.0"},
+      {:k8s, "~> 2.6.0"},
       {:phoenix_html_helpers, "~> 1.0"} # temporary until able to migrate to new Phoenix HTML 4.x
     ]
   end
