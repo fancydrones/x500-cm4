@@ -6,6 +6,9 @@ on:
       app_name:
         required: true
         type: string
+      runner_label:
+        required: true
+        type: string
 
 env:
   KUSTOMIZE_VER: 5.4.2
@@ -16,7 +19,7 @@ env:
 
 jobs:
   build-and-push-image:
-    runs-on: ubuntu-arm-latest-s
+    runs-on: inputs.runner_label
     permissions:
       contents: read
       packages: write
