@@ -15,4 +15,3 @@ jobs:
     uses: ./.github/workflows/process-image-template.yaml
     with:
       app_name: companion
-      platforms: linux/amd64,linux/arm64

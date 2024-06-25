@@ -3,15 +3,12 @@ name: Reusable image Create, publish and release
 on:
   workflow_call:
     inputs:
-      platforms:
-        required: true
-        type: string
       app_name:
         required: true
         type: string
 
 env:
-  KUSTOMIZE_VER: 4.5.7
+  KUSTOMIZE_VER: 5.4.2
   APPS_PATH: deployments/apps
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
@@ -19,7 +16,7 @@ env:
 
 jobs:
   build-and-push-image:
-    runs-on: ubuntu-arm-latest-l
+    runs-on: ubuntu-arm-latest-s
     permissions:
       contents: read
       packages: write
@@ -28,10 +25,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: linux/arm64
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
+      #   with:
+      #     platforms: linux/arm64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
