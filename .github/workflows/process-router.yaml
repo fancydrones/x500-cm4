@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/router/**'
       - '.github/workflows/process-router.yaml'
+      - '.github/workflows/process-image-template.yaml'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
