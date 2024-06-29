@@ -32,7 +32,6 @@ jobs:
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
         env:
-          platforms: linux/arm64
           platform: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
@@ -61,6 +60,8 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
+        env:
+          platform: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
@@ -88,6 +89,8 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
+        env:
+          platform: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
