@@ -97,31 +97,31 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  # NOT ABLE TO SCAN ARM64 right now
-  
-  # scan-streamer-image:
-  #   permissions:
-  #     contents: write # for actions/checkout to fetch code
-  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Find current image
-  #       run: |
-  #         IMAGE_STREAMER=$(cat ./deployments/apps/streamer-deployment.yaml | grep "image: aler9" | cut -d ':' -f 2-3)
-  #         echo $IMAGE_STREAMER
-  #         echo "IMAGE_STREAMER=$IMAGE_STREAMER" >> $GITHUB_ENV
-  #     - name: Run Trivy vulnerability scanner
-  #       uses: aquasecurity/trivy-action@master
-  #       with:
-  #         image-ref: ${{ env.IMAGE_STREAMER }}
-  #         format: sarif
-  #         output: trivy-results.sarif
-  #         severity: 'CRITICAL,HIGH'
-  #     - name: Upload Trivy scan results to GitHub Security tab
-  #       uses: github/codeql-action/upload-sarif@v3
-  #       if: always()
-  #       with:
-  #         sarif_file: 'trivy-results.sarif'
+  scan-streamer-image:
+    permissions:
+      contents: write # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Find current image
+        run: |
+          IMAGE_STREAMER=$(cat ./deployments/apps/streamer-deployment.yaml | grep "image: aler9" | cut -d ':' -f 2-3)
+          echo $IMAGE_STREAMER
+          echo "IMAGE_STREAMER=$IMAGE_STREAMER" >> $GITHUB_ENV
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_STREAMER }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: 'CRITICAL,HIGH'
+        env:
+          TRIVY_PLATFORM: linux/arm64
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
