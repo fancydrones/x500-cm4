@@ -25,7 +25,7 @@ jobs:
           echo $IMAGE_COMPANION
           echo "IMAGE_COMPANION=$IMAGE_COMPANION" >> $GITHUB_ENV
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.26.0
         with:
           image-ref: ${{ env.IMAGE_COMPANION }}
           format: sarif
