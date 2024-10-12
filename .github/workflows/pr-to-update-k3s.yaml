@@ -30,8 +30,8 @@ jobs:
           echo "k3s_version=$VERSION" >> $GITHUB_OUTPUT
       - name: "Patch"
         run: |
-          rm kustomization.yaml -f
-          rm patch.yaml -f
+          rm -f kustomization.yaml
+          rm -f patch.yaml
           ./kustomize create
           cat <<EOF > patch.yaml                                                                                                                                    ─╯
           - op: replace
