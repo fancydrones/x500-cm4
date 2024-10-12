@@ -46,13 +46,13 @@ jobs:
           ./kustomize edit add resource ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           ./kustomize edit add patch --kind Plan --path patch.yaml
           ./kustomize build . > x.yaml
-          cat "---------------------------------"
+          echo "---------------------------------"
           cat kustomization.yaml
-          cat "---------------------------------"
+          echo "---------------------------------"
           cat patch.yaml
-          cat "---------------------------------"
+          echo "---------------------------------"
           cat x.yaml
-          cat "---------------------------------"
+          echo "---------------------------------"
           mv x.yaml ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           rm kustomization.yaml
           rm patch.yaml
