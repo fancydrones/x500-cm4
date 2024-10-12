@@ -6,7 +6,7 @@ on:
     - cron: "0 5 * * 0" # https://crontab.guru/#0_5_*_*_0 - “At 05:00 on Sunday.”
 
 env:
-  KUSTOMIZE_VER: 5.4.2
+  KUSTOMIZE_VER: 5.5.0
 
 permissions:
   contents: write
@@ -25,9 +25,8 @@ jobs:
           echo "before"
           curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
           tar -xvzf kustomize.tar.gz && chmod +x ./kustomize
+          rm kustomize.tar.gz
           ./kustomize version
-          pwd
-          ls -la
       - name: Check for updates
         id: update
         run: |
@@ -36,13 +35,13 @@ jobs:
           echo "k3s_version=$VERSION" >> $GITHUB_OUTPUT
       - name: "Patch"
         run: |
-          ls -la
-          pwd
+          rm -f kustomization.yaml
+          rm -f patch.yaml
           ./kustomize create
-          cat <<EOF > patch.yaml                                                                                                                                    ─╯
+          cat <<EOF > patch.yaml
           - op: replace
           path: /spec/version
-          value: v1.31.1+k3s1
+          value: ${{ steps.update.outputs.k3s_version }}
           EOF
           ./kustomize edit add resource ./k3s-system-upgrade/upgrade-plan.yaml
           ./kustomize build . > x.yaml
@@ -55,7 +54,7 @@ jobs:
         with:
             token: ${{ secrets.GITHUB_TOKEN }}
             branch: update-flux
-            commit-message: Update to ${{ steps.update.outputs.flux_version }}
-            title: Update to ${{ steps.update.outputs.flux_version }}
+            commit-message: Update to ${{ steps.update.outputs.k3s_version }}
+            title: Update to ${{ steps.update.outputs.k3s_version }}
             body: |
-              ${{ steps.update.outputs.flux_version }}
+              ${{ steps.update.outputs.k3s_version }}
