@@ -1,4 +1,4 @@
-name: update-flux
+name: update-system-upgrade-controller
 
 on:
   workflow_dispatch:
