@@ -43,10 +43,10 @@ jobs:
           path: /spec/version
           value: ${{ steps.update.outputs.k3s_version }}
           EOF
-          ./kustomize edit add resource ./k3s-system-upgrade/upgrade-plan.yaml
+          ./kustomize edit add resource ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           ./kustomize build . > x.yaml
           cat x.yaml
-          mv x.yaml ./k3s-system-upgrade/upgrade-plan.yaml
+          mv x.yaml ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           rm kustomization.yaml
           rm patch.yaml
       - name: Create Pull Request
