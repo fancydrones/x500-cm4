@@ -40,14 +40,19 @@ jobs:
           ./kustomize create
           cat <<EOF > patch.yaml
           - op: replace
-          path: /spec/version
-          value: ${{ steps.update.outputs.k3s_version }}
+            path: /spec/version
+            value: ${{ steps.update.outputs.k3s_version }}
           EOF
           ./kustomize edit add resource ./deployments/k3s-system-upgrade/upgrade-plan.yaml
+          ./kustomize edit add patch --kind Plan --path patch.yaml
           ./kustomize build . > x.yaml
+          cat "---------------------------------"
           cat kustomization.yaml
+          cat "---------------------------------"
           cat patch.yaml
+          cat "---------------------------------"
           cat x.yaml
+          cat "---------------------------------"
           mv x.yaml ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           rm kustomization.yaml
           rm patch.yaml
