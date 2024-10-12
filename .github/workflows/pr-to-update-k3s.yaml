@@ -1,4 +1,4 @@
-name: update-flux
+name: update-k3s
 
 on:
   workflow_dispatch:
