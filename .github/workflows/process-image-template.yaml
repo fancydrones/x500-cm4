@@ -11,7 +11,7 @@ on:
         type: string
 
 env:
-  KUSTOMIZE_VER: 5.4.2
+  KUSTOMIZE_VER: 5.5.0
   APPS_PATH: deployments/apps
   REGISTRY: ghcr.io
   IMAGE_VENDOR: FancyDrones
