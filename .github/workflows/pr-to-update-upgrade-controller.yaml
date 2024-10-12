@@ -3,7 +3,7 @@ name: update-system-upgrade-controller
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 5 * * 0" # https://crontab.guru/#0_5_*_*_0 - “At 05:00 on Sunday.”
+    - cron: "0 3 * * 0" # https://crontab.guru/#0_3_*_*_0 - “At 03:00 on Sunday.”
 
 permissions:
   contents: write
