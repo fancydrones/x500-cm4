@@ -15,8 +15,6 @@ permissions:
 jobs:
   patch-k3s-if-new-version:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Check out code
         uses: actions/checkout@v4
