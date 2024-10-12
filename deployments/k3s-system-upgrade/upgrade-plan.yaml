@@ -1,4 +1,3 @@
-# Server plan
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
@@ -16,4 +15,4 @@ spec:
   serviceAccountName: system-upgrade
   upgrade:
     image: rancher/k3s-upgrade
-  version: v1.28.2+k3s1
+  version: v1.31.1+k3s1
