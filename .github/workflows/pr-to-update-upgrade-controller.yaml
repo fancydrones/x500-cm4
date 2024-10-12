@@ -1,0 +1,32 @@
+name: update-flux
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 0" # https://crontab.guru/#0_5_*_*_0 - “At 05:00 on Sunday.”
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  components:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Check for updates
+        id: update
+        run: |
+          curl \
+          -L https://raw.githubusercontent.com/rancher/system-upgrade-controller/refs/heads/master/manifests/system-upgrade-controller.yaml \
+          -o ./deployments/k3s-system-upgrade/system-upgrade-controller.yaml
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            branch: update-k3s-upgrade-controller
+            commit-message: Update k3s upgrade controller
+            title: Update k3s upgrade controller
+            body: Update k3s upgrade controller
