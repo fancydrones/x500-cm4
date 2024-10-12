@@ -45,6 +45,8 @@ jobs:
           EOF
           ./kustomize edit add resource ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           ./kustomize build . > x.yaml
+          cat kustomization.yaml
+          cat patch.yaml
           cat x.yaml
           mv x.yaml ./deployments/k3s-system-upgrade/upgrade-plan.yaml
           rm kustomization.yaml
@@ -53,7 +55,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
             token: ${{ secrets.GITHUB_TOKEN }}
-            branch: update-flux
+            branch: update-k3s
             commit-message: Update to ${{ steps.update.outputs.k3s_version }}
             title: Update to ${{ steps.update.outputs.k3s_version }}
             body: |
