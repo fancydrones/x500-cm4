@@ -13,8 +13,10 @@ permissions:
   pull-requests: write
 
 jobs:
-  components:
+  patch-k3s-if-new-version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -30,6 +32,7 @@ jobs:
           echo "k3s_version=$VERSION" >> $GITHUB_OUTPUT
       - name: "Patch"
         run: |
+          cd deployments
           ./kustomize create
           cat <<EOF > patch.yaml                                                                                                                                    ─╯
           - op: replace
