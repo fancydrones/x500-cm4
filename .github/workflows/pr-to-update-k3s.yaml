@@ -25,14 +25,15 @@ jobs:
           echo "before"
           curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
           tar -xvzf kustomize.tar.gz && chmod +x ./kustomize
+          ./kustomize version
       - name: Check for updates
         id: update
         run: |
           VERSION="$(curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest | jq '.tag_name')"
+          echo "k3s_version=$VERSION"
           echo "k3s_version=$VERSION" >> $GITHUB_OUTPUT
       - name: "Patch"
         run: |
-          cd deployments
           ./kustomize create
           cat <<EOF > patch.yaml                                                                                                                                    ─╯
           - op: replace
