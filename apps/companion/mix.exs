@@ -33,19 +33,19 @@ defmodule Companion.MixProject do
   defp deps do
     [
       {:xmavlink_util, "~> 0.4"},
-      {:phoenix, "~> 1.7.6"},
+      {:phoenix, "~> 1.7.14"},
       {:phoenix_html, "~> 4.1.1"},
-      {:phoenix_live_reload, "~> 1.5.2", only: :dev},
-      {:phoenix_live_view, "~> 0.20.5"},
-      {:phoenix_view, "~> 2.0.2"},
-      {:floki, ">= 0.34.3", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.1"},
+      {:phoenix_live_reload, "~> 1.5.3", only: :dev},
+      {:phoenix_live_view, "~> 0.20.17"},
+      {:phoenix_view, "~> 2.0.4"},
+      {:floki, ">= 0.36.2", only: :test},
+      {:phoenix_live_dashboard, "~> 0.8.4"},
       {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0.0"},
-      {:telemetry_poller, "~> 1.0"},
+      {:telemetry_poller, "~> 1.1.0"},
       {:gettext, "~> 0.26.1"},
-      {:jason, "~> 1.4.1"},
-      {:plug_cowboy, "~> 2.7.0"},
+      {:jason, "~> 1.4.4"},
+      {:plug_cowboy, "~> 2.7.2"},
       {:k8s, "~> 2.6.1"},
       {:phoenix_html_helpers, "~> 1.0"} # temporary until able to migrate to new Phoenix HTML 4.x
     ]
