@@ -5,8 +5,8 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.14.2-erlang-25.2-alpine-3.17.0
 ARG ELIXIR_VERSION=1.17.3
-ARG OTP_VERSION=27.1.1
-ARG ALPINE_VERSION=3.18.9
+ARG OTP_VERSION=27.1.2
+ARG ALPINE_VERSION=3.20.3
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION}"
 ARG RUNNER_IMAGE="alpine:${ALPINE_VERSION}"
