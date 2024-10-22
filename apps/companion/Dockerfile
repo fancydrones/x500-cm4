@@ -11,7 +11,7 @@ ARG ALPINE_VERSION=3.20.3
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION}"
 ARG RUNNER_IMAGE="alpine:${ALPINE_VERSION}"
 
-FROM ${BUILDER_IMAGE} as build
+FROM ${BUILDER_IMAGE} AS build
 
 # install build dependencies
 RUN apk update && apk add --no-cache build-base git linux-headers
@@ -69,7 +69,7 @@ RUN mix release
 FROM ${RUNNER_IMAGE} AS app
 # set runner ENV
 ENV MIX_ENV="prod"
-RUN apk update && apk upgrade && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc libssl1.1
+RUN apk update && apk upgrade && apk add --no-cache openssl ncurses-libs bind-tools libstdc++ libgcc libssl3
 WORKDIR /app
 RUN chown nobody:nobody /app
 USER nobody:nobody
