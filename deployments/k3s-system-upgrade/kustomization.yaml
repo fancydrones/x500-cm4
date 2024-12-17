@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
 - system-upgrade-controller.yaml
 - clusterrolebinding.yaml
-# - upgrade-plan.yaml
+- upgrade-plan.yaml
