@@ -1,5 +1,7 @@
 # :helicopter: RPiUAV
 
+![Future](./media/generated-self-built.png)
+
 ## :dart: Goal
 
 [Pixhawk](https://pixhawk.org/) and [Dronecode](https://www.dronecode.org/) are very powerful and mature platforms and eco-systems, but they lack the final wrapping to make a complete UAV system. This repository aims at providing this final wrapping, and making it as easy as possible to get started with a fully operational camera drone using LTE for communications.

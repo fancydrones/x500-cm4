@@ -2,3 +2,4 @@
 _site
 kustomize
 kustomize.tar.gz
+.DS_Store
