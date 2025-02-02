@@ -41,7 +41,7 @@ defmodule Companion.MixProject do
       {:floki, ">= 0.36.2", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.4"},
       {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
-      {:telemetry_metrics, "~> 1.0.0"},
+      {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.1.0"},
       {:gettext, "~> 0.26.1"},
       {:jason, "~> 1.4.4"},
