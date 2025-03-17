@@ -25,7 +25,7 @@ jobs:
           echo $IMAGE_COMPANION
           echo "IMAGE_COMPANION=$IMAGE_COMPANION" >> $GITHUB_ENV
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: ${{ env.IMAGE_COMPANION }}
           format: sarif
@@ -54,7 +54,7 @@ jobs:
           echo $IMAGE_ANNOUNCER
           echo "IMAGE_ANNOUNCER=$IMAGE_ANNOUNCER" >> $GITHUB_ENV
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: ${{ env.IMAGE_ANNOUNCER }}
           format: sarif
@@ -83,7 +83,7 @@ jobs:
           echo $IMAGE_ROUTER
           echo "IMAGE_ROUTER=$IMAGE_ROUTER" >> $GITHUB_ENV
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: ${{ env.IMAGE_ROUTER }}
           format: sarif
@@ -112,7 +112,7 @@ jobs:
           echo $IMAGE_STREAMER
           echo "IMAGE_STREAMER=$IMAGE_STREAMER" >> $GITHUB_ENV
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: ${{ env.IMAGE_STREAMER }}
           format: sarif
