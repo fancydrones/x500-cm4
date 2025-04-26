@@ -22,46 +22,46 @@ spec:
         app.kubernetes.io/name: streamer-deployment
     spec:
       containers:
-      - env:
-        - name: RTSP_PATHS_CAM_SOURCE
-          value: "rpiCamera"
-        image: bluenviron/mediamtx:1.11.3-rpi
-        name: streamer
-        ports:
-        - containerPort: 8554
-        - containerPort: 8888
-        - containerPort: 8889
-        resources:
-          limits:
-            cpu: "2"
-            memory: 2500Mi
-          requests:
-            cpu: "1"
-            memory: 500Mi
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - mountPath: /run/udev
-          name: udev
-          readOnly: true
-        - mountPath: /dev/shm
-          name: temp
-        - name: cam-conf
-          mountPath: /rtsp-simple-server.yml # This should be your final destination
-          subPath: rtsp-simple-server.yml
-          readOnly: true
+        - env:
+            - name: RTSP_PATHS_CAM_SOURCE
+              value: "rpiCamera"
+          image: bluenviron/mediamtx:1.12.0-rpi
+          name: streamer
+          ports:
+            - containerPort: 8554
+            - containerPort: 8888
+            - containerPort: 8889
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2500Mi
+            requests:
+              cpu: "1"
+              memory: 500Mi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /run/udev
+              name: udev
+              readOnly: true
+            - mountPath: /dev/shm
+              name: temp
+            - name: cam-conf
+              mountPath: /rtsp-simple-server.yml # This should be your final destination
+              subPath: rtsp-simple-server.yml
+              readOnly: true
       hostNetwork: true
       volumes:
-      - hostPath:
-          path: /run/udev/
-        name: udev
-        readOnly: true
-      - name: temp
-        emptyDir: {}
-      - name: cam-conf
-        readOnly: true
-        configMap:
-          name: rpi4-config
-          items:
-            - key: STREAMER_CONFIG
-              path: rtsp-simple-server.yml
+        - hostPath:
+            path: /run/udev/
+          name: udev
+          readOnly: true
+        - name: temp
+          emptyDir: {}
+        - name: cam-conf
+          readOnly: true
+          configMap:
+            name: rpi4-config
+            items:
+              - key: STREAMER_CONFIG
+                path: rtsp-simple-server.yml
