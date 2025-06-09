@@ -40,7 +40,7 @@ defmodule Companion.MixProject do
       {:phoenix_view, "~> 2.0.4"},
       {:floki, ">= 0.36.2", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.4"},
-      {:esbuild, "~> 0.9.0", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.10.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.2.0"},
       {:gettext, "~> 0.26.1"},
