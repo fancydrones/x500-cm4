@@ -39,7 +39,7 @@ spec:
               name: rpi4-config
         - name: MAVLINK20
           value: "1"
-        image: ghcr.io/fancydrones/x500-cm4/announcer:20250303-f97934b
+        image: ghcr.io/fancydrones/x500-cm4/announcer@sha256:d394198996ca11bff3f5f78b33ceb0e255c9d7273d5f19c669048e9a4a7a55fa
         name: announcer
         resources:
           limits:

@@ -25,6 +25,7 @@ jobs:
       packages: write
     outputs:
       version_tag: ${{ env.datetag }}
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,6 +64,7 @@ jobs:
             org.opencontainers.image.version=${{ env.datetag }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: apps/${{ inputs.app_name }}
@@ -89,7 +91,7 @@ jobs:
         run: |
           rm kustomization.yaml -f
           ./kustomize create
-          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}
+          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}@${{ needs.build-and-push-image.outputs.digest }}
           ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}-deployment.yaml
           ./kustomize build . > x.yaml
           cat x.yaml
@@ -100,6 +102,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}"
+          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}@${{ needs.build-and-push-image.outputs.digest }}"
           git pull --rebase=true
           git push
