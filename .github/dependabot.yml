@@ -9,11 +9,31 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   - package-ecosystem: "pip"
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+  - package-ecosystem: "pip"
+    directory: "/apps/announcer"
+    schedule:
+      interval: "weekly"
+    groups:
+      announcer-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "mix" # Elixir companion
     directory: "/apps/companion"
     schedule:
       interval: "weekly"
+    groups:
+      elixir-dependencies:
+        patterns:
+          - "*"
