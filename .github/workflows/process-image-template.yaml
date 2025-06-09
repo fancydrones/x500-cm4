@@ -91,7 +91,7 @@ jobs:
         run: |
           rm kustomization.yaml -f
           ./kustomize create
-          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}@${{ needs.build-and-push-image.outputs.digest }}
+          ./kustomize edit set image ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}@${{ needs.build-and-push-image.outputs.digest }}
           ./kustomize edit add resource $APPS_PATH/${{ inputs.app_name }}-deployment.yaml
           ./kustomize build . > x.yaml
           cat x.yaml
@@ -102,6 +102,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}@${{ needs.build-and-push-image.outputs.digest }}"
+          git commit -m "New version: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.app_name }}:${{ needs.build-and-push-image.outputs.version_tag }}@${{ needs.build-and-push-image.outputs.digest }}"
           git pull --rebase=true
           git push

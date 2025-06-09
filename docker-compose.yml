@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   streamer:
-    image: bluenviron/mediamtx@sha256:18e39f7d81326bee3cca2d43f773ae491546fb4422ca4604c00760b18047bd6f
+    image: bluenviron/mediamtx:1.12.0-rpi@sha256:18e39f7d81326bee3cca2d43f773ae491546fb4422ca4604c00760b18047bd6f
     ports:
     - 8554:8554
     volumes:
@@ -22,7 +22,7 @@ services:
           h264parse ! rtph264pay config-interval=1 name=pay0 pt=96
       - VIDEO_PORT=8554
   router:
-    image: ghcr.io/fancydrones/x500-cm4/router@sha256:d1b4a39129f32b13f7452c4b252da8815f0703706f5f46850a121d4638729ecb
+    image: ghcr.io/fancydrones/x500-cm4/router:20221109-90362cf@sha256:d1b4a39129f32b13f7452c4b252da8815f0703706f5f46850a121d4638729ecb
     ports:
     - 5760:5760
     - 14560:14560
@@ -36,7 +36,7 @@ services:
     - ./mavlink-router.conf:/etc/mavlink-router/main.conf
     - /dev/serial0:/dev/serial0
   announcer:
-    image: ghcr.io/fancydrones/x500-cm4/announcer@sha256:d394198996ca11bff3f5f78b33ceb0e255c9d7273d5f19c669048e9a4a7a55fa
+    image: ghcr.io/fancydrones/x500-cm4/announcer:20221109-3cdc41c@sha256:d394198996ca11bff3f5f78b33ceb0e255c9d7273d5f19c669048e9a4a7a55fa
     network_mode: host
     restart: always
     environment:

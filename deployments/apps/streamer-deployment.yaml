@@ -25,7 +25,7 @@ spec:
         - env:
             - name: RTSP_PATHS_CAM_SOURCE
               value: "rpiCamera"
-          image: bluenviron/mediamtx@sha256:18e39f7d81326bee3cca2d43f773ae491546fb4422ca4604c00760b18047bd6f
+          image: bluenviron/mediamtx:1.12.0-rpi@sha256:18e39f7d81326bee3cca2d43f773ae491546fb4422ca4604c00760b18047bd6f
           name: streamer
           ports:
             - containerPort: 8554
