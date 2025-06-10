@@ -31,6 +31,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: true
         env:
           TRIVY_PLATFORM: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
@@ -60,6 +61,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: true
         env:
           TRIVY_PLATFORM: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
@@ -89,6 +91,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: true
         env:
           TRIVY_PLATFORM: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
@@ -118,6 +121,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: 'CRITICAL,HIGH'
+          limit-severities-for-sarif: true
         env:
           TRIVY_PLATFORM: linux/arm64
       - name: Upload Trivy scan results to GitHub Security tab
