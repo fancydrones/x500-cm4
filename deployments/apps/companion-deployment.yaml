@@ -27,7 +27,7 @@ spec:
           value: GM4Nv3AsIrj36aK6y2NJYmuKZSKoJ9i5bjxaLSLTH+2A16LC69JzQzHe7X3m7YJR
         - name: MAVLINK_CONNECTION
           value: udpout:router-service.rpiuav.svc.cluster.local:14550
-        image: ghcr.io/fancydrones/x500-cm4/companion:20250609-336f85d
+        image: ghcr.io/fancydrones/x500-cm4/companion:20250629-5ae97e2
         name: companion
         ports:
         - containerPort: 4000
