@@ -33,10 +33,10 @@ defmodule Companion.MixProject do
   defp deps do
     [
       {:xmavlink_util, "~> 0.4"},
-      {:phoenix, "~> 1.7.14"},
+      {:phoenix, "~> 1.8.1"},
       {:phoenix_html, "~> 4.2.0"},
       {:phoenix_live_reload, "~> 1.6.0", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
+      {:phoenix_live_view, "~> 1.1.8"},
       {:phoenix_view, "~> 2.0.4"},
       {:floki, ">= 0.36.2", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.4"},
