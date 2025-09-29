@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/name: router-deployment
     spec:
       containers:
-      - image: ghcr.io/fancydrones/x500-cm4/router:20250303-f97934b
+      - image: ghcr.io/fancydrones/x500-cm4/router:20250929-2882eab
         name: router
         ports:
         - containerPort: 5760
