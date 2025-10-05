@@ -32,7 +32,7 @@ defmodule Companion.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:xmavlink_util, "~> 0.4"},
+      {:xmavlink_util, "~> 0.4.1"},
       {:phoenix, "~> 1.7.14"},
       {:phoenix_html, "~> 4.2.0"},
       {:phoenix_live_reload, "~> 1.6.0", only: :dev},
@@ -47,7 +47,8 @@ defmodule Companion.MixProject do
       {:jason, "~> 1.4.4"},
       {:plug_cowboy, "~> 2.7.2"},
       {:k8s, "~> 2.7.0"},
-      {:phoenix_html_helpers, "~> 1.0"} # temporary until able to migrate to new Phoenix HTML 4.x
+      # temporary until able to migrate to new Phoenix HTML 4.x
+      {:phoenix_html_helpers, "~> 1.0"}
     ]
   end
 
