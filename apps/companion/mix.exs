@@ -43,7 +43,7 @@ defmodule Companion.MixProject do
       {:esbuild, "~> 0.10.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.3.0"},
-      {:gettext, "~> 0.26.1"},
+      {:gettext, "~> 1.0.0"},
       {:jason, "~> 1.4.4"},
       {:plug_cowboy, "~> 2.7.4"},
       {:k8s, "~> 2.7.0"},
