@@ -1,0 +1,50 @@
+name: Companion App PR
+
+on:
+  pull_request:
+    paths:
+      - "apps/companion/**"
+      - ".github/workflows/companion-pr.yml"
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/companion
+          file: ./apps/companion/Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: ./apps/companion/.tool-versions
+          version-type: strict
+
+      - name: Install dependencies
+        working-directory: ./apps/companion
+        run: mix deps.get
+
+      - name: Run tests
+        working-directory: ./apps/companion
+        run: mix test
