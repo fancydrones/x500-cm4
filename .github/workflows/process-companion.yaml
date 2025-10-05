@@ -2,18 +2,20 @@ name: Companion image
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
     paths:
-      - 'apps/companion/**'
-      - '.github/workflows/process-companion.yaml'
-      - '.github/workflows/process-image-template.yaml'
+      - "apps/companion/**"
+      - ".github/workflows/process-companion.yaml"
+      - ".github/workflows/process-image-template.yaml"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
+
 jobs:
   process-image:
     uses: ./.github/workflows/process-image-template.yaml
     with:
       app_name: companion
       runner_label: ubuntu-arm-latest-m
+    secrets:
+      DEPLOYMENT_APP_SECRET: ${{ secrets.DEPLOYMENT_APP_SECRET }}
