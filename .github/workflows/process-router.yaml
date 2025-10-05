@@ -17,5 +17,3 @@ jobs:
     with:
       app_name: router
       runner_label: ubuntu-arm-latest-s
-    secrets:
-      DEPLOYMENT_APP_SECRET: ${{ secrets.DEPLOYMENT_APP_SECRET }}

@@ -9,9 +9,6 @@ on:
       runner_label:
         required: true
         type: string
-    secrets:
-      DEPLOYMENT_APP_SECRET:
-        required: true
 
 env:
   KUSTOMIZE_VER: 5.5.0
