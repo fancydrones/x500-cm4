@@ -2,18 +2,19 @@ name: Router image
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
     paths:
-      - 'apps/router/**'
-      - '.github/workflows/process-router.yaml'
-      - '.github/workflows/process-image-template.yaml'
+      - "apps/router/**"
+      - ".github/workflows/process-router.yaml"
+      - ".github/workflows/process-image-template.yaml"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
+
 jobs:
   process-image:
     uses: ./.github/workflows/process-image-template.yaml
     with:
       app_name: router
       runner_label: ubuntu-arm-latest-s
+    secrets: inherit

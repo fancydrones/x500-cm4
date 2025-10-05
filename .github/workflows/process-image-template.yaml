@@ -75,11 +75,19 @@ jobs:
   update-deployment:
     needs: build-and-push-image
     runs-on: ubuntu-latest
+    environment: version_upgrade
     permissions:
       contents: write
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.DEPLOYMENT_APP_ID }}
+          private-key: ${{ secrets.DEPLOYMENT_APP_PRIVATE_KEY }}
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
       - name: Prepare Kustomize
         run: |
           echo "before"
