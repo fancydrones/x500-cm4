@@ -1,7 +1,5 @@
 defmodule CompanionWeb.OverviewLive do
   use Phoenix.LiveView
-  import Phoenix.HTML
-  import Phoenix.HTML.Form
   use PhoenixHTMLHelpers
 
   require Logger
@@ -20,6 +18,7 @@ defmodule CompanionWeb.OverviewLive do
     socket =
       socket
       |> assign(deployments: [], nodes: [], pods_metrics: [])
+
     {:ok, socket}
   end
 
@@ -47,9 +46,11 @@ defmodule CompanionWeb.OverviewLive do
 
   def handle_info({:node_metrics, node_metrics}, socket) do
     Logger.debug("Web got node metrics")
+
     socket =
       socket
       |> assign(nodes: convert_node(node_metrics))
+
     {:noreply, socket}
   end
 
@@ -61,6 +62,7 @@ defmodule CompanionWeb.OverviewLive do
       socket
       |> assign(pod_metrics: pod_metrics)
       |> assign(deployments: new_deployments)
+
     {:noreply, socket}
   end
 
@@ -71,10 +73,14 @@ defmodule CompanionWeb.OverviewLive do
     deployments
     |> Enum.map(fn d ->
       case Enum.find(pod_metrics, fn p -> d.selector["app"] == p.labels["app"] end) do
-        nil -> d
+        nil ->
+          d
+
         p ->
           case Enum.find(p.containers, fn c -> c.name == d.name end) do
-            nil -> d
+            nil ->
+              d
+
             c ->
               %{
                 d
@@ -88,26 +94,32 @@ defmodule CompanionWeb.OverviewLive do
   end
 
   defp convert_node(node_metrics) do
-    Enum.map(node_metrics, fn n -> %{
-          name: n.name,
-          cpu: scale_cpu(n.cpu),
-          memory: scale_memory(n.memory),
-          timestamp: n.timestamp
-        }
-      end)
+    Enum.map(node_metrics, fn n ->
+      %{
+        name: n.name,
+        cpu: scale_cpu(n.cpu),
+        memory: scale_memory(n.memory),
+        timestamp: n.timestamp
+      }
+    end)
     |> Enum.sort_by(fn d -> d.name end)
   end
 
   defp scale_cpu(cpu) do
     l = String.length(cpu)
     {cpu, unit} = String.split_at(cpu, l - 1)
-    String.to_integer(cpu) * get_unit_muliplier(unit) |> Float.round(3) |> to_string()
+    (String.to_integer(cpu) * get_unit_muliplier(unit)) |> Float.round(3) |> to_string()
   end
 
   defp scale_memory(memory, print_unit \\ "Gi") do
     l = String.length(memory)
     {memory, unit} = String.split_at(memory, l - 2)
-    value = String.to_integer(memory) * get_unit_muliplier(unit) / get_unit_muliplier(print_unit) |> Float.round(2) |> to_string()
+
+    value =
+      (String.to_integer(memory) * get_unit_muliplier(unit) / get_unit_muliplier(print_unit))
+      |> Float.round(2)
+      |> to_string()
+
     value <> print_unit
   end
 
@@ -117,38 +129,39 @@ defmodule CompanionWeb.OverviewLive do
       "u" -> 0.000001
       "m" -> 0.001
       "k" -> 1000
-      "M" -> 1000000
-      "G" -> 1000000000
-      "T" -> 1000000000000
-      "P" -> 1000000000000000
-      "E" -> 1000000000000000000
-      "Z" -> 1000000000000000000000
-      "Y" -> 1000000000000000000000000
+      "M" -> 1_000_000
+      "G" -> 1_000_000_000
+      "T" -> 1_000_000_000_000
+      "P" -> 1_000_000_000_000_000
+      "E" -> 1_000_000_000_000_000_000
+      "Z" -> 1_000_000_000_000_000_000_000
+      "Y" -> 1_000_000_000_000_000_000_000_000
       "Ki" -> 1024
-      "Mi" -> 1048576
-      "Gi" -> 1073741824
-      "Ti" -> 1099511627776
-      "Pi" -> 1125899906842624
-      "Ei" -> 1152921504606846976
-      "Zi" -> 1180591620717411303424
-      "Yi" -> 1208925819614629174706176
+      "Mi" -> 1_048_576
+      "Gi" -> 1_073_741_824
+      "Ti" -> 1_099_511_627_776
+      "Pi" -> 1_125_899_906_842_624
+      "Ei" -> 1_152_921_504_606_846_976
+      "Zi" -> 1_180_591_620_717_411_303_424
+      "Yi" -> 1_208_925_819_614_629_174_706_176
       _ -> 1
     end
   end
 
   defp convert_deployments(deployments) do
-    Enum.map(deployments, fn d -> %{
-          name: d.name,
-          image_version: d.image_version,
-          replicas_from_spec: d.replicas_from_spec,
-          ready_replicas: d.ready_replicas,
-          backgrond_color: get_color_from_count(d.ready_replicas, d.replicas_from_spec),
-          selector: d.selector,
-          cpu: "",
-          memory: "",
-          timestamp: ""
-        }
-      end)
+    Enum.map(deployments, fn d ->
+      %{
+        name: d.name,
+        image_version: d.image_version,
+        replicas_from_spec: d.replicas_from_spec,
+        ready_replicas: d.ready_replicas,
+        backgrond_color: get_color_from_count(d.ready_replicas, d.replicas_from_spec),
+        selector: d.selector,
+        cpu: "",
+        memory: "",
+        timestamp: ""
+      }
+    end)
     |> Enum.sort_by(fn d -> d.name end)
   end
 
@@ -163,6 +176,7 @@ defmodule CompanionWeb.OverviewLive do
   @impl true
   def render(assigns) do
     ~H"""
+    <CompanionWeb.Layouts.app flash={@flash}>
       <section class="phx-hero">
         <h1>Apps currently deployed:</h1>
         <div class="cards">
@@ -208,7 +222,7 @@ defmodule CompanionWeb.OverviewLive do
           <% end %>
         </div>
       </section>
+    </CompanionWeb.Layouts.app>
     """
   end
-
 end

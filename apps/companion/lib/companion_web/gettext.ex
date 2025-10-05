@@ -20,5 +20,5 @@ defmodule CompanionWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :companion
+  use Gettext.Backend, otp_app: :companion
 end

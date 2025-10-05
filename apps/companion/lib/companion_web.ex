@@ -25,7 +25,7 @@ defmodule CompanionWeb do
 
       import Plug.Conn
       import CompanionWeb.Gettext
-      #alias CompanionWeb.Router.Helpers, as: Routes
+      # alias CompanionWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
     end
@@ -48,8 +48,7 @@ defmodule CompanionWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {CompanionWeb.LayoutView, "live.html"}
+      use Phoenix.LiveView
 
       unquote(view_helpers())
     end
@@ -71,6 +70,19 @@ defmodule CompanionWeb do
     end
   end
 
+  def html do
+    quote do
+      use Phoenix.Component
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
+
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
+    end
+  end
+
   def router do
     quote do
       use Phoenix.Router
@@ -84,7 +96,7 @@ defmodule CompanionWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import CompanionWeb.Gettext
+      use Gettext, backend: CompanionWeb.Gettext
     end
   end
 
@@ -96,28 +108,46 @@ defmodule CompanionWeb do
       use PhoenixHTMLHelpers
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
-      import Phoenix.LiveView.Helpers
-
       import Phoenix.Component
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
       import CompanionWeb.ErrorHelpers
-      import CompanionWeb.Gettext
-      #alias CompanionWeb.Router.Helpers, as: Routes
+      use Gettext, backend: CompanionWeb.Gettext
+      # alias CompanionWeb.Router.Helpers, as: Routes
       unquote(verified_routes())
     end
   end
 
-  def verified_routes do
-      quote do
-        use Phoenix.VerifiedRoutes,
-          endpoint: CompanionWeb.Endpoint,
-          router: CompanionWeb.Router,
-          statics: CompanionWeb.static_paths()
-      end
+  defp html_helpers do
+    quote do
+      # HTML escaping functionality
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
+      use PhoenixHTMLHelpers
+
+      # Core UI components
+      import Phoenix.Component
+
+      # Shortcut for generating JS commands
+      alias Phoenix.LiveView.JS
+
+      # Routes generation with the ~p sigil
+      unquote(verified_routes())
+
+      use Gettext, backend: CompanionWeb.Gettext
     end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: CompanionWeb.Endpoint,
+        router: CompanionWeb.Router,
+        statics: CompanionWeb.static_paths()
+    end
+  end
 
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
