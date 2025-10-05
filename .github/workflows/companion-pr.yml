@@ -1,0 +1,61 @@
+name: Companion App PR
+
+on:
+  pull_request:
+    paths:
+      - "apps/companion/**"
+      - ".github/workflows/companion-pr.yml"
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/companion
+          file: ./apps/companion/Dockerfile
+          push: false
+          load: true
+          tags: companion:pr-${{ github.event.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Print image size
+        run: |
+          IMAGE_SIZE=$(docker image inspect companion:pr-${{ github.event.pull_request.number }} --format='{{.Size}}')
+          IMAGE_SIZE_MB=$(echo "scale=2; $IMAGE_SIZE / 1024 / 1024" | bc)
+          echo "::notice title=Docker Image Size::Image size: ${IMAGE_SIZE_MB} MB (${IMAGE_SIZE} bytes)"
+          echo "### Docker Image Size 📦" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${IMAGE_SIZE_MB} MB" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bytes**: ${IMAGE_SIZE} bytes" >> $GITHUB_STEP_SUMMARY
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: ./apps/companion/.tool-versions
+          version-type: strict
+
+      - name: Install dependencies
+        working-directory: ./apps/companion
+        run: mix deps.get
+
+      - name: Run tests
+        working-directory: ./apps/companion
+        run: mix test

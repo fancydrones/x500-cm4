@@ -32,22 +32,23 @@ defmodule Companion.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:xmavlink_util, "~> 0.4"},
-      {:phoenix, "~> 1.7.14"},
-      {:phoenix_html, "~> 4.2.0"},
-      {:phoenix_live_reload, "~> 1.6.0", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
+      {:xmavlink_util, "~> 0.4.1"},
+      {:phoenix, "~> 1.8.1"},
+      {:phoenix_html, "~> 4.3.0"},
+      {:phoenix_live_reload, "~> 1.6.1", only: :dev},
+      {:phoenix_live_view, "~> 1.1.13"},
       {:phoenix_view, "~> 2.0.4"},
-      {:floki, ">= 0.36.2", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.4"},
+      {:floki, ">= 0.38.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.8.7"},
       {:esbuild, "~> 0.10.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.3.0"},
       {:gettext, "~> 0.26.1"},
       {:jason, "~> 1.4.4"},
-      {:plug_cowboy, "~> 2.7.2"},
+      {:plug_cowboy, "~> 2.7.4"},
       {:k8s, "~> 2.7.0"},
-      {:phoenix_html_helpers, "~> 1.0"} # temporary until able to migrate to new Phoenix HTML 4.x
+      # temporary until able to migrate to new Phoenix HTML 4.x
+      {:phoenix_html_helpers, "~> 1.0"}
     ]
   end
 

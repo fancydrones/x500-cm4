@@ -1,0 +1,17 @@
+<header>
+  <section class="container">
+    <nav>
+      <ul>
+        <li><.link href={~p"/"}>Overview</.link></li>
+        <li><.link href={~p"/config"}>Config</.link></li>
+        <li><a href="http://10.10.10.2:8888/cam/" target="_blank">Camera</a></li>
+        <li><a href="https://fancydrones.github.io/x500-cm4/" target="_blank">Documentation</a></li>
+      </ul>
+    </nav>
+    <img src={~p"/images/camera-drone.svg"} height="40" />
+  </section>
+</header>
+<main class="container">
+  <.flash_group flash={@flash} />
+  <%= render_slot(@inner_block) %>
+</main>

@@ -1,8 +1,6 @@
 defmodule CompanionWeb.ErrorView do
   use CompanionWeb, :view
 
-  import Phoenix.HTML
-  import Phoenix.HTML.Form
   use PhoenixHTMLHelpers
 
   # If you want to customize a particular status code

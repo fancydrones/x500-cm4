@@ -2,24 +2,24 @@ defmodule CompanionWeb.Router do
   use CompanionWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, {CompanionWeb.LayoutView, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, html: {CompanionWeb.Layouts, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
   scope "/", CompanionWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    #get "/", PageController, :index
-    live "/", OverviewLive
-    live "/config", ConfigLive
+    # get "/", PageController, :index
+    live("/", OverviewLive)
+    live("/config", ConfigLive)
   end
 
   # Other scopes may use custom stacks.
@@ -38,9 +38,9 @@ defmodule CompanionWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      live_dashboard "/dashboard", metrics: CompanionWeb.Telemetry
+      live_dashboard("/dashboard", metrics: CompanionWeb.Telemetry)
     end
   end
 end
