@@ -17,6 +17,5 @@ jobs:
     with:
       app_name: router
       runner_label: ubuntu-arm-latest-s
-      environment: version_upgrade # To get secret for deployment app
     secrets:
       DEPLOYMENT_APP_SECRET: ${{ secrets.DEPLOYMENT_APP_SECRET }}
