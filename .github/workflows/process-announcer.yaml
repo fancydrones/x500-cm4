@@ -17,3 +17,4 @@ jobs:
     with:
       app_name: announcer
       runner_label: ubuntu-arm-latest-m
+    secrets: inherit

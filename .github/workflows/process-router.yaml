@@ -17,3 +17,4 @@ jobs:
     with:
       app_name: router
       runner_label: ubuntu-arm-latest-s
+    secrets: inherit
