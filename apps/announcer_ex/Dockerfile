@@ -17,7 +17,7 @@ FROM ${BUILDER_IMAGE} AS builder
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache build-base git make gcc
+RUN apk update && apk add --no-cache build-base git linux-headers
 
 # Install hex and rebar
 RUN mix local.hex --force && mix local.rebar --force
