@@ -3,16 +3,14 @@ defmodule AnnouncerEx.MessageBuilder do
   Builds MAVLink messages for the camera component.
   """
 
-  alias XMAVLink.Dialect.Common.Message
-
   @doc """
   Build a heartbeat message.
   """
   def build_heartbeat do
-    %Message.Heartbeat{
+    %Common.Message.Heartbeat{
       type: :mav_type_camera,
       autopilot: :mav_autopilot_generic,
-      base_mode: 0,
+      base_mode: MapSet.new(),
       custom_mode: 0,
       system_status: :mav_state_standby,
       mavlink_version: 3
@@ -23,7 +21,7 @@ defmodule AnnouncerEx.MessageBuilder do
   Build camera information message.
   """
   def build_camera_information(state) do
-    %Message.CameraInformation{
+    %Common.Message.CameraInformation{
       time_boot_ms: boot_timestamp(state.boot_time),
       vendor_name: pad_bytes(state.camera_name, 32),
       model_name: pad_bytes(state.camera_name, 32),
@@ -34,10 +32,9 @@ defmodule AnnouncerEx.MessageBuilder do
       resolution_h: 1280,
       resolution_v: 720,
       lens_id: 0,
-      flags: [:camera_cap_flags_has_video_stream],
+      flags: MapSet.new([:camera_cap_flags_has_video_stream]),
       cam_definition_version: 1,
-      cam_definition_uri: pad_bytes("", 140),
-      gimbal_device_id: 0
+      cam_definition_uri: pad_bytes("", 140)
     }
   end
 
@@ -45,11 +42,11 @@ defmodule AnnouncerEx.MessageBuilder do
   Build video stream information message.
   """
   def build_video_stream_information(state) do
-    %Message.VideoStreamInformation{
+    %Common.Message.VideoStreamInformation{
       stream_id: 1,
       count: 1,
       type: :video_stream_type_rtsp,
-      flags: [:video_stream_status_flags_running],
+      flags: MapSet.new([:video_stream_status_flags_running]),
       framerate: 30.0,
       resolution_h: 1280,
       resolution_v: 720,
@@ -65,11 +62,11 @@ defmodule AnnouncerEx.MessageBuilder do
   Build camera settings message.
   """
   def build_camera_settings(state) do
-    %Message.CameraSettings{
+    %Common.Message.CameraSettings{
       time_boot_ms: boot_timestamp(state.boot_time),
-      mode_id: 1,
-      zoomLevel: 1.0,
-      focusLevel: 1.0
+      mode_id: :camera_mode_image,
+      zoomlevel: 1.0,
+      focuslevel: 1.0
     }
   end
 
@@ -77,9 +74,9 @@ defmodule AnnouncerEx.MessageBuilder do
   Build video stream status message.
   """
   def build_video_stream_status(_state) do
-    %Message.VideoStreamStatus{
+    %Common.Message.VideoStreamStatus{
       stream_id: 1,
-      flags: [:video_stream_status_flags_running],
+      flags: MapSet.new([:video_stream_status_flags_running]),
       framerate: 30.0,
       resolution_h: 1280,
       resolution_v: 720,
@@ -93,7 +90,7 @@ defmodule AnnouncerEx.MessageBuilder do
   Build command acknowledgement message.
   """
   def build_command_ack(command_id, result, source_system, source_component) do
-    %Message.CommandAck{
+    %Common.Message.CommandAck{
       command: command_id,
       result: result,
       progress: 0,

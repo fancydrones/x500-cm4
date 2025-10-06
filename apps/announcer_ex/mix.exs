@@ -22,8 +22,8 @@ defmodule AnnouncerEx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:xmavlink, "~> 0.3.0"},
-      {:xmavlink_util, "~> 0.4.1"}
+      {:xmavlink, "~> 0.4.1"},
+      {:xmavlink_util, "~> 0.4.2"}
     ]
   end
 end

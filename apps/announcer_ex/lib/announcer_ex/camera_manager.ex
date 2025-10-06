@@ -10,7 +10,6 @@ defmodule AnnouncerEx.CameraManager do
 
   alias AnnouncerEx.{CommandHandler, Config, MessageBuilder}
   alias XMAVLink.Router
-  alias XMAVLink.Dialect.Common.Message
 
   require Logger
 
@@ -42,7 +41,7 @@ defmodule AnnouncerEx.CameraManager do
     )
 
     # Subscribe to COMMAND_LONG messages for this component
-    Router.subscribe([message: Message.CommandLong])
+    Router.subscribe([message: Common.Message.CommandLong])
 
     # Start heartbeat timer
     schedule_heartbeat()
@@ -53,7 +52,7 @@ defmodule AnnouncerEx.CameraManager do
   @impl true
   def handle_info(:send_heartbeat, state) do
     heartbeat = MessageBuilder.build_heartbeat()
-    Router.send_message(heartbeat)
+    Router.pack_and_send(heartbeat)
 
     Logger.debug("Sent heartbeat")
 

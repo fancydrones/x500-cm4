@@ -60,7 +60,7 @@ defmodule AnnouncerEx.CommandHandler do
     send_ack(command_msg, :mav_result_accepted)
 
     camera_info = MessageBuilder.build_camera_information(state)
-    Router.send_message(camera_info)
+    Router.pack_and_send(camera_info)
   end
 
   # Request video stream information
@@ -68,7 +68,7 @@ defmodule AnnouncerEx.CommandHandler do
     send_ack(command_msg, :mav_result_accepted)
 
     stream_info = MessageBuilder.build_video_stream_information(state)
-    Router.send_message(stream_info)
+    Router.pack_and_send(stream_info)
   end
 
   # Request camera settings
@@ -76,7 +76,7 @@ defmodule AnnouncerEx.CommandHandler do
     send_ack(command_msg, :mav_result_accepted)
 
     settings = MessageBuilder.build_camera_settings(state)
-    Router.send_message(settings)
+    Router.pack_and_send(settings)
   end
 
   # Request video stream status
@@ -84,7 +84,7 @@ defmodule AnnouncerEx.CommandHandler do
     send_ack(command_msg, :mav_result_accepted)
 
     status = MessageBuilder.build_video_stream_status(state)
-    Router.send_message(status)
+    Router.pack_and_send(status)
   end
 
   # Request camera capture status (unsupported)
@@ -114,6 +114,6 @@ defmodule AnnouncerEx.CommandHandler do
       command_msg.target_component
     )
 
-    Router.send_message(ack)
+    Router.pack_and_send(ack)
   end
 end
