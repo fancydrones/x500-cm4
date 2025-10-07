@@ -49,18 +49,21 @@ class MavlinkCameraManager(threading.Thread):
 
     def wait_conn(self):
         """
-        Sends a ping to stabilish the UDP communication and awaits for a response
+        Sends heartbeat to establish the UDP communication and awaits for a response
         """
         msg = None
-        while not msg:
-            self.master.mav.ping_send(
-                int(self._boot_ts()), # Unix time in microseconds
-                int(0), # Ping number
-                int(0), # Request ping of all systems
-                int(0) # Request ping of all components
-            )
-            msg = self.master.recv_match()
+        attempts = 0
+        max_attempts = 10
+        while not msg and attempts < max_attempts:
+            self.send_heartbeat()
+            msg = self.master.recv_match(timeout=0.5)
+            attempts += 1
             time.sleep(0.5)
+        
+        if msg:
+            logging.info(f"Connection established after {attempts} attempts")
+        else:
+            logging.warning(f"No response after {attempts} attempts, continuing anyway")
 
     def mavlink_type(self, xml_type):
         if xml_type == "int32":
@@ -213,9 +216,11 @@ class MavlinkCameraManager(threading.Thread):
                         logging.debug(msg)
 
                 elif msg["mavpackettype"] == "PARAM_EXT_REQUEST_READ":
-                    self.read_param(msg['param_id'])
+                    logging.warning("PARAM_EXT_REQUEST_READ not supported - self.control not initialized")
+                    # self.read_param(msg['param_id'])  # Disabled: self.control not initialized
                 elif msg["mavpackettype"] == "PARAM_EXT_SET":
-                    self.set_param(raw_msg)
+                    logging.warning("PARAM_EXT_SET not supported - self.control not initialized")
+                    # self.set_param(raw_msg)  # Disabled: self.control not initialized
             except AttributeError as e:
                 if "NoneType" not in str(e):
                     logging.debug(e)
@@ -287,6 +292,8 @@ class MavlinkCameraManager(threading.Thread):
         )
 
     def send_video_stream_information(self):
+        # Handle None rtspstream case
+        rtsp_bytes = self.rtspstream if self.rtspstream is not None else b""
         self.master.mav.video_stream_information_send(
             1,
             1,
@@ -299,7 +306,7 @@ class MavlinkCameraManager(threading.Thread):
             0,
             63,
             self.makestring(self.camera_name.encode("ascii"), 32),
-            self.makestring(self.rtspstream, 160),
+            self.makestring(rtsp_bytes, 160),
         )
 
     @staticmethod
