@@ -37,7 +37,7 @@ config :xmavlink,
 
 **Root Cause**: `config_env()` is a compile-time macro that returns the Mix environment during compilation, not at runtime. In a release, this conditional is evaluated during build time with whatever Mix.env was set during compilation, and the configuration is frozen.
 
-**Fix**: Removed the conditional wrapper since runtime.exs is specifically designed to run at application startup, not compile time.
+**Fix**: Removed the conditional wrapper intentionally to apply configuration in all environments. The recommended pattern (`if config_env() == :prod do`) works as intended for releases, but the change ensures the configuration is always applied, not just in production.
 
 **Files Changed**:
 - `config/runtime.exs`
