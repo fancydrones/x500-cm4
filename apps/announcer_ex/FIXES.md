@@ -53,6 +53,19 @@ config :xmavlink,
 - `config/prod.exs`
 - `lib/announcer_ex/application.ex`
 
+### Issue 5: XMAVLink UDP Socket Binding Bug (CRITICAL)
+
+**Problem**: The application was failing to connect to the router service with the error `:eaddrnotavail` (address not available).
+
+**Root Cause**: XMAVLink 0.4.3 has a bug in `UDPOutConnection.connect/2` where it tries to bind the local UDP socket to the remote destination IP address using `ip: address` in `:gen_udp.open/2`. In Kubernetes, the DNS hostname resolves to the ClusterIP, and the pod cannot bind to that IP because it's not assigned to the pod's network interface.
+
+**Fix**: Created a patched version of `XMAVLink.UDPOutConnection` that removes the incorrect `ip: address` option from `:gen_udp.open/2`. The patched module has the same name as the dependency module, so Elixir uses our version instead.
+
+**Files Changed**:
+- `lib/announcer_ex/udp_out_connection_patch.ex` (new file)
+
+**See**: `UDP_FIX.md` for detailed explanation.
+
 ## Testing
 
 The fixes have been tested locally with `mix test` and show:
