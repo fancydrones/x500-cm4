@@ -84,6 +84,6 @@ Expected performance improvements over Python implementation:
 
 ## Dependencies
 
-- `xmavlink` ~> 0.3.0 - MAVLink protocol implementation
-- `xmavlink_util` ~> 0.4.1 - MAVLink Common dialect and utilities
+- `xmavlink` ~> 0.4.1 - MAVLink protocol implementation
+- `xmavlink_util` ~> 0.4.2 - MAVLink Common dialect and utilities
 
