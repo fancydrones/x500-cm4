@@ -49,7 +49,7 @@ defmodule XMAVLink.UDPOutConnection do
 
           :unknown_message ->
             # We re-broadcast valid frames with unknown messages
-            :ok = Logger.debug("relaying unknown message with id #{received_frame.message_id}}")
+            :ok = Logger.debug("relaying unknown message with id #{received_frame.message_id}")
 
             {:ok, {socket, source_addr, source_port}, receiving_connection,
              struct(received_frame, target: :broadcast)}
