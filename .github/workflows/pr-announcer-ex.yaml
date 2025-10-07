@@ -1,0 +1,70 @@
+name: Announcer Ex PR Checks
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/announcer_ex/**"
+      - ".github/workflows/pr-announcer-ex.yaml"
+
+jobs:
+  test:
+    name: Run Mix Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/announcer_ex
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: ./apps/announcer_ex/.tool-versions
+          version-type: strict
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            apps/announcer_ex/deps
+            apps/announcer_ex/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('apps/announcer_ex/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/announcer_ex
+          file: apps/announcer_ex/Dockerfile
+          push: false
+          load: true
+          tags: announcer-ex:pr-${{ github.event.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Print image size
+        run: |
+          IMAGE_SIZE=$(docker image inspect announcer-ex:pr-${{ github.event.pull_request.number }} --format='{{.Size}}')
+          IMAGE_SIZE_MB=$(echo "scale=2; $IMAGE_SIZE / 1024 / 1024" | bc)
+          echo "::notice title=Docker Image Size::Image size: ${IMAGE_SIZE_MB} MB (${IMAGE_SIZE} bytes)"
+          echo "### Docker Image Size 📦" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${IMAGE_SIZE_MB} MB" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bytes**: ${IMAGE_SIZE} bytes" >> $GITHUB_STEP_SUMMARY

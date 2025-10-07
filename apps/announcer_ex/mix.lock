@@ -1,0 +1,7 @@
+%{
+  "circuits_uart": {:hex, :circuits_uart, "1.5.5", "0cb6df39ab66bf712dd854d1da8fe9cdbe2fee245661bf6aef49031b43acdbf6", [:mix], [{:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "e688282b271d66cfe10c26e19fe3592202524532aaaebb3849ea26770ea52f5d"},
+  "elixir_make": {:hex, :elixir_make, "0.9.0", "6484b3cd8c0cee58f09f05ecaf1a140a8c97670671a6a0e7ab4dc326c3109726", [:mix], [], "hexpm", "db23d4fd8b757462ad02f8aa73431a426fe6671c80b200d9710caf3d1dd0ffdb"},
+  "poolboy": {:hex, :poolboy, "1.5.2", "392b007a1693a64540cead79830443abf5762f5d30cf50bc95cb2c1aaafa006b", [:rebar3], [], "hexpm", "dad79704ce5440f3d5a3681c8590b9dc25d1a561e8f5a9c995281012860901e3"},
+  "xmavlink": {:hex, :xmavlink, "0.4.1", "21ba84fb9969038418df339c371bcb16d2b2aa4d197cd9d00142c15d6c6f10d3", [:mix], [{:circuits_uart, "~> 1.5", [hex: :circuits_uart, repo: "hexpm", optional: false]}, {:poolboy, "~> 1.5", [hex: :poolboy, repo: "hexpm", optional: false]}], "hexpm", "7035ff1d17a3606453c257629e56d76fd23fe4def504466a2b18e59f3408094a"},
+  "xmavlink_util": {:hex, :xmavlink_util, "0.4.2", "69da63f870df153d0a31689667c1dd3667446ce3f37c88494dfe4cebe642a743", [:mix], [{:xmavlink, "~> 0.4.1", [hex: :xmavlink, repo: "hexpm", optional: false]}], "hexpm", "933e1ac03004cd9bfa26025e6e2f048b1b17310b312fff482b1373ced10d25d3"},
+}
