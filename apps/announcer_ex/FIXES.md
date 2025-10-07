@@ -65,7 +65,7 @@ To deploy the fixes:
 
 1. Build a new Docker image:
 ```bash
-cd /Users/royveshovda/src/fancydrones/x500-cm4/apps/announcer_ex
+cd apps/announcer_ex
 docker build -t ghcr.io/fancydrones/x500-cm4/announcer-ex:latest .
 ```
 
