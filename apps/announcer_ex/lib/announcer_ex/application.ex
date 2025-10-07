@@ -13,7 +13,7 @@ defmodule AnnouncerEx.Application do
 
     # Log XMAVLink configuration for debugging
     xmavlink_config = Application.get_all_env(:xmavlink)
-    Logger.info("XMAVLink configuration: #{inspect(xmavlink_config)}")
+    Logger.debug("XMAVLink configuration: #{inspect(xmavlink_config)}")
 
     children = [
       AnnouncerEx.CameraManager
