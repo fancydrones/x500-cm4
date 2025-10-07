@@ -3,8 +3,8 @@ import Config
 # Production configuration
 # Runtime environment variables are handled in runtime.exs
 
-# Set production logger level
-config :logger, level: :info
+# Set production logger level to debug temporarily for debugging
+config :logger, level: :debug
 
 # Compile-time production settings
 config :announcer_ex,

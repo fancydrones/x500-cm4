@@ -4,11 +4,16 @@ defmodule AnnouncerEx.Application do
   @moduledoc false
 
   use Application
+  require Logger
 
   @impl true
   def start(_type, _args) do
     # Ensure XMAVLink application is started
     Application.ensure_all_started(:xmavlink)
+
+    # Log XMAVLink configuration for debugging
+    xmavlink_config = Application.get_all_env(:xmavlink)
+    Logger.info("XMAVLink configuration: #{inspect(xmavlink_config)}")
 
     children = [
       AnnouncerEx.CameraManager
