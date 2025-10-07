@@ -73,7 +73,7 @@ Or force a rollout restart if using :latest:
 kubectl rollout restart deployment/announcer-ex -n rpiuav
 ```
 
-4. Verify the deployment:
+- Verify the deployment:
 ```bash
 kubectl get pods -n rpiuav
 kubectl logs -n rpiuav <announcer-ex-pod-name> --tail=50
