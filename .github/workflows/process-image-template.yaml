@@ -62,10 +62,17 @@ jobs:
             org.opencontainers.image.vendor=${{ env.IMAGE_VENDOR }}
             org.opencontainers.image.version=${{ env.datetag }}
 
+      - name: Set directory name
+        id: dir
+        run: |
+          # Convert hyphens to underscores for directory name
+          dir_name=$(echo "${{ inputs.app_name }}" | tr '-' '_')
+          echo "dir_name=$dir_name" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: apps/${{ inputs.app_name }}
+          context: apps/${{ steps.dir.outputs.dir_name }}
           platforms: linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
