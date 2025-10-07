@@ -18,7 +18,14 @@ defmodule AnnouncerEx.CommandHandler do
   @mav_cmd_set_camera_zoom 531
 
   @doc """
-  Handle a command from a COMMAND_LONG message.
+  Handles a command from a COMMAND_LONG message.
+  
+  ## Parameters
+    - `command_msg`: The COMMAND_LONG message containing the command to handle.
+    - `frame`: The MAVLink frame containing metadata about the message, including
+      `source_system` and `source_component`, which identify the origin of the command.
+      These are extracted to determine where to send responses and for logging.
+    - `state`: The current state of the system.
   """
   def handle_command(command_msg, frame, state) do
     command_id = command_msg.command
