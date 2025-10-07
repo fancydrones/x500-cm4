@@ -63,20 +63,9 @@ The fixes have been tested locally with `mix test` and show:
 
 To deploy the fixes:
 
-1. Build a new Docker image:
+**Note:** Replace `${VERSION}` with your chosen version string or commit SHA. For example, you can set it with:
 ```bash
-cd apps/announcer_ex
-docker build -t ghcr.io/fancydrones/x500-cm4/announcer-ex:latest .
-```
-
-2. Push the image:
-```bash
-docker push ghcr.io/fancydrones/x500-cm4/announcer-ex:latest
-```
-
-3. Update the deployment (if using a specific tag):
-```bash
-kubectl set image deployment/announcer-ex announcer-ex=ghcr.io/fancydrones/x500-cm4/announcer-ex:latest -n rpiuav
+VERSION=$(git rev-parse --short HEAD)
 ```
 
 Or force a rollout restart if using :latest:
