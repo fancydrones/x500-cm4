@@ -41,7 +41,8 @@ defmodule AnnouncerEx.CameraManager do
     )
 
     # Subscribe to COMMAND_LONG messages for this component
-    Router.subscribe(message: Common.Message.CommandLong)
+    # as_frame: true ensures we receive the frame with source_system/component info
+    Router.subscribe(message: Common.Message.CommandLong, as_frame: true)
 
     # Start heartbeat timer
     schedule_heartbeat()
@@ -61,12 +62,13 @@ defmodule AnnouncerEx.CameraManager do
   end
 
   @impl true
-  def handle_info({:mavlink_message, %{message: command_msg} = frame}, state) do
+  def handle_info(frame = %XMAVLink.Frame{message: command_msg}, state)
+      when is_struct(command_msg, Common.Message.CommandLong) do
     # Check if command is for this component
     if command_msg.target_system == state.system_id and
          command_msg.target_component == state.camera_id do
       Logger.debug(
-        "Processing command #{command_msg.command} for system #{state.system_id}/#{state.camera_id}"
+        "Processing command #{command_msg.command} from #{frame.source_system}/#{frame.source_component} for system #{state.system_id}/#{state.camera_id}"
       )
 
       CommandHandler.handle_command(command_msg, frame, state)
