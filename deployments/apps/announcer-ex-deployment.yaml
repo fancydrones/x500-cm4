@@ -43,7 +43,7 @@ spec:
           value: "false"
         - name: ENABLE_CAMERA_INFO_BROADCAST
           value: "false"
-        image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-f1c3e47
+        image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-f55f0dd
         name: announcer-ex
         resources:
           limits:
