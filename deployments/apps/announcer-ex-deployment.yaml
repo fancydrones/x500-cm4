@@ -41,7 +41,7 @@ spec:
           value: "1"
         - name: ENABLE_STREAM_STATUS
           value: "true"
-        image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-6eb7af1
+        image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-52119d6
         name: announcer-ex
         resources:
           limits:
