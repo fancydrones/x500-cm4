@@ -40,8 +40,8 @@ spec:
         - name: MAVLINK20
           value: "1"
         - name: ENABLE_STREAM_STATUS
-          value: "false"
-        image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-f6eff36
+          value: "true"
+        image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-55eec17
         name: announcer-ex
         resources:
           limits:
