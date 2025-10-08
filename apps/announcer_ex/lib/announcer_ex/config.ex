@@ -88,4 +88,17 @@ defmodule AnnouncerEx.Config do
   def router_connection_string! do
     "udpout:#{system_host!()}:#{system_port!()}"
   end
+
+  @doc """
+  Get whether to enable periodic stream status broadcasting.
+  Defaults to false (disabled).
+  """
+  def enable_stream_status! do
+    case System.get_env("ENABLE_STREAM_STATUS") do
+      nil -> false
+      "true" -> true
+      "1" -> true
+      _ -> false
+    end
+  end
 end
