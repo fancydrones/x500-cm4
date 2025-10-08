@@ -7,7 +7,9 @@ defmodule AnnouncerEx.MessageBuilderTest do
       heartbeat = MessageBuilder.build_heartbeat()
 
       assert heartbeat.type == :mav_type_camera
-      assert heartbeat.autopilot == :mav_autopilot_invalid
+      # Must use MAV_AUTOPILOT_GENERIC (0) to match Python implementation
+      # and ensure QGC properly recognizes the camera component
+      assert heartbeat.autopilot == :mav_autopilot_generic
       assert heartbeat.system_status == :mav_state_standby
       assert heartbeat.mavlink_version == 3
     end

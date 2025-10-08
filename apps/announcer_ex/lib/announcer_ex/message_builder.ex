@@ -5,11 +5,12 @@ defmodule AnnouncerEx.MessageBuilder do
 
   @doc """
   Build a heartbeat message.
+  Matches the original Python implementation which uses MAV_AUTOPILOT_GENERIC.
   """
   def build_heartbeat do
     %Common.Message.Heartbeat{
       type: :mav_type_camera,
-      autopilot: :mav_autopilot_invalid,
+      autopilot: :mav_autopilot_generic,
       base_mode: MapSet.new(),
       custom_mode: 0,
       system_status: :mav_state_standby,
