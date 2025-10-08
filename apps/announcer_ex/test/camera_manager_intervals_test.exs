@@ -7,9 +7,25 @@ defmodule AnnouncerEx.CameraManagerIntervalsTest do
   - Heartbeat must be 1Hz (1000ms) per MAVLink spec
   - Camera info broadcast should be 30s to avoid overwhelming QGC
   - Stream status should NOT be periodically broadcast (request-only per MAVLink spec)
+  - Startup delay prevents race conditions during camera discovery
   """
 
   describe "broadcast interval constants" do
+    test "startup delay prevents race conditions in camera discovery" do
+      # This test ensures we have a startup delay before sending the first heartbeat
+      # This prevents race conditions where QGC receives our heartbeat and sends
+      # MAV_CMD_REQUEST_MESSAGE before our command subscription is fully established
+      startup_delay = get_module_attribute(AnnouncerEx.CameraManager, :startup_delay)
+
+      assert startup_delay >= 500,
+             "Startup delay must be at least 500ms to prevent discovery race conditions"
+
+      assert startup_delay <= 2000,
+             "Startup delay should not be more than 2s to avoid unnecessary discovery delays"
+    end
+  end
+
+  describe "broadcast interval constants (legacy)" do
     test "heartbeat interval is 1 second (1Hz) as required by MAVLink spec" do
       # This test ensures we don't accidentally change the heartbeat interval
       # MAVLink requires heartbeats at 1Hz minimum
@@ -93,6 +109,7 @@ defmodule AnnouncerEx.CameraManagerIntervalsTest do
           :heartbeat_interval -> 1000
           :camera_info_interval -> 30_000
           :stream_status_interval -> 2000
+          :startup_delay -> 500
           _ -> raise "Unknown attribute #{attribute}"
         end
     end
