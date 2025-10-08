@@ -110,18 +110,21 @@ defmodule AnnouncerEx.MessageBuilder do
 
   @doc """
   Pad string to specific byte length.
-  Returns a list of bytes (integers 0-255).
+  Returns a binary string padded with null bytes.
   """
   def pad_bytes(str, length) do
-    bytes = :binary.bin_to_list(str)
-    bytes_length = length(bytes)
+    # Get the byte size of the string
+    byte_size = byte_size(str)
 
     cond do
-      bytes_length >= length ->
-        Enum.take(bytes, length)
+      # String is already longer than or equal to length, truncate it
+      byte_size >= length ->
+        :binary.part(str, 0, length)
 
+      # String is shorter, pad with null bytes
       true ->
-        bytes ++ List.duplicate(0, length - bytes_length)
+        padding_size = length - byte_size
+        str <> :binary.copy(<<0>>, padding_size)
     end
   end
 end
