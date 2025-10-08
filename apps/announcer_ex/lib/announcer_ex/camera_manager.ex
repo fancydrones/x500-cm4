@@ -62,6 +62,7 @@ defmodule AnnouncerEx.CameraManager do
     # Optionally start periodic camera info announcements
     if state.enable_camera_info_broadcast do
       schedule_camera_info()
+      Logger.info("Camera info broadcasting enabled. Periodic CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION will be sent.")
     end
 
     {:ok, state}
@@ -101,7 +102,7 @@ defmodule AnnouncerEx.CameraManager do
     result2 = Router.pack_and_send(stream_info)
     Logger.debug("VIDEO_STREAM_INFORMATION pack_and_send result: #{inspect(result2)}")
 
-    Logger.info("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
+    Logger.debug("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
 
     schedule_camera_info()
     {:noreply, state}
@@ -143,7 +144,7 @@ defmodule AnnouncerEx.CameraManager do
     # Log the type of message received for debugging
     case msg do
       %XMAVLink.Frame{message: message} ->
-        message_type = message.__struct__ |> Module.split() |> List.last()
+        message_type = message.__struct__ |> to_string() |> String.split(".") |> List.last()
         Logger.debug("Received non-command message: #{message_type}")
 
       _ ->
