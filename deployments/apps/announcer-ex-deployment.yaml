@@ -40,9 +40,9 @@ spec:
             - name: MAVLINK20
               value: "1"
             - name: ENABLE_STREAM_STATUS
-              value: "false"
-            - name: "ENABLE_CAMERA_INFO_BROADCAST"
               value: "true"
+            - name: "ENABLE_CAMERA_INFO_BROADCAST"
+              value: "false"
           image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-ac8dc33
           name: announcer-ex
           resources:
