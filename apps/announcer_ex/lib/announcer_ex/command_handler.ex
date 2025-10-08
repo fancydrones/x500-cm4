@@ -39,8 +39,6 @@ defmodule AnnouncerEx.CommandHandler do
     source_system = frame.source_system
     source_component = frame.source_component
 
-    Logger.debug("Received command: #{command_id} from #{source_system}/#{source_component}")
-
     case command_id do
       @mav_cmd_request_message ->
         requested_msg_id = trunc(command_msg.param1)
@@ -73,7 +71,6 @@ defmodule AnnouncerEx.CommandHandler do
         handle_set_camera_zoom(command_msg, source_system, source_component, state)
 
       _ ->
-        Logger.debug("Ignoring unknown command: #{command_id}")
         :ok
     end
   end

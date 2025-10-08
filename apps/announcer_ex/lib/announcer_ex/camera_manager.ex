@@ -74,8 +74,6 @@ defmodule AnnouncerEx.CameraManager do
     heartbeat = MessageBuilder.build_heartbeat()
     Router.pack_and_send(heartbeat)
 
-    Logger.debug("Sent heartbeat: type=#{inspect(heartbeat.type)}, autopilot=#{inspect(heartbeat.autopilot)}, system_status=#{inspect(heartbeat.system_status)}")
-
     schedule_heartbeat()
     {:noreply, state}
   end
@@ -85,8 +83,6 @@ defmodule AnnouncerEx.CameraManager do
     status = MessageBuilder.build_video_stream_status(state)
     Router.pack_and_send(status)
 
-    Logger.debug("Sent stream status")
-
     schedule_stream_status()
     {:noreply, state}
   end
@@ -94,18 +90,10 @@ defmodule AnnouncerEx.CameraManager do
   @impl true
   def handle_info(:send_camera_info, state) do
     camera_info = MessageBuilder.build_camera_information(state)
-    # vendor_name is now a list, not a binary
-    Logger.debug("Sending CAMERA_INFORMATION: vendor=#{inspect(Enum.take(camera_info.vendor_name, 10))}")
-    result1 = Router.pack_and_send(camera_info)
-    Logger.debug("CAMERA_INFORMATION pack_and_send result: #{inspect(result1)}")
+    Router.pack_and_send(camera_info)
 
     stream_info = MessageBuilder.build_video_stream_information(state)
-    # name is still a binary
-    Logger.debug("Sending VIDEO_STREAM_INFORMATION: name=#{inspect(stream_info.name |> :binary.bin_to_list() |> Enum.take(10))}")
-    result2 = Router.pack_and_send(stream_info)
-    Logger.debug("VIDEO_STREAM_INFORMATION pack_and_send result: #{inspect(result2)}")
-
-    Logger.info("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
+    Router.pack_and_send(stream_info)
 
     schedule_camera_info()
     {:noreply, state}
@@ -132,28 +120,13 @@ defmodule AnnouncerEx.CameraManager do
       )
 
       CommandHandler.handle_command(command_msg, frame, state)
-    else
-      Logger.debug(
-        "Ignoring command for system #{command_msg.target_system}/#{command_msg.target_component} " <>
-          "(we are #{state.system_id}/#{state.camera_id})"
-      )
     end
 
     {:noreply, state}
   end
 
   @impl true
-  def handle_info(msg, state) do
-    # Log the type of message received for debugging
-    case msg do
-      %XMAVLink.Frame{message: message} ->
-        message_type = message.__struct__ |> to_string() |> String.split(".") |> List.last()
-        Logger.debug("Received non-command message: #{message_type}")
-
-      _ ->
-        Logger.debug("Received unknown message: #{inspect(msg)}")
-    end
-
+  def handle_info(_msg, state) do
     {:noreply, state}
   end
 
