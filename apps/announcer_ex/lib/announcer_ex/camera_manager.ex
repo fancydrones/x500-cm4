@@ -118,7 +118,7 @@ defmodule AnnouncerEx.CameraManager do
     # Log the type of message received for debugging
     case msg do
       %XMAVLink.Frame{message: message} ->
-        message_type = message.__struct__ |> Module.split() |> List.last()
+        message_type = message.__struct__ |> to_string() |> String.split(".") |> List.last()
         Logger.debug("Received non-command message: #{message_type}")
 
       _ ->
