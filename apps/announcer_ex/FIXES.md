@@ -137,4 +137,3 @@ When `as_frame: true`:
    - Both implementations should now behave identically
    - Consider running both side-by-side temporarily to verify parity
 
-````
