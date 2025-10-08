@@ -14,6 +14,7 @@ defmodule AnnouncerEx.CameraManager do
   require Logger
 
   @heartbeat_interval 1000
+  @camera_info_interval 5000
 
   # Client API
 
@@ -47,6 +48,9 @@ defmodule AnnouncerEx.CameraManager do
     # Start heartbeat timer
     schedule_heartbeat()
 
+    # Start periodic camera information announcements
+    schedule_camera_info()
+
     {:ok, state}
   end
 
@@ -58,6 +62,22 @@ defmodule AnnouncerEx.CameraManager do
     Logger.debug("Sent heartbeat")
 
     schedule_heartbeat()
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:send_camera_info, state) do
+    # Send camera information
+    camera_info = MessageBuilder.build_camera_information(state)
+    Router.pack_and_send(camera_info)
+
+    # Send video stream information
+    stream_info = MessageBuilder.build_video_stream_information(state)
+    Router.pack_and_send(stream_info)
+
+    Logger.debug("Sent camera information and stream details")
+
+    schedule_camera_info()
     {:noreply, state}
   end
 
@@ -91,5 +111,9 @@ defmodule AnnouncerEx.CameraManager do
 
   defp schedule_heartbeat do
     Process.send_after(self(), :send_heartbeat, @heartbeat_interval)
+  end
+
+  defp schedule_camera_info do
+    Process.send_after(self(), :send_camera_info, @camera_info_interval)
   end
 end
