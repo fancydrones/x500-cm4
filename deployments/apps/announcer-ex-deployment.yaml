@@ -41,8 +41,8 @@ spec:
               value: "1"
             - name: ENABLE_STREAM_STATUS
               value: "false"
-            - name: "ENABLE_CAMERA_INFO_BROADCAST"
-              value: "false"
+            - name: ENABLE_CAMERA_INFO_BROADCAST
+              value: "true"
           image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-04849c8
           name: announcer-ex
           resources:
