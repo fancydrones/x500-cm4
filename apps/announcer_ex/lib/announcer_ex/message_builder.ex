@@ -9,7 +9,7 @@ defmodule AnnouncerEx.MessageBuilder do
   def build_heartbeat do
     %Common.Message.Heartbeat{
       type: :mav_type_camera,
-      autopilot: :mav_autopilot_generic,
+      autopilot: :mav_autopilot_invalid,
       base_mode: MapSet.new(),
       custom_mode: 0,
       system_status: :mav_state_standby,
@@ -56,6 +56,50 @@ defmodule AnnouncerEx.MessageBuilder do
       name: pad_bytes(state.camera_name, 32),
       uri: pad_bytes(state.stream_url, 160)
     }
+  end
+
+  @doc """
+  Build all video stream information messages.
+  Returns a list of VideoStreamInformation messages, one per stream.
+
+  Supports both single stream (legacy) and multiple streams configuration.
+  If state.streams is not set, uses the default stream from state.stream_url.
+  """
+  def build_all_stream_info(state) do
+    streams = Map.get(state, :streams, nil)
+
+    case streams do
+      nil ->
+        # Legacy single stream mode
+        [build_video_stream_information(state)]
+
+      stream_list when is_list(stream_list) and length(stream_list) > 0 ->
+        # Multiple streams mode
+        count = length(stream_list)
+
+        stream_list
+        |> Enum.with_index(1)
+        |> Enum.map(fn {stream, idx} ->
+          %Common.Message.VideoStreamInformation{
+            stream_id: idx,
+            count: count,
+            type: Map.get(stream, :type, :video_stream_type_rtsp),
+            flags: Map.get(stream, :flags, :video_stream_status_flags_running),
+            framerate: Map.get(stream, :framerate, 30.0),
+            resolution_h: Map.get(stream, :resolution_h, 1280),
+            resolution_v: Map.get(stream, :resolution_v, 720),
+            bitrate: Map.get(stream, :bitrate, 5000),
+            rotation: Map.get(stream, :rotation, 0),
+            hfov: Map.get(stream, :hfov, 63),
+            name: pad_bytes(Map.get(stream, :name, state.camera_name), 32),
+            uri: pad_bytes(Map.get(stream, :uri, ""), 160)
+          }
+        end)
+
+      _ ->
+        # Fallback to single stream
+        [build_video_stream_information(state)]
+    end
   end
 
   @doc """

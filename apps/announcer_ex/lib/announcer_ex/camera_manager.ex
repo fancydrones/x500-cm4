@@ -14,7 +14,7 @@ defmodule AnnouncerEx.CameraManager do
   require Logger
 
   @heartbeat_interval 1000
-  @camera_info_interval 5000
+  @stream_status_interval 2000
 
   # Client API
 
@@ -34,7 +34,8 @@ defmodule AnnouncerEx.CameraManager do
       camera_name: Config.camera_name!(),
       stream_url: Config.camera_url!(),
       system_id: Config.system_id!(),
-      boot_time: System.monotonic_time(:millisecond)
+      boot_time: System.monotonic_time(:millisecond),
+      enable_stream_status: Config.enable_stream_status!()
     }
 
     Logger.info(
@@ -48,8 +49,10 @@ defmodule AnnouncerEx.CameraManager do
     # Start heartbeat timer
     schedule_heartbeat()
 
-    # Start periodic camera information announcements
-    schedule_camera_info()
+    # Optionally start periodic stream status announcements
+    if state.enable_stream_status do
+      schedule_stream_status()
+    end
 
     {:ok, state}
   end
@@ -66,18 +69,13 @@ defmodule AnnouncerEx.CameraManager do
   end
 
   @impl true
-  def handle_info(:send_camera_info, state) do
-    # Send camera information
-    camera_info = MessageBuilder.build_camera_information(state)
-    Router.pack_and_send(camera_info)
+  def handle_info(:send_stream_status, state) do
+    status = MessageBuilder.build_video_stream_status(state)
+    Router.pack_and_send(status)
 
-    # Send video stream information
-    stream_info = MessageBuilder.build_video_stream_information(state)
-    Router.pack_and_send(stream_info)
+    Logger.debug("Sent stream status")
 
-    Logger.debug("Sent camera information and stream details")
-
-    schedule_camera_info()
+    schedule_stream_status()
     {:noreply, state}
   end
 
@@ -113,7 +111,7 @@ defmodule AnnouncerEx.CameraManager do
     Process.send_after(self(), :send_heartbeat, @heartbeat_interval)
   end
 
-  defp schedule_camera_info do
-    Process.send_after(self(), :send_camera_info, @camera_info_interval)
+  defp schedule_stream_status do
+    Process.send_after(self(), :send_stream_status, @stream_status_interval)
   end
 end
