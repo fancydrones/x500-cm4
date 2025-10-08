@@ -15,7 +15,8 @@ defmodule AnnouncerEx.CameraManager do
 
   @heartbeat_interval 1000
   @stream_status_interval 2000
-  @camera_info_interval 5000
+  # Reduce broadcast frequency to avoid overwhelming QGC (30 seconds instead of 5)
+  @camera_info_interval 30_000
 
   # Client API
 

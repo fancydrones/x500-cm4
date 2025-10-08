@@ -44,8 +44,8 @@ defmodule AnnouncerEx.MessageBuilder do
       resolution_v: 720,
       lens_id: 0,
       flags: MapSet.new([:camera_cap_flags_has_video_stream]),
-      cam_definition_version: 1,
-      cam_definition_uri: pad_bytes("", 140)
+      cam_definition_version: 0,  # 0 indicates no definition file available
+      cam_definition_uri: pad_bytes("", 140)  # Empty string is valid for "no camera definition"
     }
   end
 
