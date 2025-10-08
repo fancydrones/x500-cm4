@@ -39,9 +39,12 @@ defmodule AnnouncerEx.CommandHandler do
     source_system = frame.source_system
     source_component = frame.source_component
 
+    Logger.debug("handle_command: command_id=#{command_id}, param1=#{command_msg.param1}, param2=#{command_msg.param2}")
+
     case command_id do
       @mav_cmd_request_message ->
         requested_msg_id = trunc(command_msg.param1)
+        Logger.debug("MAV_CMD_REQUEST_MESSAGE for msg_id=#{requested_msg_id}")
         handle_request_message(requested_msg_id, command_msg, source_system, source_component, state)
 
       @mav_cmd_request_camera_information ->
