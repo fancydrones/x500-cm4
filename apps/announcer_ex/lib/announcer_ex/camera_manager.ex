@@ -15,6 +15,7 @@ defmodule AnnouncerEx.CameraManager do
 
   @heartbeat_interval 1000
   @stream_status_interval 2000
+  @camera_info_interval 5000
 
   # Client API
 
@@ -35,7 +36,8 @@ defmodule AnnouncerEx.CameraManager do
       stream_url: Config.camera_url!(),
       system_id: Config.system_id!(),
       boot_time: System.monotonic_time(:millisecond),
-      enable_stream_status: Config.enable_stream_status!()
+      enable_stream_status: Config.enable_stream_status!(),
+      enable_camera_info_broadcast: Config.enable_camera_info_broadcast!()
     }
 
     Logger.info(
@@ -55,6 +57,11 @@ defmodule AnnouncerEx.CameraManager do
     # Optionally start periodic stream status announcements
     if state.enable_stream_status do
       schedule_stream_status()
+    end
+
+    # Optionally start periodic camera info announcements
+    if state.enable_camera_info_broadcast do
+      schedule_camera_info()
     end
 
     {:ok, state}
@@ -79,6 +86,20 @@ defmodule AnnouncerEx.CameraManager do
     Logger.debug("Sent stream status")
 
     schedule_stream_status()
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(:send_camera_info, state) do
+    camera_info = MessageBuilder.build_camera_information(state)
+    Router.pack_and_send(camera_info)
+
+    stream_info = MessageBuilder.build_video_stream_information(state)
+    Router.pack_and_send(stream_info)
+
+    Logger.info("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
+
+    schedule_camera_info()
     {:noreply, state}
   end
 
@@ -136,5 +157,9 @@ defmodule AnnouncerEx.CameraManager do
 
   defp schedule_stream_status do
     Process.send_after(self(), :send_stream_status, @stream_status_interval)
+  end
+
+  defp schedule_camera_info do
+    Process.send_after(self(), :send_camera_info, @camera_info_interval)
   end
 end

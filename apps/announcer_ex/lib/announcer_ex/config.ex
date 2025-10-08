@@ -101,4 +101,20 @@ defmodule AnnouncerEx.Config do
       _ -> false
     end
   end
+
+  @doc """
+  Get whether to enable periodic camera info broadcasting.
+  Some QGC versions require cameras to periodically announce themselves.
+  Defaults to true (enabled).
+  """
+  def enable_camera_info_broadcast! do
+    case System.get_env("ENABLE_CAMERA_INFO_BROADCAST") do
+      nil -> true
+      "true" -> true
+      "1" -> true
+      "false" -> false
+      "0" -> false
+      _ -> true
+    end
+  end
 end
