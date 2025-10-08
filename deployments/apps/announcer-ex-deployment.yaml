@@ -39,6 +39,8 @@ spec:
               name: rpi4-config
         - name: MAVLINK20
           value: "1"
+        - name: ENABLE_STREAM_STATUS
+          value: "true"
         image: ghcr.io/fancydrones/x500-cm4/announcer-ex:20251008-6eb7af1
         name: announcer-ex
         resources:
