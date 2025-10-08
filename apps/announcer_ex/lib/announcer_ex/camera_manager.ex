@@ -92,7 +92,8 @@ defmodule AnnouncerEx.CameraManager do
   @impl true
   def handle_info(:send_heartbeat, state) do
     heartbeat = MessageBuilder.build_heartbeat()
-    Router.pack_and_send(heartbeat)
+    result = Router.pack_and_send(heartbeat)
+    Logger.debug("Sent HEARTBEAT from #{state.system_id}/#{state.camera_id}, result: #{inspect(result)}")
 
     schedule_heartbeat()
     {:noreply, state}
@@ -110,10 +111,12 @@ defmodule AnnouncerEx.CameraManager do
   @impl true
   def handle_info(:send_camera_info, state) do
     camera_info = MessageBuilder.build_camera_information(state)
-    Router.pack_and_send(camera_info)
+    result1 = Router.pack_and_send(camera_info)
+    Logger.info("Broadcast CAMERA_INFORMATION from #{state.system_id}/#{state.camera_id}, result: #{inspect(result1)}")
 
     stream_info = MessageBuilder.build_video_stream_information(state)
-    Router.pack_and_send(stream_info)
+    result2 = Router.pack_and_send(stream_info)
+    Logger.info("Broadcast VIDEO_STREAM_INFORMATION from #{state.system_id}/#{state.camera_id}, result: #{inspect(result2)}")
 
     schedule_camera_info()
     {:noreply, state}
