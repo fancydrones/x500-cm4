@@ -98,7 +98,7 @@ defmodule AnnouncerEx.CameraManager do
     stream_info = MessageBuilder.build_video_stream_information(state)
     Router.pack_and_send(stream_info)
 
-    Logger.info("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
+    Logger.debug("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
 
     schedule_camera_info()
     {:noreply, state}
