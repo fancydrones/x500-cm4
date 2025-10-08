@@ -34,7 +34,9 @@ defmodule AnnouncerEx.MessageBuilder do
       time_boot_ms: boot_timestamp(state.boot_time),
       vendor_name: vendor_bytes,
       model_name: model_bytes,
-      firmware_version: 1,
+      # Encode firmware version: (Dev << 24) | (Patch << 16) | (Minor << 8) | Major
+      # Version 1.0.0 (no dev) = 0x00000100
+      firmware_version: encode_firmware_version(1, 0, 0, 0),
       # Use realistic camera specs to avoid division by zero in QGC
       # Typical IMX219 sensor (Raspberry Pi Camera v2)
       focal_length: 3.04,           # mm - realistic value, not 0!
@@ -181,5 +183,25 @@ defmodule AnnouncerEx.MessageBuilder do
         padding_size = length - byte_size
         str <> :binary.copy(<<0>>, padding_size)
     end
+  end
+
+  @doc """
+  Encode firmware version according to MAVLink specification.
+  Format: (Dev << 24) | (Patch << 16) | (Minor << 8) | Major
+
+  ## Examples
+      iex> AnnouncerEx.MessageBuilder.encode_firmware_version(1, 2, 3, 4)
+      0x04030201
+
+      iex> AnnouncerEx.MessageBuilder.encode_firmware_version(1, 0, 0, 0)
+      0x00000001
+  """
+  def encode_firmware_version(major, minor, patch, dev) do
+    import Bitwise
+
+    ((dev &&& 0xFF) <<< 24) |||
+    ((patch &&& 0xFF) <<< 16) |||
+    ((minor &&& 0xFF) <<< 8) |||
+    (major &&& 0xFF)
   end
 end
