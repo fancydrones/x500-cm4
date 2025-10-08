@@ -35,9 +35,11 @@ defmodule AnnouncerEx.MessageBuilder do
       vendor_name: vendor_bytes,
       model_name: model_bytes,
       firmware_version: 1,
-      focal_length: 0.0,
-      sensor_size_h: 0.0,
-      sensor_size_v: 0.0,
+      # Use realistic camera specs to avoid division by zero in QGC
+      # Typical IMX219 sensor (Raspberry Pi Camera v2)
+      focal_length: 3.04,           # mm - realistic value, not 0!
+      sensor_size_h: 3.68,          # mm - sensor width, not 0!
+      sensor_size_v: 2.76,          # mm - sensor height, not 0!
       resolution_h: 1280,
       resolution_v: 720,
       lens_id: 0,
@@ -61,7 +63,7 @@ defmodule AnnouncerEx.MessageBuilder do
       resolution_v: 720,
       bitrate: 5000,
       rotation: 0,
-      hfov: 63,
+      hfov: 63,  # Horizontal field of view in degrees (IMX219 typical)
       name: pad_bytes(state.camera_name, 32),
       uri: pad_bytes(state.stream_url, 160)
     }
