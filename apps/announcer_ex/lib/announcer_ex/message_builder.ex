@@ -46,7 +46,7 @@ defmodule AnnouncerEx.MessageBuilder do
       stream_id: 1,
       count: 1,
       type: :video_stream_type_rtsp,
-      flags: MapSet.new([:video_stream_status_flags_running]),
+      flags: 1,  # VIDEO_STREAM_STATUS_FLAGS_RUNNING
       framerate: 30.0,
       resolution_h: 1280,
       resolution_v: 720,
@@ -76,7 +76,7 @@ defmodule AnnouncerEx.MessageBuilder do
   def build_video_stream_status(_state) do
     %Common.Message.VideoStreamStatus{
       stream_id: 1,
-      flags: MapSet.new([:video_stream_status_flags_running]),
+      flags: 1,  # VIDEO_STREAM_STATUS_FLAGS_RUNNING
       framerate: 30.0,
       resolution_h: 1280,
       resolution_v: 720,
