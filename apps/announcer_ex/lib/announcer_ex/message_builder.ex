@@ -21,10 +21,19 @@ defmodule AnnouncerEx.MessageBuilder do
   Build camera information message.
   """
   def build_camera_information(state) do
+    # MAVLink expects vendor_name and model_name as lists of uint8_t, not binary strings
+    # Convert string to list of byte values
+    vendor = String.slice(state.camera_name, 0, 31)
+    model = String.slice(state.camera_name, 0, 31)
+
+    # Convert to list of bytes (integers) and pad to 32 bytes
+    vendor_bytes = String.to_charlist(vendor) |> Enum.concat(List.duplicate(0, 32)) |> Enum.take(32)
+    model_bytes = String.to_charlist(model) |> Enum.concat(List.duplicate(0, 32)) |> Enum.take(32)
+
     %Common.Message.CameraInformation{
       time_boot_ms: boot_timestamp(state.boot_time),
-      vendor_name: pad_bytes(state.camera_name, 32),
-      model_name: pad_bytes(state.camera_name, 32),
+      vendor_name: vendor_bytes,
+      model_name: model_bytes,
       firmware_version: 1,
       focal_length: 0.0,
       sensor_size_h: 0.0,

@@ -93,10 +93,14 @@ defmodule AnnouncerEx.CameraManager do
   @impl true
   def handle_info(:send_camera_info, state) do
     camera_info = MessageBuilder.build_camera_information(state)
-    Router.pack_and_send(camera_info)
+    Logger.debug("Sending CAMERA_INFORMATION: vendor=#{inspect(camera_info.vendor_name |> :binary.bin_to_list() |> Enum.take(10))}")
+    result1 = Router.pack_and_send(camera_info)
+    Logger.debug("CAMERA_INFORMATION pack_and_send result: #{inspect(result1)}")
 
     stream_info = MessageBuilder.build_video_stream_information(state)
-    Router.pack_and_send(stream_info)
+    Logger.debug("Sending VIDEO_STREAM_INFORMATION: name=#{inspect(stream_info.name |> :binary.bin_to_list() |> Enum.take(10))}")
+    result2 = Router.pack_and_send(stream_info)
+    Logger.debug("VIDEO_STREAM_INFORMATION pack_and_send result: #{inspect(result2)}")
 
     Logger.debug("Broadcast CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION")
 
