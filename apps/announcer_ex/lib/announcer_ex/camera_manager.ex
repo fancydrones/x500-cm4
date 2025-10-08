@@ -42,9 +42,12 @@ defmodule AnnouncerEx.CameraManager do
       "Camera initialized: #{state.camera_name} (ID: #{state.camera_id}) on system #{state.system_id}"
     )
 
-    # Subscribe to COMMAND_LONG messages for this component
+    # Subscribe to COMMAND_LONG messages
     # as_frame: true ensures we receive the frame with source_system/component info
+    # We subscribe to ALL CommandLong messages and filter them in handle_info
     Router.subscribe(message: Common.Message.CommandLong, as_frame: true)
+
+    Logger.info("Subscribed to CommandLong messages. Waiting for commands from QGC...")
 
     # Start heartbeat timer
     schedule_heartbeat()
@@ -62,7 +65,7 @@ defmodule AnnouncerEx.CameraManager do
     heartbeat = MessageBuilder.build_heartbeat()
     Router.pack_and_send(heartbeat)
 
-    Logger.debug("Sent heartbeat")
+    Logger.debug("Sent heartbeat: type=#{inspect(heartbeat.type)}, autopilot=#{inspect(heartbeat.autopilot)}, system_status=#{inspect(heartbeat.system_status)}")
 
     schedule_heartbeat()
     {:noreply, state}
@@ -112,7 +115,16 @@ defmodule AnnouncerEx.CameraManager do
 
   @impl true
   def handle_info(msg, state) do
-    Logger.debug("Received unknown message: #{inspect(msg)}")
+    # Log the type of message received for debugging
+    case msg do
+      %XMAVLink.Frame{message: message} ->
+        message_type = message.__struct__ |> Module.split() |> List.last()
+        Logger.debug("Received non-command message: #{message_type}")
+
+      _ ->
+        Logger.debug("Received unknown message: #{inspect(msg)}")
+    end
+
     {:noreply, state}
   end
 
