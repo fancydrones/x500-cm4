@@ -62,6 +62,7 @@ defmodule AnnouncerEx.CameraManager do
     # Optionally start periodic camera info announcements
     if state.enable_camera_info_broadcast do
       schedule_camera_info()
+      Logger.info("Camera info broadcasting enabled. Periodic CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION will be sent.")
     end
 
     {:ok, state}
