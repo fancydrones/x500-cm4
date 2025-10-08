@@ -17,6 +17,9 @@ defmodule AnnouncerEx.CameraManager do
   @stream_status_interval 2000
   # Reduce broadcast frequency to avoid overwhelming QGC (30 seconds instead of 5)
   @camera_info_interval 30_000
+  # Delay before sending first heartbeat to ensure subscriptions are established
+  # This prevents race conditions where QGC sends commands before we're ready
+  @startup_delay 500
 
   # Client API
 
@@ -52,7 +55,25 @@ defmodule AnnouncerEx.CameraManager do
 
     Logger.info("Subscribed to CommandLong messages. Waiting for commands from QGC...")
 
-    # Start heartbeat timer
+    # Wait a short time before starting to send messages
+    # This ensures the router subscription is fully established and prevents
+    # race conditions where QGC receives our heartbeat and sends commands
+    # before we're ready to handle them
+    Process.send_after(self(), :startup_complete, @startup_delay)
+
+    # Camera info broadcasting will be started after startup delay
+    if state.enable_camera_info_broadcast do
+      Logger.info("Camera info broadcasting will be enabled after startup delay. Periodic CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION will be sent.")
+    end
+
+    {:ok, state}
+  end
+
+  @impl true
+  def handle_info(:startup_complete, state) do
+    Logger.info("Camera startup complete. Beginning heartbeat and announcements.")
+
+    # Start heartbeat timer immediately
     schedule_heartbeat()
 
     # Optionally start periodic stream status announcements
@@ -63,10 +84,9 @@ defmodule AnnouncerEx.CameraManager do
     # Optionally start periodic camera info announcements
     if state.enable_camera_info_broadcast do
       schedule_camera_info()
-      Logger.info("Camera info broadcasting enabled. Periodic CAMERA_INFORMATION and VIDEO_STREAM_INFORMATION will be sent.")
     end
 
-    {:ok, state}
+    {:noreply, state}
   end
 
   @impl true
