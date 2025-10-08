@@ -80,27 +80,34 @@ defmodule AnnouncerEx.CommandHandler do
 
   # Handle MAV_CMD_REQUEST_MESSAGE command
   defp handle_request_message(msg_id, command_msg, source_system, source_component, state) do
-    Logger.debug("Request for message ID: #{msg_id}")
+    Logger.info("Request for message ID: #{msg_id} (param2: #{command_msg.param2})")
 
     case msg_id do
       @msg_id_camera_information ->
+        Logger.info("Sending CAMERA_INFORMATION to #{source_system}/#{source_component}")
         send_ack(command_msg, :mav_result_accepted, source_system, source_component)
         camera_info = MessageBuilder.build_camera_information(state)
         Router.pack_and_send(camera_info)
+        Logger.info("Sent CAMERA_INFORMATION")
 
       @msg_id_video_stream_information ->
+        stream_id = trunc(command_msg.param2)
+        Logger.info("Sending VIDEO_STREAM_INFORMATION (stream_id: #{stream_id}) to #{source_system}/#{source_component}")
         send_ack(command_msg, :mav_result_accepted, source_system, source_component)
         # Send all stream information messages
         stream_infos = MessageBuilder.build_all_stream_info(state)
         Enum.each(stream_infos, &Router.pack_and_send/1)
+        Logger.info("Sent #{length(stream_infos)} VIDEO_STREAM_INFORMATION message(s)")
 
       @msg_id_video_stream_status ->
+        Logger.info("Sending VIDEO_STREAM_STATUS to #{source_system}/#{source_component}")
         send_ack(command_msg, :mav_result_accepted, source_system, source_component)
         status = MessageBuilder.build_video_stream_status(state)
         Router.pack_and_send(status)
+        Logger.info("Sent VIDEO_STREAM_STATUS")
 
       _ ->
-        Logger.debug("Unsupported message ID requested: #{msg_id}")
+        Logger.warning("Unsupported message ID requested: #{msg_id}")
         send_ack(command_msg, :mav_result_unsupported, source_system, source_component)
     end
   end

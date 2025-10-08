@@ -83,16 +83,27 @@ defmodule AnnouncerEx.CameraManager do
   def handle_info(frame = %XMAVLink.Frame{message: command_msg}, state)
       when is_struct(command_msg, Common.Message.CommandLong) do
     # Check if command is for this component
-    if command_msg.target_system == state.system_id and
-         command_msg.target_component == state.camera_id do
-      Logger.debug(
-        "Processing command #{command_msg.command} from #{frame.source_system}/#{frame.source_component} for system #{state.system_id}/#{state.camera_id}"
+    # Accept commands targeted at:
+    # 1. This specific component (target_system == our system AND target_component == our component)
+    # 2. Broadcast to all components on our system (target_system == our system AND target_component == 0)
+    # 3. Broadcast to all systems (target_system == 0)
+    target_matches =
+      (command_msg.target_system == 0) or
+        (command_msg.target_system == state.system_id and
+           (command_msg.target_component == 0 or command_msg.target_component == state.camera_id))
+
+    if target_matches do
+      Logger.info(
+        "Processing command #{command_msg.command} from #{frame.source_system}/#{frame.source_component} " <>
+          "for target #{command_msg.target_system}/#{command_msg.target_component} " <>
+          "(we are #{state.system_id}/#{state.camera_id})"
       )
 
       CommandHandler.handle_command(command_msg, frame, state)
     else
       Logger.debug(
-        "Ignoring command for system #{command_msg.target_system}/#{command_msg.target_component}"
+        "Ignoring command for system #{command_msg.target_system}/#{command_msg.target_component} " <>
+          "(we are #{state.system_id}/#{state.camera_id})"
       )
     end
 
