@@ -1,9 +1,12 @@
 import Config
 
-# Test-specific config - set test environment variables
-System.put_env("CAMERA_ID", "100")
-System.put_env("CAMERA_NAME", "Test Camera")
-System.put_env("CAMERA_URL", "rtsp://test:554/stream")
-System.put_env("SYSTEM_ID", "1")
-System.put_env("SYSTEM_HOST", "localhost")
-System.put_env("SYSTEM_PORT", "14550")
+# Test-specific config - configure announcer_ex for tests
+config :announcer_ex,
+  camera_id: 100,
+  camera_name: "Test Camera",
+  camera_url: "rtsp://test:554/stream",
+  system_id: 1,
+  system_host: "localhost",
+  system_port: 14550,
+  enable_stream_status: false,
+  enable_camera_info_broadcast: true

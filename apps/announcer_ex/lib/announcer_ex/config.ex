@@ -1,84 +1,57 @@
 defmodule AnnouncerEx.Config do
   @moduledoc """
   Configuration management for the announcer application.
-  Reads and validates environment variables.
+  Reads configuration from application environment.
   """
 
   @doc """
-  Get the camera URL from environment.
+  Get the camera URL from application config.
   Raises if not set.
   """
   def camera_url! do
-    System.get_env("CAMERA_URL") ||
-      raise "CAMERA_URL environment variable is required"
+    Application.fetch_env!(:announcer_ex, :camera_url) ||
+      raise "camera_url configuration is required"
   end
 
   @doc """
-  Get the camera component ID from environment.
-  Raises if not set or invalid integer.
+  Get the camera component ID from application config.
+  Raises if not set.
   """
   def camera_id! do
-    case System.get_env("CAMERA_ID") do
-      nil ->
-        raise "CAMERA_ID environment variable is required"
-
-      value ->
-        case Integer.parse(value) do
-          {id, ""} -> id
-          _ -> raise "CAMERA_ID must be a valid integer, got: #{value}"
-        end
-    end
+    Application.fetch_env!(:announcer_ex, :camera_id)
   end
 
   @doc """
-  Get the camera name from environment.
+  Get the camera name from application config.
   Raises if not set.
   """
   def camera_name! do
-    System.get_env("CAMERA_NAME") ||
-      raise "CAMERA_NAME environment variable is required"
+    Application.fetch_env!(:announcer_ex, :camera_name) ||
+      raise "camera_name configuration is required"
   end
 
   @doc """
-  Get the MAVLink system host from environment.
+  Get the MAVLink system host from application config.
   Defaults to router service hostname.
   """
   def system_host! do
-    System.get_env("SYSTEM_HOST") || "router-service.rpiuav.svc.cluster.local"
+    Application.get_env(:announcer_ex, :system_host, "router-service.rpiuav.svc.cluster.local")
   end
 
   @doc """
-  Get the MAVLink system port from environment.
+  Get the MAVLink system port from application config.
   Defaults to 14560.
   """
   def system_port! do
-    case System.get_env("SYSTEM_PORT") do
-      nil ->
-        14560
-
-      value ->
-        case Integer.parse(value) do
-          {port, ""} -> port
-          _ -> raise "SYSTEM_PORT must be a valid integer, got: #{value}"
-        end
-    end
+    Application.get_env(:announcer_ex, :system_port, 14560)
   end
 
   @doc """
-  Get the MAVLink system ID from environment.
+  Get the MAVLink system ID from application config.
   Defaults to 1.
   """
   def system_id! do
-    case System.get_env("SYSTEM_ID") do
-      nil ->
-        1
-
-      value ->
-        case Integer.parse(value) do
-          {id, ""} -> id
-          _ -> raise "SYSTEM_ID must be a valid integer, got: #{value}"
-        end
-    end
+    Application.get_env(:announcer_ex, :system_id, 1)
   end
 
   @doc """
@@ -94,12 +67,7 @@ defmodule AnnouncerEx.Config do
   Defaults to false (disabled).
   """
   def enable_stream_status! do
-    case System.get_env("ENABLE_STREAM_STATUS") do
-      nil -> false
-      "true" -> true
-      "1" -> true
-      _ -> false
-    end
+    Application.get_env(:announcer_ex, :enable_stream_status, false)
   end
 
   @doc """
@@ -108,13 +76,6 @@ defmodule AnnouncerEx.Config do
   Defaults to true (enabled).
   """
   def enable_camera_info_broadcast! do
-    case System.get_env("ENABLE_CAMERA_INFO_BROADCAST") do
-      nil -> true
-      "true" -> true
-      "1" -> true
-      "false" -> false
-      "0" -> false
-      _ -> true
-    end
+    Application.get_env(:announcer_ex, :enable_camera_info_broadcast, true)
   end
 end
