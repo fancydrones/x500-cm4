@@ -109,7 +109,7 @@ defmodule AnnouncerEx.Config do
   """
   def enable_camera_info_broadcast! do
     case System.get_env("ENABLE_CAMERA_INFO_BROADCAST") do
-      nil -> true
+      nil -> false
       "true" -> true
       "1" -> true
       "false" -> false
