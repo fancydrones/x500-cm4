@@ -8,7 +8,7 @@ defmodule AnnouncerEx.CameraManager do
 
   use GenServer
 
-  alias AnnouncerEx.{CommandHandler, Config, MessageBuilder}
+  alias AnnouncerEx.{CommandHandler, MessageBuilder}
   alias XMAVLink.Router
 
   require Logger
@@ -33,15 +33,15 @@ defmodule AnnouncerEx.CameraManager do
   def init(_opts) do
     Logger.info("Starting CameraManager")
 
-    # Load configuration
+    # Load configuration from application environment
     state = %{
-      camera_id: Config.camera_id!(),
-      camera_name: Config.camera_name!(),
-      stream_url: Config.camera_url!(),
-      system_id: Config.system_id!(),
+      camera_id: Application.fetch_env!(:announcer_ex, :camera_id),
+      camera_name: Application.fetch_env!(:announcer_ex, :camera_name),
+      stream_url: Application.fetch_env!(:announcer_ex, :camera_url),
+      system_id: Application.fetch_env!(:announcer_ex, :system_id),
       boot_time: System.monotonic_time(:millisecond),
-      enable_stream_status: Config.enable_stream_status!(),
-      enable_camera_info_broadcast: Config.enable_camera_info_broadcast!()
+      enable_stream_status: Application.fetch_env!(:announcer_ex, :enable_stream_status),
+      enable_camera_info_broadcast: Application.fetch_env!(:announcer_ex, :enable_camera_info_broadcast)
     }
 
     Logger.info(

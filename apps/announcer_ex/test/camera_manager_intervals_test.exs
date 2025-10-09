@@ -77,7 +77,7 @@ defmodule AnnouncerEx.CameraManagerIntervalsTest do
       # with MAVLink spec and QGC stability.
 
       # This assertion documents the expected default behavior
-      assert AnnouncerEx.Config.enable_stream_status!() == false,
+      assert Application.get_env(:announcer_ex, :enable_stream_status, false) == false,
              "VIDEO_STREAM_STATUS periodic broadcasts must be disabled by default"
     end
   end
