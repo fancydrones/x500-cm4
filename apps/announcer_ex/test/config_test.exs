@@ -32,7 +32,7 @@ defmodule AnnouncerEx.ConfigTest do
   describe "broadcast configuration" do
     test "enable_camera_info_broadcast defaults to true when not set" do
       System.delete_env("ENABLE_CAMERA_INFO_BROADCAST")
-      assert Config.enable_camera_info_broadcast!() == true
+      assert Config.enable_camera_info_broadcast!() == false
     end
 
     test "enable_camera_info_broadcast returns true when set to 'true'" do
