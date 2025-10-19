@@ -1,0 +1,34 @@
+defmodule VideoStreamer.Pipeline do
+  @moduledoc """
+  Main Membrane pipeline for video streaming.
+  Captures video from Raspberry Pi camera, encodes to H.264,
+  and outputs RTP packets for RTSP streaming.
+  """
+
+  use Membrane.Pipeline
+
+  require Membrane.Logger
+
+  @impl true
+  def handle_init(_ctx, _opts) do
+    camera_config = Application.get_env(:video_streamer, :camera)
+
+    spec = [
+      child(:camera_source, %Membrane.Rpicam.Source{
+        width: camera_config[:width],
+        height: camera_config[:height],
+        framerate: {camera_config[:framerate], 1}
+      })
+      |> child(:h264_parser, Membrane.H264.Parser)
+      |> child(:rtp_payloader, Membrane.RTP.H264.Payloader)
+    ]
+
+    {[spec: spec], %{}}
+  end
+
+  @impl true
+  def handle_child_notification(notification, element, _ctx, state) do
+    Membrane.Logger.debug("Notification from #{inspect(element)}: #{inspect(notification)}")
+    {[], state}
+  end
+end
