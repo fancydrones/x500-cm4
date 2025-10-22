@@ -237,6 +237,8 @@ defmodule VideoStreamer.RTSP.Session do
         client_port: state.client_port_rtp
       }
 
+      Logger.info("PLAY: Restarting pipeline with config: client_ip=#{state.client_ip}, client_port=#{state.client_port_rtp}")
+
       case VideoStreamer.PipelineManager.restart_streaming(new_config) do
         {:ok, :restarted} ->
           response = Protocol.build_play_response(cseq, session_id)

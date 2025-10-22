@@ -17,6 +17,8 @@ defmodule VideoStreamer.Pipeline do
     client_ip = opts[:client_ip]
     client_port = opts[:client_port]
 
+    Membrane.Logger.info("Pipeline init with client_ip=#{inspect(client_ip)}, client_port=#{inspect(client_port)}")
+
     # Build pipeline spec
     spec = build_pipeline_spec(camera_config, client_ip, client_port)
 
@@ -26,6 +28,18 @@ defmodule VideoStreamer.Pipeline do
   @impl true
   def handle_child_notification(notification, element, _ctx, state) do
     Membrane.Logger.debug("Notification from #{inspect(element)}: #{inspect(notification)}")
+    {[], state}
+  end
+
+  @impl true
+  def handle_child_pad_removed(child, pad, _ctx, state) do
+    Membrane.Logger.debug("Pad #{inspect(pad)} removed from child #{inspect(child)}")
+    {[], state}
+  end
+
+  @impl true
+  def handle_child_terminated(child, _ctx, state) do
+    Membrane.Logger.warning("Child #{inspect(child)} terminated")
     {[], state}
   end
 

@@ -86,19 +86,27 @@ defmodule VideoStreamer.PipelineManager do
 
   def handle_call({:restart_streaming, new_config}, _from, state) do
     # Stop existing pipeline
-    if state.pipeline, do: stop_pipeline(state.pipeline)
+    if state.pipeline do
+      Logger.info("Stopping existing pipeline #{inspect(state.pipeline)}")
+      stop_pipeline(state.pipeline)
+      # Give it a moment to shut down cleanly
+      Process.sleep(500)
+    end
 
     # Update config if provided
     config = new_config || state.config
+
+    Logger.info("Restarting pipeline with config: #{inspect(Map.take(config, [:client_ip, :client_port]))}")
 
     # Start new pipeline
     case start_pipeline(config) do
       {:ok, _supervisor_pid, pipeline_pid} ->
         new_state = %{state | pipeline: pipeline_pid, config: config, status: :running}
-        Logger.info("Pipeline restarted with new config")
+        Logger.info("Pipeline restarted successfully with PID #{inspect(pipeline_pid)}")
         {:reply, {:ok, :restarted}, new_state}
 
       {:error, reason} ->
+        Logger.error("Failed to restart pipeline: #{inspect(reason)}")
         {:reply, {:error, reason}, %{state | status: :error}}
     end
   end
@@ -124,10 +132,11 @@ defmodule VideoStreamer.PipelineManager do
   defp start_pipeline(config) do
     # Extract client info if provided
     pipeline_opts = [
-      client_ip: config[:client_ip],
-      client_port: config[:client_port]
+      client_ip: Map.get(config, :client_ip),
+      client_port: Map.get(config, :client_port)
     ]
 
+    Logger.info("Starting pipeline with opts: #{inspect(pipeline_opts)}")
     Membrane.Pipeline.start_link(Pipeline, pipeline_opts)
   end
 
