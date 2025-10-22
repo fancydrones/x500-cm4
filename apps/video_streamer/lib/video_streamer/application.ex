@@ -13,10 +13,10 @@ defmodule VideoStreamer.Application do
       # Telemetry supervisor for metrics
       VideoStreamer.Telemetry,
 
-      # RTSP server (Phase 2)
-      # {VideoStreamer.RTSP.Server, []},
+      # RTSP server - handles client connections
+      {VideoStreamer.RTSP.Server, []},
 
-      # Main streaming pipeline
+      # Main streaming pipeline manager
       {VideoStreamer.PipelineManager, []}
     ]
 
