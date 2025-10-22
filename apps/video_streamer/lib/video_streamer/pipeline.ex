@@ -21,6 +21,8 @@ defmodule VideoStreamer.Pipeline do
       })
       |> child(:h264_parser, Membrane.H264.Parser)
       |> child(:rtp_payloader, Membrane.RTP.H264.Payloader)
+      # Temporary sink for Phase 1 testing - will be replaced with RTSP output in Phase 2
+      |> child(:fake_sink, Membrane.Element.Fake.Sink.Buffers)
     ]
 
     {[spec: spec], %{}}

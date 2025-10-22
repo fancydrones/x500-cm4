@@ -41,6 +41,7 @@ defmodule VideoStreamer.MixProject do
       {:membrane_file_plugin, "~> 0.17.0"},  # Future recording
       {:membrane_tee_plugin, "~> 0.12.0"},   # Future multi-output
       {:membrane_h264_plugin, "~> 0.9.0"},  # H.264 parser
+      {:membrane_fake_plugin, "~> 0.11.0"},  # Fake sink for Phase 1 testing
 
       # Configuration & telemetry
       {:telemetry, "~> 1.2"},
