@@ -178,6 +178,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - Implemented basic RTP streaming (Phase 3 preview)
 - Single client support working (multi-client in Phase 3)
 - All core RTSP methods implemented and tested
+- **2025-10-22 Fix:** Corrected UDPSink accepted_format to match StreamSendBin output (%RemoteStream{type: :packetized, content_format: RTP})
 
 ---
 
@@ -601,6 +602,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - **SDP generation is key**: Proper SDP with codec parameters is critical for client compatibility
 - **Quick iteration wins**: Getting basic video working first, then adding multi-client support
 - **UDP RTP is simple**: Just send packets to client IP:port, no complex protocol
+- **Membrane stream format matching is critical**: Element input pads must match output pad formats exactly. `StreamSendBin` outputs `%RemoteStream{type: :packetized, content_format: RTP}`, not raw `Membrane.RTP`
 
 ---
 

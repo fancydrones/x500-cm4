@@ -8,8 +8,10 @@ defmodule VideoStreamer.RTP.UDPSink do
 
   use Membrane.Sink
 
+  alias Membrane.{RemoteStream, RTP}
+
   def_input_pad :input,
-    accepted_format: Membrane.RTP,
+    accepted_format: %RemoteStream{type: :packetized, content_format: RTP},
     flow_control: :auto
 
   def_options client_ip: [
