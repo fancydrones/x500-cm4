@@ -25,19 +25,26 @@ defmodule VideoStreamer.RTP.UDPSink do
   def handle_init(_ctx, options) do
     # Open UDP socket on port 50000 (server_port_rtp from RTSP SETUP)
     # This is critical - RTP must be sent from the port advertised in RTSP
-    {:ok, socket} = :gen_udp.open(50000, [:binary, {:active, false}])
+    case :gen_udp.open(50000, [:binary, {:active, false}, {:reuseaddr, true}]) do
+      {:ok, socket} ->
+        Membrane.Logger.info("Opened UDP socket on port 50000 for RTP streaming")
 
-    # Parse IP address
-    {:ok, ip_tuple} = :inet.parse_address(String.to_charlist(options.client_ip))
+        # Parse IP address
+        {:ok, ip_tuple} = :inet.parse_address(String.to_charlist(options.client_ip))
 
-    state = %{
-      socket: socket,
-      client_ip: ip_tuple,
-      client_port: options.client_port,
-      packet_count: 0
-    }
+        state = %{
+          socket: socket,
+          client_ip: ip_tuple,
+          client_port: options.client_port,
+          packet_count: 0
+        }
 
-    {[], state}
+        {[], state}
+
+      {:error, reason} ->
+        Membrane.Logger.error("Failed to open UDP socket on port 50000: #{inspect(reason)}")
+        raise "Cannot bind to port 50000: #{inspect(reason)}"
+    end
   end
 
   @impl true
