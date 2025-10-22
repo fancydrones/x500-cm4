@@ -17,7 +17,8 @@ defmodule VideoStreamer.Pipeline do
       child(:camera_source, %Membrane.Rpicam.Source{
         width: camera_config[:width],
         height: camera_config[:height],
-        framerate: {camera_config[:framerate], 1}
+        framerate: {camera_config[:framerate], 1},
+        verbose: Keyword.get(camera_config, :verbose, false)
       })
       |> child(:h264_parser, %Membrane.H264.Parser{
         output_alignment: :nalu,

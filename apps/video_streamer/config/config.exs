@@ -5,7 +5,8 @@ config :video_streamer,
   camera: [
     width: 1920,
     height: 1080,
-    framerate: 30
+    framerate: 30,
+    verbose: false  # Set to true to see frame statistics from rpicam-vid
   ],
   rtsp: [
     port: 8554,
