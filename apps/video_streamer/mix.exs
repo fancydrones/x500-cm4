@@ -25,8 +25,8 @@ defmodule VideoStreamer.MixProject do
       # Membrane core
       {:membrane_core, "~> 1.0"},
 
-      # Camera capture
-      {:membrane_rpicam_plugin, "~> 0.1.5"},
+      # Camera capture - internalized (see lib/membrane_rpicam/source.ex)
+      # {:membrane_rpicam_plugin, "~> 0.1.5"},  # Removed - internalized with fixes
 
       # RTP/RTSP
       {:membrane_rtp_plugin, "~> 0.31.0"},
