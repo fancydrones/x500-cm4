@@ -163,6 +163,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [x] Update pipeline to support client configuration
 - [x] Connect RTSP PLAY to pipeline restart with client info
 - [x] Test end-to-end video streaming
+- [x] Fix UDPSink stream format to match StreamSendBin output
+- [x] Verify streaming works on hardware with real clients
 
 **Phase 2 Completion Criteria:**
 - [x] RTSP server listens on port 8554 ✅
@@ -170,6 +172,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [x] SDP is valid and contains correct codec info ✅
 - [x] Session management works correctly ✅
 - [x] Video streams to VLC client ✅
+- [x] Video streams successfully on hardware ✅
 - [ ] All integration tests pass (deferred to Phase 5)
 
 **Phase 2 Notes:**
@@ -179,6 +182,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - Single client support working (multi-client in Phase 3)
 - All core RTSP methods implemented and tested
 - **2025-10-22 Fix:** Corrected UDPSink accepted_format to match StreamSendBin output (%RemoteStream{type: :packetized, content_format: RTP})
+- **2025-10-22 Verification:** Video streaming confirmed working on Raspberry Pi hardware with real clients
 
 ---
 
@@ -535,13 +539,13 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 ## Progress Summary
 
 **Phase 1:** ✅ **COMPLETE** (All tasks done, hardware testing successful!)
-**Phase 2:** ✅ **COMPLETE** (RTSP server + RTP streaming working!)
+**Phase 2:** ✅ **COMPLETE** (RTSP server + RTP streaming working on hardware!)
 **Phase 3:** 🟡 Partially Complete (basic RTP done, multi-client pending)
 **Phase 4:** ⬜ Not Started
 **Phase 5:** ⬜ Not Started
 **Phase 6:** ⬜ Not Started
 
-**Overall Progress:** ~80 / 215 tasks completed (~37%)
+**Overall Progress:** ~82 / 215 tasks completed (~38%)
 
 **Completed Subsections:**
 - 1.1 Project Structure (5/5) ✅
@@ -557,7 +561,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - 2.4 RTSP Server (8/9 - multi-client testing deferred) ✅
 - 2.5 Integration (5/7 - some testing deferred) ✅
 - 2.6 Client Testing (4/6 - some tests deferred) ✅
-- 2.7 RTP Streaming (4/4) ✅
+- 2.7 RTP Streaming (6/6) ✅ **FULLY COMPLETE - Hardware Verified!**
 
 ---
 
@@ -567,7 +571,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 
 - ✅ **RESOLVED**: Phase 1 hardware testing completed successfully
 - ✅ **RESOLVED**: Phase 2 RTSP server implementation complete
-- **No blockers**: Video streaming is working! Can proceed with Phase 3 (multi-client) or Phase 4 (containerization)
+- ✅ **RESOLVED**: Phase 2 RTP streaming format mismatch fixed (2025-10-22)
+- **No blockers**: Video streaming fully working on hardware! Ready to proceed with Phase 3 (multi-client) or Phase 4 (containerization)
 
 ### Decisions Made
 
@@ -587,6 +592,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - **Camera binary**: Auto-detect rpicam-vid (newer) vs libcamera-vid (older)
 - **RTP streaming**: Using UDP sink for now (simple single-client), will add Membrane.Tee for multi-client in Phase 3
 - **RTSP session**: Each PLAY restarts pipeline with new client info (temporary solution for Phase 2)
+- **Stream format**: Using `Membrane.RTP.StreamSendBin` which outputs `%RemoteStream{type: :packetized, content_format: RTP}` with properly serialized RTP packets
 
 ### Lessons Learned
 
@@ -607,4 +613,4 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 ---
 
 **Last Updated:** 2025-10-22
-**Updated By:** Claude Code (Phase 2 Complete - Video Streaming Working!)
+**Updated By:** Claude Code (Phase 2 Complete - Video Streaming Verified on Hardware!)
