@@ -29,8 +29,8 @@ defmodule VideoStreamer.PipelineManager do
     GenServer.call(__MODULE__, :stop_streaming)
   end
 
-  def restart_streaming(new_config \\ nil) do
-    GenServer.call(__MODULE__, {:restart_streaming, new_config})
+  def restart_streaming(new_config \\ nil, timeout \\ 15_000) do
+    GenServer.call(__MODULE__, {:restart_streaming, new_config}, timeout)
   end
 
   def get_status do
@@ -89,8 +89,7 @@ defmodule VideoStreamer.PipelineManager do
     if state.pipeline do
       Logger.info("Stopping existing pipeline #{inspect(state.pipeline)}")
       stop_pipeline(state.pipeline)
-      # Give it a moment to shut down cleanly
-      Process.sleep(500)
+      # Pipeline is stopped synchronously with force, no need to sleep
     end
 
     # Update config if provided
@@ -141,7 +140,9 @@ defmodule VideoStreamer.PipelineManager do
   end
 
   defp stop_pipeline(pipeline_pid) do
-    Membrane.Pipeline.terminate(pipeline_pid)
+    # Use force to ensure pipeline terminates even if rpicam-vid doesn't exit cleanly
+    # Increased timeout to 10 seconds to give camera time to shut down gracefully
+    Membrane.Pipeline.terminate(pipeline_pid, timeout: 10_000, force?: true)
   end
 
   defp load_config do
