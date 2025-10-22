@@ -23,8 +23,9 @@ defmodule VideoStreamer.RTP.UDPSink do
 
   @impl true
   def handle_init(_ctx, options) do
-    # Open UDP socket
-    {:ok, socket} = :gen_udp.open(0, [:binary, {:active, false}])
+    # Open UDP socket on port 50000 (server_port_rtp from RTSP SETUP)
+    # This is critical - RTP must be sent from the port advertised in RTSP
+    {:ok, socket} = :gen_udp.open(50000, [:binary, {:active, false}])
 
     # Parse IP address
     {:ok, ip_tuple} = :inet.parse_address(String.to_charlist(options.client_ip))
