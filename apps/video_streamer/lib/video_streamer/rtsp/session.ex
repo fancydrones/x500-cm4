@@ -90,6 +90,14 @@ defmodule VideoStreamer.RTSP.Session do
   @impl true
   def handle_info({:tcp_closed, socket}, %State{socket: socket} = state) do
     Logger.info("Client #{state.client_ip} disconnected")
+
+    # Remove client from pipeline if they were streaming
+    if state.session_id && state.state == :playing do
+      client_id = state.session_id
+      Logger.info("Removing disconnected client #{client_id} from pipeline")
+      VideoStreamer.PipelineManager.remove_client(client_id)
+    end
+
     {:stop, :normal, state}
   end
 
@@ -241,27 +249,21 @@ defmodule VideoStreamer.RTSP.Session do
     session_id = state.session_id
 
     if session_id && state.client_port_rtp do
-      # Restart pipeline with client RTP destination
-      new_config = %{
-        camera: Application.get_env(:video_streamer, :camera),
-        rtsp: Application.get_env(:video_streamer, :rtsp),
-        encoder: Application.get_env(:video_streamer, :encoder),
-        client_ip: state.client_ip,
-        client_port: state.client_port_rtp
-      }
+      # Add this client to the pipeline's Tee (multi-client support)
+      client_id = session_id
 
-      Logger.info("PLAY: Restarting pipeline with config: client_ip=#{state.client_ip}, client_port=#{state.client_port_rtp}")
+      Logger.info("PLAY: Adding client #{client_id} to pipeline: #{state.client_ip}:#{state.client_port_rtp}")
 
-      case VideoStreamer.PipelineManager.restart_streaming(new_config) do
-        {:ok, :restarted} ->
+      case VideoStreamer.PipelineManager.add_client(client_id, state.client_ip, state.client_port_rtp) do
+        {:ok, :client_added} ->
           response = Protocol.build_play_response(cseq, session_id)
           send_response(response, state.socket)
 
-          Logger.info("Client #{state.client_ip} started playing to #{state.client_ip}:#{state.client_port_rtp} (session: #{session_id})")
+          Logger.info("Client #{state.client_ip} started playing (session: #{session_id})")
           {:ok, %{state | state: :playing}}
 
         {:error, reason} ->
-          Logger.error("Failed to restart pipeline for client: #{inspect(reason)}")
+          Logger.error("Failed to add client to pipeline: #{inspect(reason)}")
           error_response = Protocol.build_error_response(cseq, 500, "Internal Server Error")
           send_response(error_response, state.socket)
           {:error, reason}
@@ -279,14 +281,26 @@ defmodule VideoStreamer.RTSP.Session do
     session_id = state.session_id
 
     if session_id do
-      # TODO Phase 3: Notify pipeline manager to stop RTP streaming
-      # VideoStreamer.PipelineManager.remove_client(...)
+      # Remove client from pipeline (multi-client support)
+      client_id = session_id
 
-      response = Protocol.build_teardown_response(cseq, session_id)
-      send_response(response, state.socket)
+      Logger.info("TEARDOWN: Removing client #{client_id} from pipeline")
 
-      Logger.info("Client #{state.client_ip} teardown (session: #{session_id})")
-      {:ok, state}
+      case VideoStreamer.PipelineManager.remove_client(client_id) do
+        {:ok, :client_removed} ->
+          response = Protocol.build_teardown_response(cseq, session_id)
+          send_response(response, state.socket)
+
+          Logger.info("Client #{state.client_ip} teardown completed (session: #{session_id})")
+          {:ok, state}
+
+        {:error, reason} ->
+          Logger.warning("Failed to remove client from pipeline: #{inspect(reason)}")
+          # Still send success response to client
+          response = Protocol.build_teardown_response(cseq, session_id)
+          send_response(response, state.socket)
+          {:ok, state}
+      end
     else
       error_response = Protocol.build_error_response(cseq, 455, "Method Not Valid In This State")
       send_response(error_response, state.socket)

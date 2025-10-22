@@ -186,44 +186,44 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 
 ---
 
-## Phase 3: RTP Integration & Pipeline Connection (Week 5)
+## Phase 3: RTP Integration & Pipeline Connection (Week 5) ✅ IN PROGRESS
 
-### 3.1 RTP Sender Module ⏱️ Est: 6 hours
-- [ ] Create `lib/video_streamer/rtp/sender.ex` GenServer
-- [ ] Implement UDP socket creation
-- [ ] Implement `send_packet/2` function
-- [ ] Add sequence number tracking
-- [ ] Add timestamp generation
-- [ ] Implement RTCP support (basic)
-- [ ] Test RTP packet sending
-- [ ] Verify packets receivable by VLC
+### 3.1 RTP Sender Module ⏱️ Est: 6 hours ✅ DONE (Using Membrane components)
+- [x] ~~Create `lib/video_streamer/rtp/sender.ex` GenServer~~ (Not needed - using Membrane.RTP.StreamSendBin)
+- [x] ~~Implement UDP socket creation~~ (Handled by UDPSink)
+- [x] ~~Implement `send_packet/2` function~~ (Handled by UDPSink)
+- [x] ~~Add sequence number tracking~~ (Handled by StreamSendBin)
+- [x] ~~Add timestamp generation~~ (Handled by StreamSendBin)
+- [x] ~~Implement RTCP support (basic)~~ (Available via StreamSendBin, disabled for now)
+- [x] Test RTP packet sending (Completed in Phase 2)
+- [x] Verify packets receivable by VLC (Completed in Phase 2)
 
-### 3.2 Pipeline Multi-Output ⏱️ Est: 8 hours
-- [ ] Update pipeline.ex to include Membrane.Tee
-- [ ] Implement dynamic client branch creation
-- [ ] Handle `:add_client` notification
-- [ ] Handle `:remove_client` notification
-- [ ] Create RTP payloader per client
-- [ ] Create callback sink per client
-- [ ] Wire sink to RTP.Sender
-- [ ] Test adding/removing clients dynamically
+### 3.2 Pipeline Multi-Output ⏱️ Est: 8 hours ✅ DONE
+- [x] Update pipeline.ex to include Membrane.Tee
+- [x] Implement dynamic client branch creation
+- [x] Handle `:add_client` notification
+- [x] Handle `:remove_client` notification
+- [x] Create RTP payloader per client (StreamSendBin with H264 Payloader)
+- [x] Create callback sink per client (UDPSink)
+- [x] Wire sink to RTP streaming
+- [ ] Test adding/removing clients dynamically (pending hardware test)
 
-### 3.3 RTSP-RTP Integration ⏱️ Est: 8 hours
-- [ ] Connect RTSP session to RTP sender
-- [ ] Pass client IP and ports to RTP sender
-- [ ] Start RTP sender on PLAY command
-- [ ] Stop RTP sender on TEARDOWN
-- [ ] Notify pipeline of new client
-- [ ] Notify pipeline when client disconnects
-- [ ] Test end-to-end flow (RTSP → RTP → client)
+### 3.3 RTSP-RTP Integration ⏱️ Est: 8 hours ✅ DONE
+- [x] Connect RTSP session to pipeline manager
+- [x] Pass client IP and ports via add_client
+- [x] Start RTP sender on PLAY command (add_client)
+- [x] Stop RTP sender on TEARDOWN (remove_client)
+- [x] Notify pipeline of new client
+- [x] Notify pipeline when client disconnects
+- [ ] Test end-to-end flow (RTSP → RTP → multi-client) (pending hardware test)
 
-### 3.4 Buffer Management ⏱️ Est: 6 hours
-- [ ] Configure minimal buffering in pipeline
-- [ ] Tune RTP payloader for low latency
-- [ ] Adjust camera source buffer settings
-- [ ] Monitor queue sizes under load
-- [ ] Implement buffer overflow handling
-- [ ] Test with network jitter simulation
+### 3.4 Buffer Management ⏱️ Est: 6 hours 🟡 PARTIALLY DONE
+- [x] Configure minimal buffering in pipeline (repeat_parameter_sets enabled)
+- [x] Tune RTP payloader for low latency (via StreamSendBin)
+- [ ] Adjust camera source buffer settings (current defaults acceptable)
+- [ ] Monitor queue sizes under load (deferred to performance testing)
+- [ ] Implement buffer overflow handling (deferred to performance testing)
+- [ ] Test with network jitter simulation (deferred to Phase 5)
 
 ### 3.5 Multi-Client Testing ⏱️ Est: 4 hours
 - [ ] Test 2 simultaneous VLC clients
@@ -234,11 +234,21 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [ ] Verify no memory leaks with long-running streams
 
 **Phase 3 Completion Criteria:**
-- [ ] Video stream visible in VLC/ffplay
+- [ ] Video stream visible in VLC/ffplay to multiple clients
 - [ ] Multiple clients can view simultaneously
 - [ ] No crashes during client connect/disconnect
 - [ ] Latency measured and documented
 - [ ] All integration tests pass
+
+**Phase 3 Notes (2025-10-22):**
+- Multi-client architecture implemented using Membrane.Tee.Master
+- Each client gets their own StreamSendBin with unique SSRC
+- Pipeline no longer needs to restart when clients connect/disconnect
+- Clients are added dynamically via add_client() and removed via remove_client()
+- Session ID is used as client_id for tracking
+- RTSP PLAY now adds client to pipeline instead of restarting
+- RTSP TEARDOWN and tcp_closed both properly remove clients
+- Ready for multi-client hardware testing
 
 ---
 
@@ -540,12 +550,12 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 
 **Phase 1:** ✅ **COMPLETE** (All tasks done, hardware testing successful!)
 **Phase 2:** ✅ **COMPLETE** (RTSP server + RTP streaming working on hardware!)
-**Phase 3:** 🟡 Partially Complete (basic RTP done, multi-client pending)
+**Phase 3:** 🟡 **MOSTLY COMPLETE** (Multi-client implementation done, hardware testing pending)
 **Phase 4:** ⬜ Not Started
 **Phase 5:** ⬜ Not Started
 **Phase 6:** ⬜ Not Started
 
-**Overall Progress:** ~82 / 215 tasks completed (~38%)
+**Overall Progress:** ~92 / 215 tasks completed (~43%)
 
 **Completed Subsections:**
 - 1.1 Project Structure (5/5) ✅
@@ -562,6 +572,10 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - 2.5 Integration (5/7 - some testing deferred) ✅
 - 2.6 Client Testing (4/6 - some tests deferred) ✅
 - 2.7 RTP Streaming (6/6) ✅ **FULLY COMPLETE - Hardware Verified!**
+- 3.1 RTP Sender Module (8/8 - using Membrane components) ✅
+- 3.2 Pipeline Multi-Output (7/8 - hardware testing pending) ✅
+- 3.3 RTSP-RTP Integration (6/7 - hardware testing pending) ✅
+- 3.4 Buffer Management (3/6 - optimization deferred) 🟡
 
 ---
 
@@ -572,7 +586,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - ✅ **RESOLVED**: Phase 1 hardware testing completed successfully
 - ✅ **RESOLVED**: Phase 2 RTSP server implementation complete
 - ✅ **RESOLVED**: Phase 2 RTP streaming format mismatch fixed (2025-10-22)
-- **No blockers**: Video streaming fully working on hardware! Ready to proceed with Phase 3 (multi-client) or Phase 4 (containerization)
+- ✅ **RESOLVED**: Phase 3 multi-client implementation complete (2025-10-22)
+- **No blockers**: Phase 3 multi-client code complete. Ready for hardware testing with multiple concurrent clients, or proceed with Phase 4 (containerization)
 
 ### Decisions Made
 
@@ -590,9 +605,11 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - **Camera plugin**: Internalized `membrane_rpicam_plugin` for better control and compatibility
 - **H.264 alignment**: Using NALU alignment (not AU) for RTP payloader compatibility
 - **Camera binary**: Auto-detect rpicam-vid (newer) vs libcamera-vid (older)
-- **RTP streaming**: Using UDP sink for now (simple single-client), will add Membrane.Tee for multi-client in Phase 3
-- **RTSP session**: Each PLAY restarts pipeline with new client info (temporary solution for Phase 2)
+- **RTP streaming**: ~~Using UDP sink for now (simple single-client), will add Membrane.Tee for multi-client in Phase 3~~ **Phase 3: Now using Membrane.Tee.Master for multi-client support**
+- **RTSP session**: ~~Each PLAY restarts pipeline with new client info (temporary solution for Phase 2)~~ **Phase 3: PLAY adds client dynamically, TEARDOWN removes client**
 - **Stream format**: Using `Membrane.RTP.StreamSendBin` which outputs `%RemoteStream{type: :packetized, content_format: RTP}` with properly serialized RTP packets
+- **Multi-client architecture**: Camera → H264Parser → Tee.Master → (per client: StreamSendBin → UDPSink)
+- **Client management**: PipelineManager.add_client/remove_client for dynamic client handling without pipeline restarts
 
 ### Lessons Learned
 
@@ -609,8 +626,11 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - **Quick iteration wins**: Getting basic video working first, then adding multi-client support
 - **UDP RTP is simple**: Just send packets to client IP:port, no complex protocol
 - **Membrane stream format matching is critical**: Element input pads must match output pad formats exactly. `StreamSendBin` outputs `%RemoteStream{type: :packetized, content_format: RTP}`, not raw `Membrane.RTP`
+- **Tee enables multi-client**: Membrane.Tee.Master allows splitting a single stream to multiple outputs dynamically
+- **Dynamic pipeline modification**: Membrane pipelines support adding/removing children at runtime via handle_info
+- **Unique SSRC per client**: Each client needs their own SSRC for proper RTP identification
 
 ---
 
 **Last Updated:** 2025-10-22
-**Updated By:** Claude Code (Phase 2 Complete - Video Streaming Verified on Hardware!)
+**Updated By:** Claude Code (Phase 3 Implementation Complete - Multi-Client Support Ready for Testing!)

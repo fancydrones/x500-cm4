@@ -33,6 +33,14 @@ defmodule VideoStreamer.PipelineManager do
     GenServer.call(__MODULE__, {:restart_streaming, new_config}, timeout)
   end
 
+  def add_client(client_id, client_ip, client_port) do
+    GenServer.call(__MODULE__, {:add_client, client_id, client_ip, client_port})
+  end
+
+  def remove_client(client_id) do
+    GenServer.call(__MODULE__, {:remove_client, client_id})
+  end
+
   def get_status do
     GenServer.call(__MODULE__, :get_status)
   end
@@ -109,6 +117,32 @@ defmodule VideoStreamer.PipelineManager do
       {:error, reason} ->
         Logger.error("Failed to restart pipeline: #{inspect(reason)}")
         {:reply, {:error, reason}, %{state | status: :error}}
+    end
+  end
+
+  def handle_call({:add_client, client_id, client_ip, client_port}, _from, state) do
+    case state.pipeline do
+      nil ->
+        Logger.warning("Cannot add client: pipeline not running")
+        {:reply, {:error, :pipeline_not_running}, state}
+
+      pipeline_pid ->
+        Logger.info("Adding client #{client_id} to pipeline: #{client_ip}:#{client_port}")
+        send(pipeline_pid, {:add_client, client_id, client_ip, client_port})
+        {:reply, {:ok, :client_added}, state}
+    end
+  end
+
+  def handle_call({:remove_client, client_id}, _from, state) do
+    case state.pipeline do
+      nil ->
+        Logger.warning("Cannot remove client: pipeline not running")
+        {:reply, {:error, :pipeline_not_running}, state}
+
+      pipeline_pid ->
+        Logger.info("Removing client #{client_id} from pipeline")
+        send(pipeline_pid, {:remove_client, client_id})
+        {:reply, {:ok, :client_removed}, state}
     end
   end
 
