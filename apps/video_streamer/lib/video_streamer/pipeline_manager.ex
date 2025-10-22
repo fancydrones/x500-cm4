@@ -62,7 +62,7 @@ defmodule VideoStreamer.PipelineManager do
 
   def handle_call(:start_streaming, _from, state) do
     case start_pipeline(state.config) do
-      {:ok, pipeline_pid} ->
+      {:ok, _supervisor_pid, pipeline_pid} ->
         new_state = %{state | pipeline: pipeline_pid, status: :running}
         Logger.info("Pipeline started successfully")
         {:reply, {:ok, :started}, new_state}
@@ -93,7 +93,7 @@ defmodule VideoStreamer.PipelineManager do
 
     # Start new pipeline
     case start_pipeline(config) do
-      {:ok, pipeline_pid} ->
+      {:ok, _supervisor_pid, pipeline_pid} ->
         new_state = %{state | pipeline: pipeline_pid, config: config, status: :running}
         Logger.info("Pipeline restarted with new config")
         {:reply, {:ok, :restarted}, new_state}
@@ -113,7 +113,7 @@ defmodule VideoStreamer.PipelineManager do
     {:noreply, state}
     |> then(fn {:noreply, s} ->
       case start_pipeline(s.config) do
-        {:ok, pid} -> {:noreply, %{s | pipeline: pid, status: :running}}
+        {:ok, _supervisor_pid, pipeline_pid} -> {:noreply, %{s | pipeline: pipeline_pid, status: :running}}
         {:error, _} -> {:noreply, %{s | status: :error}}
       end
     end)
