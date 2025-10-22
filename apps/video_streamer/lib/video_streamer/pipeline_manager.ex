@@ -122,7 +122,13 @@ defmodule VideoStreamer.PipelineManager do
   ## Private Functions
 
   defp start_pipeline(config) do
-    Membrane.Pipeline.start_link(Pipeline, config)
+    # Extract client info if provided
+    pipeline_opts = [
+      client_ip: config[:client_ip],
+      client_port: config[:client_port]
+    ]
+
+    Membrane.Pipeline.start_link(Pipeline, pipeline_opts)
   end
 
   defp stop_pipeline(pipeline_pid) do
@@ -133,7 +139,10 @@ defmodule VideoStreamer.PipelineManager do
     %{
       camera: Application.get_env(:video_streamer, :camera),
       rtsp: Application.get_env(:video_streamer, :rtsp),
-      encoder: Application.get_env(:video_streamer, :encoder)
+      encoder: Application.get_env(:video_streamer, :encoder),
+      # Client info will be added when RTSP PLAY is called
+      client_ip: nil,
+      client_port: nil
     }
   end
 end

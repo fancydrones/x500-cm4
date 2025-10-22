@@ -10,10 +10,29 @@ defmodule VideoStreamer.Pipeline do
   require Membrane.Logger
 
   @impl true
-  def handle_init(_ctx, _opts) do
+  def handle_init(_ctx, opts) do
     camera_config = Application.get_env(:video_streamer, :camera)
 
-    spec = [
+    # Check if client info is provided (for RTP streaming)
+    client_ip = opts[:client_ip]
+    client_port = opts[:client_port]
+
+    # Build pipeline spec
+    spec = build_pipeline_spec(camera_config, client_ip, client_port)
+
+    {[spec: spec], %{client_ip: client_ip, client_port: client_port}}
+  end
+
+  @impl true
+  def handle_child_notification(notification, element, _ctx, state) do
+    Membrane.Logger.debug("Notification from #{inspect(element)}: #{inspect(notification)}")
+    {[], state}
+  end
+
+  ## Private Functions
+
+  defp build_pipeline_spec(camera_config, client_ip, client_port) do
+    base_spec = [
       child(:camera_source, %Membrane.Rpicam.Source{
         width: camera_config[:width],
         height: camera_config[:height],
@@ -25,16 +44,28 @@ defmodule VideoStreamer.Pipeline do
         generate_best_effort_timestamps: %{framerate: {camera_config[:framerate], 1}}
       })
       |> child(:rtp_payloader, Membrane.RTP.H264.Payloader)
-      # Temporary sink for Phase 1 testing - will be replaced with RTSP output in Phase 2
-      |> child(:fake_sink, Membrane.Fake.Sink.Buffers)
     ]
 
-    {[spec: spec], %{}}
-  end
+    # Add appropriate sink based on whether we have client info
+    if client_ip && client_port do
+      Membrane.Logger.info("Pipeline configured for RTP streaming to #{client_ip}:#{client_port}")
 
-  @impl true
-  def handle_child_notification(notification, element, _ctx, state) do
-    Membrane.Logger.debug("Notification from #{inspect(element)}: #{inspect(notification)}")
-    {[], state}
+      base_spec ++
+        [
+          get_child(:rtp_payloader)
+          |> child(:rtp_sink, %VideoStreamer.RTP.UDPSink{
+            client_ip: client_ip,
+            client_port: client_port
+          })
+        ]
+    else
+      Membrane.Logger.info("Pipeline configured with fake sink (no client)")
+
+      base_spec ++
+        [
+          get_child(:rtp_payloader)
+          |> child(:fake_sink, Membrane.Fake.Sink.Buffers)
+        ]
+    end
   end
 end

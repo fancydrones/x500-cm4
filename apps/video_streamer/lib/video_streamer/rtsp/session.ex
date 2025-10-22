@@ -227,15 +227,30 @@ defmodule VideoStreamer.RTSP.Session do
     cseq = Protocol.get_cseq(request)
     session_id = state.session_id
 
-    if session_id do
-      # TODO Phase 3: Notify pipeline manager to start RTP streaming
-      # VideoStreamer.PipelineManager.add_client(...)
+    if session_id && state.client_port_rtp do
+      # Restart pipeline with client RTP destination
+      new_config = %{
+        camera: Application.get_env(:video_streamer, :camera),
+        rtsp: Application.get_env(:video_streamer, :rtsp),
+        encoder: Application.get_env(:video_streamer, :encoder),
+        client_ip: state.client_ip,
+        client_port: state.client_port_rtp
+      }
 
-      response = Protocol.build_play_response(cseq, session_id)
-      send_response(response, state.socket)
+      case VideoStreamer.PipelineManager.restart_streaming(new_config) do
+        {:ok, :restarted} ->
+          response = Protocol.build_play_response(cseq, session_id)
+          send_response(response, state.socket)
 
-      Logger.info("Client #{state.client_ip} started playing (session: #{session_id})")
-      {:ok, %{state | state: :playing}}
+          Logger.info("Client #{state.client_ip} started playing to #{state.client_ip}:#{state.client_port_rtp} (session: #{session_id})")
+          {:ok, %{state | state: :playing}}
+
+        {:error, reason} ->
+          Logger.error("Failed to restart pipeline for client: #{inspect(reason)}")
+          error_response = Protocol.build_error_response(cseq, 500, "Internal Server Error")
+          send_response(error_response, state.socket)
+          {:error, reason}
+      end
     else
       error_response = Protocol.build_error_response(cseq, 455, "Method Not Valid In This State")
       send_response(error_response, state.socket)
