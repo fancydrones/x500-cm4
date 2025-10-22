@@ -27,10 +27,10 @@ defmodule VideoStreamer.RTP.UDPSink do
     # This is critical - RTP must be sent from the port advertised in RTSP
     case :gen_udp.open(50000, [:binary, {:active, false}, {:reuseaddr, true}]) do
       {:ok, socket} ->
-        Membrane.Logger.info("Opened UDP socket on port 50000 for RTP streaming")
-
         # Parse IP address
         {:ok, ip_tuple} = :inet.parse_address(String.to_charlist(options.client_ip))
+
+        Membrane.Logger.info("Opened UDP socket on port 50000, sending RTP to #{options.client_ip}:#{options.client_port}")
 
         state = %{
           socket: socket,
