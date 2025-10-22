@@ -140,8 +140,9 @@ defmodule Membrane.Rpicam.Source do
     width = resolve_defaultable_option(opts.width, 0)
     height = resolve_defaultable_option(opts.height, 0)
 
-    # PATCHED: Added --codec h264 to fix libav output format error
-    "#{app_binary} -t #{timeout} --codec h264 --framerate #{framerate_float} --width #{width} --height #{height} -o -"
+    # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
+    # The --libav-format parameter is required when outputting to stdout (-o -)
+    "#{app_binary} -t #{timeout} --codec h264 --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} -o -"
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var

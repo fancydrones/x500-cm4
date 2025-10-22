@@ -19,7 +19,7 @@ The original `membrane_rpicam_plugin` v0.1.5 had compatibility issues:
 
 See [source.ex](source.ex) for the full implementation. Key changes:
 
-- **Line 144**: Added `--codec h264` parameter to the command
+- **Line 145**: Added `--codec h264` and `--libav-format h264` parameters to fix stdout output
 - **Lines 155-178**: Added automatic detection of `rpicam-vid` vs `libcamera-vid`
 - Uses `rpicam-vid` by default on newer Raspberry Pi OS
 - Falls back to `libcamera-vid` on older systems
