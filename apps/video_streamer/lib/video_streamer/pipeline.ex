@@ -55,7 +55,8 @@ defmodule VideoStreamer.Pipeline do
       })
       |> child(:h264_parser, %Membrane.H264.Parser{
         output_alignment: :nalu,
-        generate_best_effort_timestamps: %{framerate: {camera_config[:framerate], 1}}
+        generate_best_effort_timestamps: %{framerate: {camera_config[:framerate], 1}},
+        repeat_parameter_sets: true
       })
       |> child(:rtp_payloader, Membrane.RTP.H264.Payloader)
     ]
