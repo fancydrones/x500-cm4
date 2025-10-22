@@ -183,36 +183,49 @@ defmodule VideoStreamer.RTSP.Session do
 
     # Parse Transport header
     transport_header = Map.get(request.headers, "Transport", "")
+    Logger.debug("Transport header from client: #{inspect(transport_header)}")
 
     case Protocol.parse_transport_header(transport_header) do
       {:ok, transport_params} ->
-        # Generate session ID if not exists
-        session_id = state.session_id || generate_session_id()
+        Logger.debug("Parsed transport params: #{inspect(transport_params)}")
 
-        # Allocate server ports for RTP/RTCP (will be used in Phase 3)
-        {server_port_rtp, server_port_rtcp} = allocate_server_ports()
+        # Check if this is interleaved/TCP mode or UDP mode
+        # If client doesn't specify client_port, reject (we only support UDP RTP)
+        if transport_params[:interleaved] || (transport_params[:client_port_rtp] == nil) do
+          Logger.warning("Client requested non-UDP transport or didn't specify client_port")
+          error_response = Protocol.build_error_response(cseq, 461, "Unsupported Transport")
+          send_response(error_response, state.socket)
+          {:error, :unsupported_transport}
+        else
+          # Generate session ID if not exists
+          session_id = state.session_id || generate_session_id()
 
-        # Build transport response
-        transport_response_params = %{
-          client_port_rtp: transport_params[:client_port_rtp],
-          client_port_rtcp: transport_params[:client_port_rtcp],
-          server_port_rtp: server_port_rtp,
-          server_port_rtcp: server_port_rtcp
-        }
+          # Allocate server ports for RTP/RTCP (will be used in Phase 3)
+          {server_port_rtp, server_port_rtcp} = allocate_server_ports()
 
-        response = Protocol.build_setup_response(cseq, session_id, transport_response_params)
-        send_response(response, state.socket)
+          # Build transport response
+          transport_response_params = %{
+            client_port_rtp: transport_params[:client_port_rtp],
+            client_port_rtcp: transport_params[:client_port_rtcp],
+            server_port_rtp: server_port_rtp,
+            server_port_rtcp: server_port_rtcp
+          }
+          Logger.debug("Transport response params: #{inspect(transport_response_params)}")
 
-        new_state = %{state |
-          session_id: session_id,
-          client_port_rtp: transport_params[:client_port_rtp],
-          client_port_rtcp: transport_params[:client_port_rtcp],
-          server_port_rtp: server_port_rtp,
-          server_port_rtcp: server_port_rtcp,
-          state: :ready
-        }
+          response = Protocol.build_setup_response(cseq, session_id, transport_response_params)
+          send_response(response, state.socket)
 
-        {:ok, new_state}
+          new_state = %{state |
+            session_id: session_id,
+            client_port_rtp: transport_params[:client_port_rtp],
+            client_port_rtcp: transport_params[:client_port_rtcp],
+            server_port_rtp: server_port_rtp,
+            server_port_rtcp: server_port_rtcp,
+            state: :ready
+          }
+
+          {:ok, new_state}
+        end
 
       {:error, reason} ->
         Logger.error("Failed to parse Transport header: #{inspect(reason)}")
