@@ -29,7 +29,7 @@ defmodule VideoStreamer.PipelineManager do
     GenServer.call(__MODULE__, :stop_streaming)
   end
 
-  def restart_streaming(new_config \\ nil, timeout \\ 15_000) do
+  def restart_streaming(new_config \\ nil, timeout \\ 20_000) do
     GenServer.call(__MODULE__, {:restart_streaming, new_config}, timeout)
   end
 
@@ -89,7 +89,9 @@ defmodule VideoStreamer.PipelineManager do
     if state.pipeline do
       Logger.info("Stopping existing pipeline #{inspect(state.pipeline)}")
       stop_pipeline(state.pipeline)
-      # Pipeline is stopped synchronously with force, no need to sleep
+      # Give camera hardware time to release (rpicam-vid needs ~1s to fully release camera)
+      Logger.debug("Waiting for camera hardware to release...")
+      Process.sleep(1500)
     end
 
     # Update config if provided
