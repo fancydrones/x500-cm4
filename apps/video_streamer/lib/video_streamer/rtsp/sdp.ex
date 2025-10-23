@@ -81,19 +81,20 @@ defmodule VideoStreamer.RTSP.SDP do
 
   defp build_fmtp_line(payload_type, _width, _height, _framerate, codec_params) do
     # H.264 profile-level-id
-    # Baseline Profile (42 = 0x42), Constrained (E0), Level 3.1 (1F)
-    # Changed from High Profile (64001F) to Baseline (42E01F) for iOS/mobile compatibility
-    # Format: profile_idc (42) + constraint_flags (E0) + level_idc (1F)
-    # 42E01F = Baseline Profile, widely supported on mobile devices including iOS
-    profile_level_id = Map.get(codec_params, :profile_level_id, "42E01F")
+    # Constrained Baseline Profile (42C01F) for iOS/mobile compatibility
+    # Format: profile_idc (42) + constraint_flags (C0) + level_idc (1F)
+    # 42C01F = Constrained Baseline Profile, Level 3.1
+    profile_level_id = Map.get(codec_params, :profile_level_id, "42C01F")
 
     # packetization-mode: 1 = Non-interleaved mode (most common)
     packetization_mode = Map.get(codec_params, :packetization_mode, 1)
 
-    # For Baseline Profile 720p30, use generic SPS/PPS that match common camera output
-    # These are base64-encoded parameter sets for H.264 Baseline Profile, Level 3.1
-    # SPS for 1280x720 Baseline Profile
-    default_sps_pps = "Z0IAH6aAoD2A,aM4G8g=="  # Generic Baseline 720p SPS/PPS
+    # Real SPS/PPS extracted from rpicam-vid H.264 stream (1280x720, Baseline Profile)
+    # These MUST match the actual camera output for iOS VLC to decode correctly
+    # Extracted from actual camera stream using: ffmpeg -i rtsp://ip:8554/video -vframes 1 -c copy -f h264
+    # SPS: 26 bytes, Profile 42C01F (Constrained Baseline, Level 3.1)
+    # PPS: 4 bytes
+    default_sps_pps = "Z0LAH9oBQBbpqAgICgAAAwACAD0JAB4wZUA=,aM4PyA=="
 
     fmtp_params = [
       "packetization-mode=#{packetization_mode}",
