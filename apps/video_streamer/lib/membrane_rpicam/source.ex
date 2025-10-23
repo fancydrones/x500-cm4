@@ -149,7 +149,10 @@ defmodule Membrane.Rpicam.Source do
     height = resolve_defaultable_option(opts.height, 0)
 
     # Suppress verbose output unless explicitly enabled
-    verbose_flag = if opts.verbose, do: "", else: "--nopreview"
+    # --nopreview: Don't show preview window
+    # --flush: Force immediate output (reduces buffering/latency)
+    # When not verbose, both flags are used for clean streaming
+    verbose_flags = if opts.verbose, do: "", else: "--nopreview --flush"
 
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
@@ -160,7 +163,7 @@ defmodule Membrane.Rpicam.Source do
     # Tune: zerolatency (optimize for streaming, no buffering)
     # Note: Profile and level are specified via libav codec options, not rpicam-vid flags
     # Multiple codec options are separated by semicolons per rpicam-vid documentation
-    "#{app_binary} -t #{timeout} --codec h264 --libav-format h264 --libav-video-codec-opts profile=main;level=4.0;preset=fast;tune=zerolatency --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
+    "#{app_binary} -t #{timeout} --codec h264 --libav-format h264 --libav-video-codec-opts profile=main;level=4.0;preset=fast;tune=zerolatency --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flags} -o -"
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var
