@@ -112,7 +112,10 @@ defmodule RouterEx.Endpoint.UdpServer do
         {:noreply, %{new_state | cleanup_timer: timer}}
 
       {:error, reason} ->
-        Logger.error("Failed to start UDP server on #{state.address}:#{state.port}: #{inspect(reason)}")
+        Logger.error(
+          "Failed to start UDP server on #{state.address}:#{state.port}: #{inspect(reason)}"
+        )
+
         {:stop, reason, state}
     end
   end
@@ -193,9 +196,14 @@ defmodule RouterEx.Endpoint.UdpServer do
         sent_count =
           Enum.reduce(state.clients, 0, fn {_key, client}, acc ->
             case :gen_udp.send(state.socket, client.address, client.port, data) do
-              :ok -> acc + 1
+              :ok ->
+                acc + 1
+
               {:error, reason} ->
-                Logger.warning("Failed to send to UDP client #{format_address(client.address)}:#{client.port}: #{inspect(reason)}")
+                Logger.warning(
+                  "Failed to send to UDP client #{format_address(client.address)}:#{client.port}: #{inspect(reason)}"
+                )
+
                 acc
             end
           end)
@@ -229,7 +237,9 @@ defmodule RouterEx.Endpoint.UdpServer do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info("UDP server terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}")
+    Logger.info(
+      "UDP server terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}"
+    )
 
     # Unregister from RouterCore
     if state.socket do

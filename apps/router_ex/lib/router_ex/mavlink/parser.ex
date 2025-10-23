@@ -214,7 +214,8 @@ defmodule RouterEx.MAVLink.Parser do
       {:ok, frame}
     else
       Logger.debug("Invalid CRC for MAVLink v2 frame, msgid=#{msg_id}")
-      {:ok, frame}  # Accept frame anyway for now
+      # Accept frame anyway for now
+      {:ok, frame}
     end
   end
 
@@ -246,7 +247,8 @@ defmodule RouterEx.MAVLink.Parser do
       {:ok, frame}
     else
       Logger.debug("Invalid CRC for MAVLink v1 frame, msgid=#{msg_id}")
-      {:ok, frame}  # Accept frame anyway for now
+      # Accept frame anyway for now
+      {:ok, frame}
     end
   end
 

@@ -10,10 +10,12 @@ config :xmavlink,
 # Test configuration
 config :router_ex,
   general: [
-    tcp_server_port: 15760,  # Different port for testing
+    # Different port for testing
+    tcp_server_port: 15760,
     report_stats: false,
     mavlink_dialect: :auto,
-    log_level: :warning  # Less verbose during tests
+    # Less verbose during tests
+    log_level: :warning
   ],
 
   # No endpoints by default in test - tests will configure as needed

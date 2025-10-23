@@ -27,7 +27,8 @@ defmodule RouterEx.MessageFilterTest do
         type: :udp_server,
         address: "127.0.0.1",
         port: 14580,
-        allow_msg_ids: [0, 33]  # Only HEARTBEAT (0) and GLOBAL_POSITION_INT (33)
+        # Only HEARTBEAT (0) and GLOBAL_POSITION_INT (33)
+        allow_msg_ids: [0, 33]
       }
 
       # Start an unfiltered UDP server to send from
@@ -44,10 +45,14 @@ defmodule RouterEx.MessageFilterTest do
       Process.sleep(100)
 
       # Create test frames with different message IDs
-      heartbeat_frame = create_test_frame(0, 1, 1)      # HEARTBEAT - should be allowed
-      gps_frame = create_test_frame(33, 1, 1)           # GLOBAL_POSITION_INT - should be allowed
-      attitude_frame = create_test_frame(30, 1, 1)      # ATTITUDE - should be blocked
-      mission_frame = create_test_frame(73, 1, 1)       # MISSION_ITEM - should be blocked
+      # HEARTBEAT - should be allowed
+      heartbeat_frame = create_test_frame(0, 1, 1)
+      # GLOBAL_POSITION_INT - should be allowed
+      gps_frame = create_test_frame(33, 1, 1)
+      # ATTITUDE - should be blocked
+      attitude_frame = create_test_frame(30, 1, 1)
+      # MISSION_ITEM - should be blocked
+      mission_frame = create_test_frame(73, 1, 1)
 
       # Send frames from sender to filtered endpoint
       {:ok, socket} = :gen_udp.open(0, [:binary, {:active, false}])
@@ -83,7 +88,8 @@ defmodule RouterEx.MessageFilterTest do
         type: :udp_server,
         address: "127.0.0.1",
         port: 14582,
-        allow_msg_ids: []  # Empty whitelist = block all
+        # Empty whitelist = block all
+        allow_msg_ids: []
       }
 
       sender_config = %{
@@ -126,7 +132,8 @@ defmodule RouterEx.MessageFilterTest do
         type: :udp_server,
         address: "127.0.0.1",
         port: 14584,
-        block_msg_ids: [30, 73]  # Block ATTITUDE (30) and MISSION_ITEM (73)
+        # Block ATTITUDE (30) and MISSION_ITEM (73)
+        block_msg_ids: [30, 73]
       }
 
       sender_config = %{
@@ -142,10 +149,14 @@ defmodule RouterEx.MessageFilterTest do
       Process.sleep(100)
 
       # Create test frames
-      heartbeat_frame = create_test_frame(0, 1, 1)      # Should pass
-      gps_frame = create_test_frame(33, 1, 1)           # Should pass
-      attitude_frame = create_test_frame(30, 1, 1)      # Should be blocked
-      mission_frame = create_test_frame(73, 1, 1)       # Should be blocked
+      # Should pass
+      heartbeat_frame = create_test_frame(0, 1, 1)
+      # Should pass
+      gps_frame = create_test_frame(33, 1, 1)
+      # Should be blocked
+      attitude_frame = create_test_frame(30, 1, 1)
+      # Should be blocked
+      mission_frame = create_test_frame(73, 1, 1)
 
       {:ok, socket} = :gen_udp.open(0, [:binary, {:active, false}])
 
@@ -176,8 +187,10 @@ defmodule RouterEx.MessageFilterTest do
         type: :udp_server,
         address: "127.0.0.1",
         port: 14586,
-        block_msg_ids: nil,  # No filtering
-        allow_msg_ids: nil   # No whitelist either
+        # No filtering
+        block_msg_ids: nil,
+        # No whitelist either
+        allow_msg_ids: nil
       }
 
       sender_config = %{
@@ -227,8 +240,10 @@ defmodule RouterEx.MessageFilterTest do
         type: :udp_server,
         address: "127.0.0.1",
         port: 14588,
-        allow_msg_ids: [0, 33],     # Only allow these
-        block_msg_ids: [0, 30, 73]  # Block these (including 0)
+        # Only allow these
+        allow_msg_ids: [0, 33],
+        # Block these (including 0)
+        block_msg_ids: [0, 30, 73]
       }
 
       sender_config = %{
@@ -305,15 +320,22 @@ defmodule RouterEx.MessageFilterTest do
       {:ok, socket} = :gen_udp.open(0, [:binary, {:active, false}])
 
       # Camera-related messages (should be allowed)
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(0, 1, 1))    # HEARTBEAT
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(76, 1, 1))   # COMMAND_LONG
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(322, 1, 1))  # VIDEO_STREAM_INFO
+      # HEARTBEAT
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(0, 1, 1))
+      # COMMAND_LONG
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(76, 1, 1))
+      # VIDEO_STREAM_INFO
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(322, 1, 1))
 
       # Non-camera messages (should be blocked)
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(30, 1, 1))   # ATTITUDE
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(33, 1, 1))   # GPS
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(74, 1, 1))   # VFR_HUD
-      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(147, 1, 1))  # BATTERY_STATUS
+      # ATTITUDE
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(30, 1, 1))
+      # GPS
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(33, 1, 1))
+      # VFR_HUD
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(74, 1, 1))
+      # BATTERY_STATUS
+      :gen_udp.send(socket, {127, 0, 0, 1}, 14590, create_test_frame(147, 1, 1))
 
       :gen_udp.close(socket)
 
@@ -335,7 +357,8 @@ defmodule RouterEx.MessageFilterTest do
   defp create_test_frame(message_id, sys_id, comp_id) do
     # Create a simple MAVLink v1 frame for testing
     # Format: STX | len | seq | sysid | compid | msgid | payload | checksum
-    payload = <<0::72>>  # 9 bytes of zeros for simplicity
+    # 9 bytes of zeros for simplicity
+    payload = <<0::72>>
     payload_len = byte_size(payload)
     seq = 0
 

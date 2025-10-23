@@ -67,9 +67,7 @@ defmodule RouterEx.ConfigManager do
   def init(_opts) do
     config = load_config()
 
-    Logger.info(
-      "Configuration loaded: #{length(config.endpoints)} endpoints configured"
-    )
+    Logger.info("Configuration loaded: #{length(config.endpoints)} endpoints configured")
 
     # Start configured endpoints
     start_endpoints(config.endpoints)
@@ -135,12 +133,13 @@ defmodule RouterEx.ConfigManager do
 
   defp default_config do
     %{
-      general: Application.get_env(:router_ex, :general, [
-        tcp_server_port: 5760,
-        report_stats: false,
-        mavlink_dialect: :auto,
-        log_level: :info
-      ]),
+      general:
+        Application.get_env(:router_ex, :general,
+          tcp_server_port: 5760,
+          report_stats: false,
+          mavlink_dialect: :auto,
+          log_level: :info
+        ),
       endpoints: Application.get_env(:router_ex, :endpoints, [])
     }
   end

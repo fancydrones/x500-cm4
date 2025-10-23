@@ -96,7 +96,10 @@ defmodule RouterEx.Endpoint.UdpClient do
         {:noreply, new_state}
 
       {:error, reason} ->
-        Logger.error("Failed to start UDP client for #{state.address}:#{state.port}: #{inspect(reason)}")
+        Logger.error(
+          "Failed to start UDP client for #{state.address}:#{state.port}: #{inspect(reason)}"
+        )
+
         {:stop, reason, state}
     end
   end
@@ -133,7 +136,10 @@ defmodule RouterEx.Endpoint.UdpClient do
             {:noreply, state}
 
           {:error, reason} ->
-            Logger.error("Failed to send to UDP endpoint #{state.address}:#{state.port}: #{inspect(reason)}")
+            Logger.error(
+              "Failed to send to UDP endpoint #{state.address}:#{state.port}: #{inspect(reason)}"
+            )
+
             {:noreply, state}
         end
 
@@ -150,7 +156,9 @@ defmodule RouterEx.Endpoint.UdpClient do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info("UDP client terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}")
+    Logger.info(
+      "UDP client terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}"
+    )
 
     # Unregister from RouterCore
     if state.socket do

@@ -35,8 +35,10 @@ defmodule RouterEx.MixProject do
       {:circuits_uart, "~> 1.5"},
 
       # Configuration parsing (optional - for backward compatibility)
-      {:yaml_elixir, "~> 2.9", optional: true},  # YAML support
-      {:toml, "~> 0.7", optional: true},         # TOML support
+      # YAML support
+      {:yaml_elixir, "~> 2.9", optional: true},
+      # TOML support
+      {:toml, "~> 0.7", optional: true},
 
       # Telemetry
       {:telemetry, "~> 1.2"},
@@ -59,25 +61,25 @@ defmodule RouterEx.MixProject do
         "README.md"
       ],
       groups_for_modules: [
-        "Core": [
+        Core: [
           RouterEx,
           RouterEx.Application,
           RouterEx.ConfigManager,
           RouterEx.RouterCore,
           RouterEx.Telemetry
         ],
-        "Endpoints": [
+        Endpoints: [
           RouterEx.Endpoint.Supervisor,
           RouterEx.Endpoint.Serial,
           RouterEx.Endpoint.UDPServer,
           RouterEx.Endpoint.UDPClient,
           RouterEx.Endpoint.TCPServer
         ],
-        "Configuration": [
+        Configuration: [
           RouterEx.Config.Schema,
           RouterEx.Config.Validator
         ],
-        "Utilities": [
+        Utilities: [
           RouterEx.MessageParser,
           RouterEx.MessageFilter
         ]

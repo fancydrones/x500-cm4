@@ -4,9 +4,11 @@ import Config
 config :router_ex,
   general: [
     tcp_server_port: 5760,
-    report_stats: true,  # Enable stats in development
+    # Enable stats in development
+    report_stats: true,
     mavlink_dialect: :auto,
-    log_level: :debug     # More verbose logging
+    # More verbose logging
+    log_level: :debug
   ],
 
   # Development endpoints (example configuration)

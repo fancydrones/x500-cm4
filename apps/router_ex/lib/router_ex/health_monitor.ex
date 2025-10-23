@@ -31,8 +31,10 @@ defmodule RouterEx.HealthMonitor do
   use GenServer
   require Logger
 
-  @check_interval 10_000  # 10 seconds
-  @unhealthy_threshold 60_000  # 60 seconds without activity
+  # 10 seconds
+  @check_interval 10_000
+  # 60 seconds without activity
+  @unhealthy_threshold 60_000
 
   defmodule State do
     @moduledoc false
@@ -180,7 +182,9 @@ defmodule RouterEx.HealthMonitor do
 
   @impl true
   def handle_cast({:record_activity, connection_id, direction, count}, state) do
-    new_health = update_connection_activity(state.connection_health, connection_id, direction, count)
+    new_health =
+      update_connection_activity(state.connection_health, connection_id, direction, count)
+
     {:noreply, %{state | connection_health: new_health}}
   end
 
@@ -210,13 +214,14 @@ defmodule RouterEx.HealthMonitor do
       connections
       |> Enum.reduce(state.connection_health, fn {conn_id, conn_info}, acc ->
         # Initialize or preserve existing health data
-        existing = Map.get(acc, conn_id, %{
-          first_seen: DateTime.utc_now(),
-          last_activity: DateTime.utc_now(),
-          messages_received: 0,
-          messages_sent: 0,
-          type: conn_info.type
-        })
+        existing =
+          Map.get(acc, conn_id, %{
+            first_seen: DateTime.utc_now(),
+            last_activity: DateTime.utc_now(),
+            messages_received: 0,
+            messages_sent: 0,
+            type: conn_info.type
+          })
 
         # Check if connection is still alive
         alive = Process.alive?(conn_info.pid)
@@ -226,7 +231,9 @@ defmodule RouterEx.HealthMonitor do
 
     # Remove connections that no longer exist
     current_conn_ids = MapSet.new(Map.keys(connections))
-    new_health = Map.filter(new_health, fn {conn_id, _} -> MapSet.member?(current_conn_ids, conn_id) end)
+
+    new_health =
+      Map.filter(new_health, fn {conn_id, _} -> MapSet.member?(current_conn_ids, conn_id) end)
 
     %{state | last_check: DateTime.utc_now(), connection_health: new_health}
   end

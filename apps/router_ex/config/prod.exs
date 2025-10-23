@@ -7,7 +7,8 @@ import Config
 config :router_ex,
   general: [
     tcp_server_port: 5760,
-    report_stats: false,  # Stats disabled by default in prod
+    # Stats disabled by default in prod
+    report_stats: false,
     mavlink_dialect: :auto,
     log_level: :info
   ]

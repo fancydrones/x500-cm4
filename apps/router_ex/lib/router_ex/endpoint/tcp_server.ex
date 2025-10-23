@@ -101,7 +101,10 @@ defmodule RouterEx.Endpoint.TcpServer do
         {:noreply, %{new_state | acceptor_pid: acceptor_pid}}
 
       {:error, reason} ->
-        Logger.error("Failed to start TCP server on #{state.address}:#{state.port}: #{inspect(reason)}")
+        Logger.error(
+          "Failed to start TCP server on #{state.address}:#{state.port}: #{inspect(reason)}"
+        )
+
         {:stop, reason, state}
     end
   end
@@ -109,15 +112,24 @@ defmodule RouterEx.Endpoint.TcpServer do
   @impl true
   def handle_info({:client_connected, client_socket, client_info}, state) do
     # Spawn a process to handle this client
-    client_pid = spawn_link(fn ->
-      handle_client(client_socket, client_info, state.connection_id)
-    end)
+    client_pid =
+      spawn_link(fn ->
+        handle_client(client_socket, client_info, state.connection_id)
+      end)
 
     # Track this client
     client_id = make_ref()
-    new_clients = Map.put(state.clients, client_id, %{pid: client_pid, socket: client_socket, info: client_info})
 
-    Logger.info("TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)")
+    new_clients =
+      Map.put(state.clients, client_id, %{
+        pid: client_pid,
+        socket: client_socket,
+        info: client_info
+      })
+
+    Logger.info(
+      "TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)"
+    )
 
     {:noreply, %{state | clients: new_clients}}
   end
@@ -143,7 +155,9 @@ defmodule RouterEx.Endpoint.TcpServer do
         sent_count =
           Enum.reduce(state.clients, 0, fn {_id, client}, acc ->
             case :gen_tcp.send(client.socket, data) do
-              :ok -> acc + 1
+              :ok ->
+                acc + 1
+
               {:error, reason} ->
                 Logger.warning("Failed to send to TCP client: #{inspect(reason)}")
                 acc
@@ -179,7 +193,9 @@ defmodule RouterEx.Endpoint.TcpServer do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info("TCP server terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}")
+    Logger.info(
+      "TCP server terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}"
+    )
 
     # Unregister from RouterCore
     if state.listen_socket do

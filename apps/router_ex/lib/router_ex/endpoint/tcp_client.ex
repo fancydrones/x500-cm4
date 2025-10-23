@@ -175,7 +175,10 @@ defmodule RouterEx.Endpoint.TcpClient do
                 {:noreply, state}
 
               {:error, reason} ->
-                Logger.error("Failed to send to #{state.address}:#{state.port}: #{inspect(reason)}")
+                Logger.error(
+                  "Failed to send to #{state.address}:#{state.port}: #{inspect(reason)}"
+                )
+
                 {:noreply, state}
             end
 
@@ -193,7 +196,9 @@ defmodule RouterEx.Endpoint.TcpClient do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info("TCP client terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}")
+    Logger.info(
+      "TCP client terminating: #{state.address}:#{state.port}, reason: #{inspect(reason)}"
+    )
 
     # Unregister from RouterCore
     if state.socket do
