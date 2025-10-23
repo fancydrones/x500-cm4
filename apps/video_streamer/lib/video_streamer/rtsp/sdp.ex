@@ -65,10 +65,14 @@ defmodule VideoStreamer.RTSP.SDP do
     # control: URL for this media track
     control = "a=control:#{stream_path}/trackID=0"
 
-    # Additional attributes
+    # Additional attributes for better client compatibility (especially mobile clients)
     attrs = [
       "a=framerate:#{framerate}",
-      "a=framesize:#{payload_type} #{width}-#{height}"
+      "a=framesize:#{payload_type} #{width}-#{height}",
+      # Add media type to help clients identify this as video
+      "a=type:broadcast",
+      # Specify this is a video stream (helps some mobile clients)
+      "a=x-dimensions:#{width},#{height}"
     ]
 
     lines = [media_line, rtpmap, fmtp, control] ++ attrs
@@ -78,7 +82,8 @@ defmodule VideoStreamer.RTSP.SDP do
   defp build_fmtp_line(payload_type, _width, _height, _framerate, codec_params) do
     # H.264 profile-level-id
     # High Profile (64 = 0x64), Constrained (00), Level 3.1 (1F)
-    # This matches what rpicam-vid outputs (libx264 High profile)
+    # This should match what rpicam-vid outputs
+    # Note: Mobile clients may have issues with High Profile - consider camera config
     profile_level_id = Map.get(codec_params, :profile_level_id, "64001F")
 
     # packetization-mode: 1 = Non-interleaved mode (most common)
