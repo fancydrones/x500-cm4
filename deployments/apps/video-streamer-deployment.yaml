@@ -1,3 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: video-streamer-service
+  namespace: rpiuav
+spec:
+  ports:
+  - name: rtsp
+    port: 8554
+    protocol: TCP
+    targetPort: 8554
+  selector:
+    app: video-streamer-replicaset
+  type: ClusterIP
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -60,32 +75,14 @@ spec:
             - mountPath: /dev/shm
               name: temp
       volumes:
-        # udev volume for camera device detection
-        - name: udev
-          hostPath:
-            path: /run/udev/
-            type: Directory
-        # Device directory for camera access
-        - name: dev
-          hostPath:
-            path: /dev
-            type: Directory
-        # Shared memory for camera buffers
-        - name: temp
-          emptyDir:
-            medium: Memory
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: video-streamer-service
-  namespace: rpiuav
-spec:
-  selector:
-    app: video-streamer-replicaset
-  ports:
-    - name: rtsp
-      protocol: TCP
-      port: 8554
-      targetPort: 8554
-  type: ClusterIP
+      - hostPath:
+          path: /run/udev/
+          type: Directory
+        name: udev
+      - hostPath:
+          path: /dev
+          type: Directory
+        name: dev
+      - emptyDir:
+          medium: Memory
+        name: temp
