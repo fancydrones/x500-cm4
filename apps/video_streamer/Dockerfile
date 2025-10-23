@@ -1,20 +1,19 @@
-# This file is based on these images:
+# Multi-stage build for video_streamer with rpicam-apps
 #
-#   - https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=alpine - for the build image
-#   - https://hub.docker.com/_/alpine?tab=tags&page=1&name=3.22 - for the release image
+# Stage 1: Build Elixir release
+# Stage 2: Runtime image with rpicam-apps from edge/testing
 #
-# Note: rpicam-vid is not available in Alpine packages.
-# The container uses the host system's rpicam-vid binary via PATH when deployed on Raspberry Pi OS.
+# Note: Using Alpine edge for runtime to avoid dependency conflicts with rpicam-apps
 
 ARG ELIXIR_VERSION=1.18.4
 ARG OTP_VERSION=28.1
 ARG ALPINE_VERSION=3.22.1
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION}"
-ARG RUNNER_IMAGE="alpine:${ALPINE_VERSION}"
+ARG RUNNER_IMAGE="alpine:edge"
 
-# Build stage
-FROM ${BUILDER_IMAGE} AS builder
+# Stage 1: Build Elixir app
+FROM ${BUILDER_IMAGE} AS elixir-builder
 
 WORKDIR /app
 
@@ -38,17 +37,25 @@ ENV MIX_ENV=prod
 RUN mix compile
 RUN mix release
 
-# Runtime stage
+# Stage 2: Runtime
 FROM ${RUNNER_IMAGE} AS app
 
-# Install runtime dependencies
-# Note: rpicam-vid binary is expected from host system (Raspberry Pi OS)
-# via hostNetwork and will be available in PATH
-RUN apk add --no-cache libstdc++ openssl ncurses-libs
+# Enable testing repository for rpicam-apps
+RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
+# Install runtime dependencies including rpicam-apps from testing
+RUN apk add --no-cache \
+    libstdc++ \
+    openssl \
+    ncurses-libs \
+    libcamera \
+    libcamera-ipa \
+    rpicam-apps@testing
 
 WORKDIR /app
 
-COPY --from=builder /app/_build/prod/rel/video_streamer ./
+# Copy Elixir release
+COPY --from=elixir-builder /app/_build/prod/rel/video_streamer ./
 
 # RTSP port
 EXPOSE 8554

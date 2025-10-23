@@ -49,16 +49,22 @@ spec:
             - mountPath: /run/udev
               name: udev
               readOnly: true
+            # Mount /dev for direct device access
+            - mountPath: /dev
+              name: dev
             # Mount /dev/shm for shared memory (camera buffers)
             - mountPath: /dev/shm
               name: temp
-      # Use host network for direct camera access
-      hostNetwork: true
       volumes:
         # udev volume for camera device detection
         - name: udev
           hostPath:
             path: /run/udev/
+            type: Directory
+        # Device directory for camera access
+        - name: dev
+          hostPath:
+            path: /dev
             type: Directory
         # Shared memory for camera buffers
         - name: temp

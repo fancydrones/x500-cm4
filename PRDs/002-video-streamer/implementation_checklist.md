@@ -279,8 +279,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [x] Set up runtime stage
 - [x] Copy release from builder
 - [x] Install runtime dependencies (libcamera, rpicam-apps)
-- [ ] Test local Docker build (pending PR)
-- [ ] Optimize image size (pending first build)
+- [x] Test local Docker build (SUCCESS - 249MB image)
+- [x] Optimize image size (Alpine edge base, multi-stage build)
 
 ### 4.2 Mix Release Configuration ⏱️ Est: 3 hours ✅ DONE
 - [x] Configure `mix release` in mix.exs (already configured)
@@ -293,7 +293,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 ### 4.3 Kubernetes Manifests ⏱️ Est: 6 hours ✅ DONE
 - [x] Create `deployments/apps/video-streamer-deployment.yaml`
 - [x] Configure pod security (privileged: true for camera access)
-- [x] Mount /dev devices for camera (hostNetwork: true, /run/udev, /dev/shm)
+- [x] Mount /dev devices for camera (removed hostNetwork, added /dev mount)
 - [x] Set resource limits (CPU: 2/0.5, Memory: 1500Mi/500Mi)
 - [x] Configure environment variables (CAMERA_WIDTH, HEIGHT, FRAMERATE, RTSP_PORT)
 - [ ] Add health check probes (deferred to Phase 5)
@@ -323,7 +323,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [x] Configure privileged security context for camera access
 - [x] Mount /run/udev for camera device detection
 - [x] Mount /dev/shm for shared memory buffers
-- [x] Use hostNetwork for direct camera access
+- [x] Mount /dev for direct camera device access
+- [x] Removed hostNetwork - using rpicam-apps from container
 - [x] Based on working streamer-deployment.yaml pattern
 - [ ] Verify camera detection in container (pending deployment)
 - [ ] Test on actual Raspberry Pi CM5 (pending deployment)
@@ -338,7 +339,7 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [ ] Document any issues and solutions
 
 **Phase 4 Completion Criteria:**
-- [x] Docker image builds successfully (pending CI test)
+- [x] Docker image builds successfully ✅
 - [ ] Container runs on Raspberry Pi (pending deployment)
 - [x] Kubernetes deployment manifest created ✅
 - [x] Service created (ClusterIP on port 8554) ✅
@@ -346,9 +347,11 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [ ] Health checks working (deferred to Phase 5)
 
 **Phase 4 Notes (2025-01-23):**
-- Created Dockerfile based on announcer-ex pattern with rpicam-apps dependencies
+- Created Dockerfile with multi-stage build (Alpine edge for runtime)
+- **Docker build successful**: 249MB image with rpicam-apps v1.9.1 from Alpine edge/testing repository
 - Created GitHub Actions workflows for PR checks and main branch build/deploy
-- Created Kubernetes deployment with proper camera access (privileged, hostNetwork, /run/udev, /dev/shm)
+- Created Kubernetes deployment with proper camera access (privileged, /dev, /run/udev, /dev/shm)
+- **Removed hostNetwork**: rpicam-apps runs inside container, not from host
 - Created Service for cluster-internal access
 - Updated kustomization.yaml to include video-streamer
 - Updated rpi4-config ConfigMap to point announcer to new video-streamer service
@@ -356,6 +359,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - Camera passthrough based on working streamer-deployment configuration
 - **Main Profile optimization completed**: H.264 Main Profile (4D4028) with ~20% bandwidth savings
 - **SPS/PPS extraction from live stream**: Real camera parameters extracted and configured in SDP
+- **Alpine edge base image**: Using edge instead of 3.22.1 to avoid dependency conflicts with rpicam-apps
+- **rpicam-apps from package**: Using Alpine package instead of compiling from source for cleaner build
 - **Ready for PR and deployment testing**
 
 ---
