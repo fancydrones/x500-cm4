@@ -158,7 +158,8 @@ defmodule Membrane.Rpicam.Source do
     # Level: 4.0 (supports up to 1080p30, better than 3.1 for flexibility)
     # Preset: fast (better compression than superfast, still real-time on CM5)
     # Tune: zerolatency (optimize for streaming, no buffering)
-    "#{app_binary} -t #{timeout} --codec h264 --profile main --level 4.0 --libav-format h264 --libav-video-codec-opts preset=fast,tune=zerolatency --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
+    # Note: --libav-video-codec-opts must be specified separately for each option
+    "#{app_binary} -t #{timeout} --codec h264 --profile main --level 4.0 --libav-format h264 --libav-video-codec-opts preset=fast --libav-video-codec-opts tune=zerolatency --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var
