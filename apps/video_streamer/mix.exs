@@ -7,7 +7,13 @@ defmodule VideoStreamer.MixProject do
       version: "0.1.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+
+      # Documentation
+      name: "VideoStreamer",
+      source_url: "https://github.com/fancydrones/x500-cm4",
+      homepage_url: "https://github.com/fancydrones/x500-cm4/tree/main/apps/video_streamer",
+      docs: docs()
     ]
   end
 
@@ -46,7 +52,56 @@ defmodule VideoStreamer.MixProject do
       # Configuration & telemetry
       {:telemetry, "~> 1.2"},
       {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.0"},
+
+      # Documentation
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end
+
+  defp docs do
+    [
+      main: "readme",
+      logo: nil,
+      extras: [
+        "README.md",
+        "docs/architecture.md",
+        "docs/operations.md",
+        "docs/development.md"
+      ],
+      groups_for_extras: [
+        Documentation: ~r/docs\/.*/
+      ],
+      groups_for_modules: [
+        "RTSP Protocol": [
+          VideoStreamer.RTSP.Server,
+          VideoStreamer.RTSP.Protocol,
+          VideoStreamer.RTSP.SDP
+        ],
+        "Pipeline Components": [
+          VideoStreamer.Pipeline,
+          VideoStreamer.PipelineManager,
+          Membrane.Rpicam.Source
+        ],
+        Core: [
+          VideoStreamer,
+          VideoStreamer.Application,
+          VideoStreamer.Telemetry
+        ]
+      ],
+      before_closing_body_tag: &before_closing_body_tag/1
+    ]
+  end
+
+  # Add some basic styling for the documentation
+  defp before_closing_body_tag(:html) do
+    """
+    <style>
+      .sidebar .sidebar-heading { color: #663399; }
+      .content a { color: #663399; }
+    </style>
+    """
+  end
+
+  defp before_closing_body_tag(_), do: ""
 end
