@@ -161,7 +161,14 @@ defmodule Membrane.Rpicam.Source do
 
   @spec open_port(Membrane.Rpicam.Source.t(), String.t()) :: port()
   defp open_port(options, app_binary) do
-    Port.open({:spawn, create_command(options, app_binary)}, [:binary, :exit_status])
+    # Set LIBCAMERA_LOG_LEVELS to suppress INFO/WARN messages for cleaner logs
+    # Log levels: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR, 4=FATAL
+    # Setting to 3 (ERROR) suppresses the noisy SDN tuning and SyncMode warnings
+    # while keeping error messages visible for troubleshooting
+    Port.open(
+      {:spawn, create_command(options, app_binary)},
+      [:binary, :exit_status, {:env, [{~c"LIBCAMERA_LOG_LEVELS", ~c"*:3"}]}]
+    )
   end
 
   @spec create_command(Membrane.Element.options(), String.t()) :: String.t()
@@ -192,6 +199,7 @@ defmodule Membrane.Rpicam.Source do
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
+    # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     [
       app_binary,
       "-t", "#{timeout}",
