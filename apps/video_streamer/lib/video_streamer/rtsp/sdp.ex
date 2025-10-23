@@ -90,18 +90,18 @@ defmodule VideoStreamer.RTSP.SDP do
     # packetization-mode: 1 = Non-interleaved mode (most common)
     packetization_mode = Map.get(codec_params, :packetization_mode, 1)
 
+    # For Baseline Profile 720p30, use generic SPS/PPS that match common camera output
+    # These are base64-encoded parameter sets for H.264 Baseline Profile, Level 3.1
+    # SPS for 1280x720 Baseline Profile
+    default_sps_pps = "Z0IAH6aAoD2A,aM4G8g=="  # Generic Baseline 720p SPS/PPS
+
     fmtp_params = [
       "packetization-mode=#{packetization_mode}",
-      "profile-level-id=#{profile_level_id}"
+      "profile-level-id=#{profile_level_id}",
+      # Include sprop-parameter-sets for iOS compatibility
+      # iOS requires SPS/PPS in SDP to initialize decoder before receiving RTP packets
+      "sprop-parameter-sets=#{Map.get(codec_params, :sprop_parameter_sets, default_sps_pps)}"
     ]
-
-    # Add SPS/PPS if available (base64 encoded)
-    fmtp_params =
-      if codec_params[:sprop_parameter_sets] do
-        fmtp_params ++ ["sprop-parameter-sets=#{codec_params[:sprop_parameter_sets]}"]
-      else
-        fmtp_params
-      end
 
     "a=fmtp:#{payload_type} " <> Enum.join(fmtp_params, ";")
   end
