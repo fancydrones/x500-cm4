@@ -24,13 +24,13 @@ RUN apk update && apk add --no-cache build-base git linux-headers
 RUN mix local.hex --force && mix local.rebar --force
 
 # Copy dependency files
-COPY mix.exs mix.lock ./
+COPY apps/video_streamer/mix.exs apps/video_streamer/mix.lock ./
 RUN mix deps.get --only prod
 RUN mix deps.compile
 
 # Copy application files
-COPY lib ./lib
-COPY config ./config
+COPY apps/video_streamer/lib ./lib
+COPY apps/video_streamer/config ./config
 
 # Compile and build release
 ENV MIX_ENV=prod
