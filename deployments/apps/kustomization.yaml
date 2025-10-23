@@ -5,7 +5,8 @@ resources:
   - announcer-ex-deployment.yaml
   - router-deployment.yaml
   - router-service.yaml
-  - streamer-deployment.yaml
+  #- streamer-deployment.yaml
+  - video-streamer-deployment.yaml
   - companion-deployment.yaml
   - companion-service.yaml
   - companion-ingress.yaml

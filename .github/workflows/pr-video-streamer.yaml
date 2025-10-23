@@ -1,0 +1,79 @@
+name: Video Streamer PR Checks
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/video_streamer/**"
+      - ".github/workflows/pr-video-streamer.yaml"
+
+jobs:
+  test:
+    name: Run Mix Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/video_streamer
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: ./apps/video_streamer/.tool-versions
+          version-type: strict
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/video_streamer/deps
+            apps/video_streamer/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('apps/video_streamer/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/arm64
+
+      - name: Build Docker image for ARM64
+        uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: apps/video_streamer
+          file: apps/video_streamer/Dockerfile
+          platforms: linux/arm64
+          push: false
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/video-streamer-arm64.tar
+
+      - name: Get image size
+        run: |
+          IMAGE_SIZE=$(stat -c%s /tmp/video-streamer-arm64.tar)
+          IMAGE_SIZE_MB=$(echo "scale=2; $IMAGE_SIZE / 1024 / 1024" | bc)
+          echo "::notice title=Docker Image Size::ARM64 image size: ${IMAGE_SIZE_MB} MB (${IMAGE_SIZE} bytes)"
+          echo "### Docker Image Size 📦" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${IMAGE_SIZE_MB} MB (tar archive)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bytes**: ${IMAGE_SIZE} bytes" >> $GITHUB_STEP_SUMMARY
