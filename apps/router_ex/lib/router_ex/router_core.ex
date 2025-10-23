@@ -94,6 +94,16 @@ defmodule RouterEx.RouterCore do
   end
 
   @doc """
+  Gets all registered connections.
+
+  Returns a map of connection_id => connection_info for all active connections.
+  """
+  @spec get_connections() :: %{connection_id() => connection_info()}
+  def get_connections do
+    GenServer.call(__MODULE__, :get_connections)
+  end
+
+  @doc """
   Gets the current routing table (for debugging/introspection).
   """
   @spec get_routing_table() :: map()
@@ -169,6 +179,11 @@ defmodule RouterEx.RouterCore do
   @impl true
   def handle_call(:get_stats, _from, state) do
     {:reply, state.stats, state}
+  end
+
+  @impl true
+  def handle_call(:get_connections, _from, state) do
+    {:reply, state.connections, state}
   end
 
   @impl true

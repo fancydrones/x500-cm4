@@ -9,6 +9,7 @@ defmodule RouterEx.Application do
   - ConfigManager: Manages router configuration
   - Telemetry: Metrics and monitoring
   - RouterCore: Core message routing logic
+  - HealthMonitor: Connection health monitoring
   - Endpoint.Supervisor: Manages connection endpoints
   """
 
@@ -28,6 +29,9 @@ defmodule RouterEx.Application do
 
       # Router core (message routing logic)
       RouterEx.RouterCore,
+
+      # Health monitor (connection health monitoring)
+      RouterEx.HealthMonitor,
 
       # Connection supervisor (manages all endpoint connections)
       {DynamicSupervisor, name: RouterEx.Endpoint.Supervisor, strategy: :one_for_one}

@@ -31,8 +31,8 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [x] Parse AllowMsgIdOut and BlockMsgIdOut
 - [x] Add configuration validation
 - [x] Implement config reload functionality
-- [ ] Add unit tests for config parser (deferred to Phase 3)
-- [ ] Test with actual mavlink-router config file (deferred to Phase 3)
+- [ ] Add unit tests for config parser (deferred to Phase 5 - current functionality tested via integration tests)
+- [ ] Test with actual mavlink-router config file (deferred to Phase 5 - INI parsing not prioritized)
 - [x] Handle malformed configuration gracefully
 
 ### 1.4 Router Core ✅
@@ -62,12 +62,12 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [x] Set up telemetry_metrics
 - [x] Configure telemetry_poller for system metrics
 - [x] Add telemetry event documentation
-- [ ] Create telemetry test helpers (deferred to Phase 3)
+- [ ] Create telemetry test helpers (deferred - telemetry tested via integration tests)
 
 ### 1.6 Initial Testing ✅
 - [x] Set up ExUnit test framework
 - [x] Create test helpers module
-- [ ] Add mock connection utilities (deferred to Phase 3)
+- [ ] Add mock connection utilities (deferred - real endpoints used in tests instead)
 - [x] Write initial integration test
 - [x] Verify application starts successfully
 - [x] Test configuration loading
@@ -114,7 +114,7 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [x] Add port conflict handling
 - [x] Test with multiple simultaneous clients
 - [ ] Test with announcer-ex connection (deferred to Phase 5)
-- [ ] Verify message filtering works (deferred to Phase 3)
+- [x] Verify message filtering works (completed in Phase 3 - 6 comprehensive tests)
 
 ### 2.4 UDP Client Handler ✅
 - [x] Create RouterEx.Endpoint.UdpClient module
@@ -139,7 +139,7 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [x] Handle client disconnections
 - [x] Track active TCP clients
 - [x] Implement broadcast to TCP clients
-- [ ] Add TCP connection limits (if needed) (deferred to Phase 3)
+- [ ] Add TCP connection limits (optional - deferred, not needed for current use cases)
 - [ ] Test with QGroundControl TCP connection (deferred to Phase 5)
 - [ ] Test with multiple simultaneous QGC clients (deferred to Phase 5)
 
@@ -148,8 +148,8 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [x] Test mixed endpoint scenarios
 - [x] Verify endpoint startup from configuration
 - [ ] Test endpoint crash recovery (deferred to Phase 5)
-- [ ] Add connection health monitoring (deferred to Phase 3)
-- [ ] Implement connection status reporting (deferred to Phase 3)
+- [x] Add connection health monitoring (HealthMonitor module added)
+- [x] Implement connection status reporting (get_health/0, get_connection_status/0)
 
 ## Phase 3: Message Routing & Filtering (Week 5) ✅ COMPLETE
 
@@ -522,8 +522,10 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - Comprehensive message filtering tests (6 test cases, 254 lines)
 - Whitelist/blacklist filtering validated
 - Video streaming scenario tested
+- HealthMonitor module for connection health (319 lines)
+- Connection status reporting API
 - Code quality improvements (0 warnings)
 
-**Files Created in Phases 1-3:** 15 modules (~4,154 lines of code)
+**Files Created in Phases 1-3:** 16 modules (~4,473 lines of code)
 **Test Coverage:** 14 tests (1 doctest + 13 regular), 100% passing
-**Code Reduction:** -545 lines duplicate code + 419 shared parser = -126 net lines
+**Code Reduction:** -545 lines duplicate code + 738 new features = +193 net lines
