@@ -241,13 +241,14 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [ ] All integration tests pass
 
 **Phase 3 Notes (2025-10-22):**
-- Multi-client architecture implemented using Membrane.Tee.Master
+- Multi-client architecture implemented using Membrane.Tee.Parallel
 - Each client gets their own StreamSendBin with unique SSRC
 - Pipeline no longer needs to restart when clients connect/disconnect
 - Clients are added dynamically via add_client() and removed via remove_client()
 - Session ID is used as client_id for tracking
 - RTSP PLAY now adds client to pipeline instead of restarting
 - RTSP TEARDOWN and tcp_closed both properly remove clients
+- **Fix**: Changed from Tee.Master to Tee.Parallel (Master requires static :master pad)
 - Ready for multi-client hardware testing
 
 ---
@@ -605,11 +606,12 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - **Camera plugin**: Internalized `membrane_rpicam_plugin` for better control and compatibility
 - **H.264 alignment**: Using NALU alignment (not AU) for RTP payloader compatibility
 - **Camera binary**: Auto-detect rpicam-vid (newer) vs libcamera-vid (older)
-- **RTP streaming**: ~~Using UDP sink for now (simple single-client), will add Membrane.Tee for multi-client in Phase 3~~ **Phase 3: Now using Membrane.Tee.Master for multi-client support**
+- **RTP streaming**: ~~Using UDP sink for now (simple single-client), will add Membrane.Tee for multi-client in Phase 3~~ **Phase 3: Now using Membrane.Tee.Parallel for multi-client support**
 - **RTSP session**: ~~Each PLAY restarts pipeline with new client info (temporary solution for Phase 2)~~ **Phase 3: PLAY adds client dynamically, TEARDOWN removes client**
 - **Stream format**: Using `Membrane.RTP.StreamSendBin` which outputs `%RemoteStream{type: :packetized, content_format: RTP}` with properly serialized RTP packets
-- **Multi-client architecture**: Camera → H264Parser → Tee.Master → (per client: StreamSendBin → UDPSink)
+- **Multi-client architecture**: Camera → H264Parser → Tee.Parallel → (per client: StreamSendBin → UDPSink)
 - **Client management**: PipelineManager.add_client/remove_client for dynamic client handling without pipeline restarts
+- **Tee choice**: Using Tee.Parallel (not Tee.Master) as it supports dynamic outputs without requiring master pad
 
 ### Lessons Learned
 
@@ -626,7 +628,8 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - **Quick iteration wins**: Getting basic video working first, then adding multi-client support
 - **UDP RTP is simple**: Just send packets to client IP:port, no complex protocol
 - **Membrane stream format matching is critical**: Element input pads must match output pad formats exactly. `StreamSendBin` outputs `%RemoteStream{type: :packetized, content_format: RTP}`, not raw `Membrane.RTP`
-- **Tee enables multi-client**: Membrane.Tee.Master allows splitting a single stream to multiple outputs dynamically
+- **Tee enables multi-client**: Membrane.Tee.Parallel allows splitting a single stream to multiple outputs dynamically
+- **Tee.Master vs Tee.Parallel**: Master requires :master pad linked in spec; Parallel supports fully dynamic outputs
 - **Dynamic pipeline modification**: Membrane pipelines support adding/removing children at runtime via handle_info
 - **Unique SSRC per client**: Each client needs their own SSRC for proper RTP identification
 
