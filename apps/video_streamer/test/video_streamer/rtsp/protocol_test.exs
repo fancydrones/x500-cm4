@@ -251,7 +251,7 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
 
     test "returns nil for missing Session" do
       request = %{headers: %{}}
-      assert Protocol.get_session(request) == nil
+      assert is_nil(Protocol.get_session(request))
     end
   end
 end
