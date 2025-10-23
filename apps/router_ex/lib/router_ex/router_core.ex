@@ -291,9 +291,16 @@ defmodule RouterEx.RouterCore do
     # Try to extract target_system from the frame/message
     # Different message types have different field names
     cond do
-      Map.has_key?(frame, :target_system) -> frame.target_system
-      is_map(frame.message) and Map.has_key?(frame.message, :target_system) -> frame.message.target_system
-      true -> 0  # Broadcast
+      Map.has_key?(frame, :target_system) ->
+        frame.target_system
+
+      Map.has_key?(frame, :message) and is_map(frame.message) and
+          Map.has_key?(frame.message, :target_system) ->
+        frame.message.target_system
+
+      true ->
+        # Broadcast - no specific target
+        0
     end
   end
 

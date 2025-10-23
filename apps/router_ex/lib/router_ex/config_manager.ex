@@ -168,12 +168,16 @@ defmodule RouterEx.ConfigManager do
 
   defp start_endpoints(endpoints) when is_list(endpoints) do
     # Start each endpoint via the Endpoint.Supervisor
-    # For Phase 1, we'll just log them
-    # Actual endpoint starting will be implemented in Phase 2
-
     Enum.each(endpoints, fn endpoint ->
-      Logger.info("Configured endpoint: #{endpoint.name} (#{endpoint.type})")
-      # TODO: Start endpoint via RouterEx.Endpoint.Supervisor.start_endpoint(endpoint)
+      Logger.info("Starting configured endpoint: #{endpoint.name} (#{endpoint.type})")
+
+      case RouterEx.Endpoint.Supervisor.start_endpoint(endpoint) do
+        {:ok, _pid} ->
+          Logger.info("Successfully started endpoint: #{endpoint.name}")
+
+        {:error, reason} ->
+          Logger.error("Failed to start endpoint #{endpoint.name}: #{inspect(reason)}")
+      end
     end)
   end
 end
