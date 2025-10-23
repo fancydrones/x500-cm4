@@ -1,0 +1,74 @@
+name: Router-Ex PR Checks
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/router_ex/**"
+      - ".github/workflows/pr-router-ex.yaml"
+
+jobs:
+  test:
+    name: Run Mix Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/router_ex
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: ./apps/router_ex/.tool-versions
+          version-type: strict
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/router_ex/deps
+            apps/router_ex/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('apps/router_ex/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+      - name: Check code formatting
+        run: mix format --check-formatted
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/router_ex
+          file: apps/router_ex/Dockerfile
+          push: false
+          load: true
+          tags: router-ex:pr-${{ github.event.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Print image size
+        run: |
+          IMAGE_SIZE=$(docker image inspect router-ex:pr-${{ github.event.pull_request.number }} --format='{{.Size}}')
+          IMAGE_SIZE_MB=$(echo "scale=2; $IMAGE_SIZE / 1024 / 1024" | bc)
+          echo "::notice title=Docker Image Size::Image size: ${IMAGE_SIZE_MB} MB (${IMAGE_SIZE} bytes)"
+          echo "### Docker Image Size 📦" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${IMAGE_SIZE_MB} MB" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bytes**: ${IMAGE_SIZE} bytes" >> $GITHUB_STEP_SUMMARY
