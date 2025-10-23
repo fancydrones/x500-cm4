@@ -1,9 +1,11 @@
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=alpine - for the build image
-#   - https://hub.docker.com/_/alpine?tab=tags&page=1&name=3.18.0 - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.14.2-erlang-25.2-alpine-3.17.0
+#   - https://hub.docker.com/_/alpine?tab=tags&page=1&name=3.22 - for the release image
+#
+# Note: rpicam-vid is not available in Alpine packages.
+# The container uses the host system's rpicam-vid binary via PATH when deployed on Raspberry Pi OS.
+
 ARG ELIXIR_VERSION=1.18.4
 ARG OTP_VERSION=28.1
 ARG ALPINE_VERSION=3.22.1
@@ -39,16 +41,10 @@ RUN mix release
 # Runtime stage
 FROM ${RUNNER_IMAGE} AS app
 
-# Install runtime dependencies including rpicam-vid and libcamera
-# rpicam-apps provides rpicam-vid binary for camera access
-# libcamera provides camera interface libraries
-RUN apk add --no-cache \
-    libstdc++ \
-    openssl \
-    ncurses-libs \
-    libcamera \
-    libcamera-ipa \
-    rpicam-apps
+# Install runtime dependencies
+# Note: rpicam-vid binary is expected from host system (Raspberry Pi OS)
+# via hostNetwork and will be available in PATH
+RUN apk add --no-cache libstdc++ openssl ncurses-libs
 
 WORKDIR /app
 
