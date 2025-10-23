@@ -225,19 +225,22 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - [ ] Implement buffer overflow handling (deferred to performance testing)
 - [ ] Test with network jitter simulation (deferred to Phase 5)
 
-### 3.5 Multi-Client Testing ⏱️ Est: 4 hours
-- [ ] Test 2 simultaneous VLC clients
+### 3.5 Multi-Client Testing ⏱️ Est: 4 hours 🟡 IN PROGRESS
+- [x] Test 2 simultaneous VLC clients (macOS - working!)
 - [ ] Test 3+ clients (stress test)
 - [ ] Measure performance degradation
-- [ ] Test client connect/disconnect during streaming
+- [x] Test client connect/disconnect during streaming (macOS - working!)
 - [ ] Test rapid connect/disconnect cycles
 - [ ] Verify no memory leaks with long-running streams
+- [ ] Test iOS VLC compatibility (issue: shows audio-only - see iOS_VLC_TROUBLESHOOTING.md)
+- [ ] Test QGroundControl compatibility
 
 **Phase 3 Completion Criteria:**
-- [ ] Video stream visible in VLC/ffplay to multiple clients
-- [ ] Multiple clients can view simultaneously
-- [ ] No crashes during client connect/disconnect
+- [x] Video stream visible in VLC to multiple clients (macOS) ✅
+- [x] Multiple clients can view simultaneously ✅
+- [x] No crashes during client connect/disconnect ✅
 - [ ] Latency measured and documented
+- [ ] iOS/mobile client compatibility resolved
 - [ ] All integration tests pass
 
 **Phase 3 Notes (2025-10-22):**
@@ -249,7 +252,12 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 - RTSP PLAY now adds client to pipeline instead of restarting
 - RTSP TEARDOWN and tcp_closed both properly remove clients
 - **Fix**: Changed from Tee.Master to Tee.Parallel (Master requires static :master pad)
-- Ready for multi-client hardware testing
+- **Hardware Testing Results**:
+  - ✅ Multi-client working on macOS (2+ VLC instances simultaneously)
+  - ✅ No pipeline restarts during client operations
+  - ✅ Clean client add/remove working as expected
+  - ⚠️ iOS VLC shows "audio-only" - investigating H.264 profile compatibility (see iOS_VLC_TROUBLESHOOTING.md)
+  - 📝 Added SDP enhancements (x-dimensions, type:broadcast) for better mobile support
 
 ---
 
