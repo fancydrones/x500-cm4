@@ -153,8 +153,12 @@ defmodule Membrane.Rpicam.Source do
 
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
-    # Added --profile baseline for iOS/mobile device compatibility (High Profile not supported on all iOS devices)
-    "#{app_binary} -t #{timeout} --codec h264 --profile baseline --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
+    # CM5 uses software H.264 encoding (libx264) which allows advanced tuning
+    # Profile: Main (better compression than Baseline, universal device support)
+    # Level: 4.0 (supports up to 1080p30, better than 3.1 for flexibility)
+    # Preset: fast (better compression than superfast, still real-time on CM5)
+    # Tune: zerolatency (optimize for streaming, no buffering)
+    "#{app_binary} -t #{timeout} --codec h264 --profile main --level 4.0 --libav-format h264 --libav-video-codec-opts preset=fast,tune=zerolatency --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var
