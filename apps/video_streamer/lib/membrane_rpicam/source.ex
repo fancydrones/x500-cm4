@@ -87,6 +87,20 @@ defmodule Membrane.Rpicam.Source do
                 H.264 encoding level (e.g., "3.1", "4.0", "4.1").
                 Level 4.1 supports up to 1080p30, level 3.1 supports up to 720p30.
                 """
+              ],
+              hflip: [
+                spec: boolean(),
+                default: false,
+                description: """
+                Flip image horizontally (mirror).
+                """
+              ],
+              vflip: [
+                spec: boolean(),
+                default: false,
+                description: """
+                Flip image vertically (upside down).
+                """
               ]
 
   @impl true
@@ -171,10 +185,30 @@ defmodule Membrane.Rpicam.Source do
     profile = Atom.to_string(opts.profile)
     level = opts.level
 
+    # Build flip options
+    hflip_flag = if opts.hflip, do: "--hflip", else: ""
+    vflip_flag = if opts.vflip, do: "--vflip", else: ""
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
-    # Profile and level are now configurable for better compatibility
-    "#{app_binary} -t #{timeout} --codec h264 --profile #{profile} --level #{level} --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
+    # Profile, level, and flip options are now configurable for better compatibility
+    [
+      app_binary,
+      "-t", "#{timeout}",
+      "--codec", "h264",
+      "--profile", profile,
+      "--level", "#{level}",
+      "--libav-format", "h264",
+      "--framerate", "#{framerate_float}",
+      "--width", "#{width}",
+      "--height", "#{height}",
+      hflip_flag,
+      vflip_flag,
+      verbose_flag,
+      "-o", "-"
+    ]
+    |> Enum.filter(&(&1 != ""))
+    |> Enum.join(" ")
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var
