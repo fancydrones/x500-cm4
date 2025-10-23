@@ -81,10 +81,11 @@ defmodule VideoStreamer.RTSP.SDP do
 
   defp build_fmtp_line(payload_type, _width, _height, _framerate, codec_params) do
     # H.264 profile-level-id
-    # High Profile (64 = 0x64), Constrained (00), Level 3.1 (1F)
-    # This should match what rpicam-vid outputs
-    # Note: Mobile clients may have issues with High Profile - consider camera config
-    profile_level_id = Map.get(codec_params, :profile_level_id, "64001F")
+    # Baseline Profile (42 = 0x42), Constrained (E0), Level 3.1 (1F)
+    # Changed from High Profile (64001F) to Baseline (42E01F) for iOS/mobile compatibility
+    # Format: profile_idc (42) + constraint_flags (E0) + level_idc (1F)
+    # 42E01F = Baseline Profile, widely supported on mobile devices including iOS
+    profile_level_id = Map.get(codec_params, :profile_level_id, "42E01F")
 
     # packetization-mode: 1 = Non-interleaved mode (most common)
     packetization_mode = Map.get(codec_params, :packetization_mode, 1)
