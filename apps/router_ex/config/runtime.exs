@@ -45,35 +45,33 @@ if config_env() == :prod do
       log_level: String.to_atom(System.get_env("LOG_LEVEL", "info"))
     ]
 
-  # Endpoint configuration from environment
-  # Example: ROUTER_ENDPOINTS environment variable can contain endpoint configuration
-  # For now, endpoints are configured via Elixir config
-  # Future: support loading from YAML/TOML/INI via environment variables
+  # Endpoint configuration
+  # ConfigManager loads endpoints from ROUTER_CONFIG environment variable (INI/YAML/TOML)
+  # We just provide empty default here - ConfigManager handles actual parsing
+  #
+  # For testing, set ROUTER_CONFIG_MODE=example to use example configuration
 
-  # Example Elixir-native endpoint configuration
   endpoints =
-    case System.get_env("ROUTER_CONFIG_MODE") do
-      "example" ->
-        # Example configuration for testing
-        [
-          %{
-            name: "FlightController",
-            type: :uart,
-            device: System.get_env("SERIAL_DEVICE", "/dev/serial0"),
-            baud: parse_int.("SERIAL_BAUD", 921_600)
-          },
-          %{
-            name: "video0",
-            type: :udp_server,
-            address: "0.0.0.0",
-            port: 14560,
-            allow_msg_ids: parse_list.("VIDEO0_ALLOWED_MSGS", [0, 4, 76, 322, 323])
-          }
-        ]
-
-      _ ->
-        # Load from application environment or empty list
-        Application.get_env(:router_ex, :endpoints, [])
+    if System.get_env("ROUTER_CONFIG_MODE") == "example" do
+      # Example configuration for local testing
+      [
+        %{
+          name: "FlightController",
+          type: :uart,
+          device: System.get_env("SERIAL_DEVICE", "/dev/serial0"),
+          baud: parse_int.("SERIAL_BAUD", 921_600)
+        },
+        %{
+          name: "video0",
+          type: :udp_server,
+          address: "0.0.0.0",
+          port: 14560,
+          allow_msg_ids: parse_list.("VIDEO0_ALLOWED_MSGS", [0, 4, 76, 322, 323])
+        }
+      ]
+    else
+      # Empty list - ConfigManager will load from ROUTER_CONFIG if present
+      []
     end
 
   config :router_ex, endpoints: endpoints

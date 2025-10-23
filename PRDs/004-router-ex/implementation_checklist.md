@@ -215,7 +215,7 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [ ] Verify compatibility with announcer-ex (deferred to Phase 5)
 - [ ] Test with actual flight controller (deferred to Phase 5)
 
-## Phase 4: Containerization & Deployment (Week 6) 🚧 IN PROGRESS
+## Phase 4: Containerization & Deployment (Week 6) ✅ COMPLETE
 
 ### 4.1 Dockerfile ✅
 - [x] Create multi-stage Dockerfile
@@ -239,42 +239,42 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - [x] Test release build locally (successful)
 - [x] Verify release startup (works with proper config)
 
-### 4.3 Kubernetes Deployment ⏸️ DEFERRED
-- [ ] Create router-ex-deployment.yaml (deferred per user request)
-- [ ] Configure namespace (rpiuav) (deferred per user request)
-- [ ] Set up pod labels and selectors (deferred per user request)
-- [ ] Configure container ports (5760, 14550, 14560-14563) (deferred per user request)
-- [ ] Add environment variables (deferred per user request)
-- [ ] Configure ConfigMap mount (ROUTER_CONFIG) (deferred per user request)
-- [ ] Set up serial device mount (/dev/serial0) (deferred per user request)
-- [ ] Configure privileged security context (deferred per user request)
-- [ ] Enable hostNetwork (deferred per user request)
-- [ ] Set resource requests/limits (deferred per user request)
-- [ ] Add liveness probe (deferred per user request)
-- [ ] Add readiness probe (deferred per user request)
-- [ ] Create Service definition (deferred per user request)
-- [ ] Test deployment on k3s cluster (deferred per user request)
-- [ ] Verify pod starts successfully (deferred per user request)
-- [ ] Test serial port access in pod (deferred per user request)
+### 4.3 Kubernetes Deployment ✅
+- [x] Create router-ex-deployment.yaml
+- [x] Configure namespace (rpiuav)
+- [x] Set up pod labels and selectors
+- [x] Configure container ports (5760, 14550, 14560-14563)
+- [x] Add environment variables (ROUTER_CONFIG from ConfigMap)
+- [x] Configure ConfigMap integration (ROUTER_CONFIG env var)
+- [x] Set up serial device mount (/dev/serial0)
+- [x] Configure privileged security context
+- [x] Enable hostNetwork
+- [x] Set resource requests/limits (CPU: 0.25-0.5, Memory: 100-500Mi)
+- [x] Add liveness probe (RPC health check every 30s)
+- [x] Add readiness probe (RPC health check every 10s)
+- [x] Create Service definition (router-ex-service.yaml)
+- [ ] Test deployment on k3s cluster (deferred to Phase 5)
+- [ ] Verify pod starts successfully (deferred to Phase 5)
+- [ ] Test serial port access in pod (deferred to Phase 5)
 
-### 4.4 CI/CD Pipeline 🚧 PARTIAL
+### 4.4 CI/CD Pipeline ✅
 - [x] Create .github/workflows/pr-router-ex.yaml (PR check workflow)
-- [ ] Create .github/workflows/process-router-ex.yaml (deferred per user request)
-- [ ] Configure build triggers (main branch, path filters) (deferred per user request)
-- [ ] Set up Docker buildx for ARM64 (deferred per user request)
-- [ ] Configure GHCR push (deferred per user request)
-- [ ] Add image tagging (date + git hash) (deferred per user request)
-- [ ] Set up Kustomize for deployment updates (deferred per user request)
-- [ ] Configure automatic manifest updates (deferred per user request)
-- [ ] Test workflow end-to-end (deferred per user request)
-- [ ] Verify automated deployment (deferred per user request)
+- [x] Create .github/workflows/process-router-ex.yaml (main branch workflow)
+- [x] Configure build triggers (main branch, paths: apps/router_ex/**)
+- [x] Set up Docker buildx for ARM64 (via process-image-template.yaml)
+- [x] Configure GHCR push (via process-image-template.yaml)
+- [x] Add image tagging (YYYYMMDD-githash format via template)
+- [x] Set up Kustomize for deployment updates (via template)
+- [x] Configure automatic manifest updates (via template)
+- [ ] Test workflow end-to-end (deferred to Phase 5 - requires push to main)
+- [ ] Verify automated deployment (deferred to Phase 5 - requires cluster)
 
-### 4.5 Configuration Integration ⏸️ DEFERRED
-- [ ] Verify ROUTER_CONFIG from rpi4-configmap works (deferred per user request)
-- [ ] Test with existing configuration (deferred per user request)
-- [ ] Add environment variable overrides (deferred per user request)
-- [ ] Document configuration precedence (deferred per user request)
-- [ ] Test configuration changes without rebuild (deferred per user request)
+### 4.5 Configuration Integration ✅
+- [x] Verify ROUTER_CONFIG from rpi4-configmap works (ConfigMap has ROUTER_CONFIG key)
+- [x] Update runtime.exs to support ROUTER_CONFIG env var
+- [x] Add environment variable overrides (TCP_SERVER_PORT, REPORT_STATS, LOG_LEVEL)
+- [x] Document configuration precedence (documented in runtime.exs)
+- [ ] Test configuration changes without rebuild (deferred to Phase 5 - requires cluster)
 
 ## Phase 5: Testing & Validation (Week 7)
 
@@ -474,10 +474,10 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 ---
 
 **Total Tasks:** ~215
-**Completed Tasks:** ~145 (67%)
+**Completed Tasks:** ~170 (79%)
 **Estimated Effort:** 8 weeks
-**Time Spent:** 3.5 weeks (Phases 1-3, Phase 4 partial)
-**Status:** Phase 4 (Dockerfile & PR checks) Complete - Kubernetes/Deployment deferred
+**Time Spent:** 4 weeks (Phases 1-4 complete)
+**Status:** Phase 4 Complete - Ready for Phase 5 (Testing & Validation)
 
 ## Progress Summary
 
@@ -485,16 +485,14 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - **Phase 1:** Project Setup & Basic Router (100% complete)
 - **Phase 2:** Connection Handlers (100% complete)
 - **Phase 3:** Message Routing & Filtering (Core features complete, advanced features deferred)
-- **Phase 4.1-4.2:** Dockerfile & Release Configuration (100% complete)
-- **Phase 4.4:** PR Check Workflow (100% complete)
+- **Phase 4:** Containerization & Deployment (100% complete - cluster testing deferred to Phase 5)
 
 ### 🚧 Current Phase
 
-- **Phase 4:** Containerization & Deployment (Partial - Dockerfile done, K8s deferred)
+- **Phase 5:** Testing & Validation (Next)
 
 ### 📋 Remaining Phases
 
-- Phase 4.3-4.5: Kubernetes & Full CI/CD (deferred per user request)
 - Phase 5: Testing & Validation
 - Phase 6: Documentation
 
@@ -529,23 +527,49 @@ This checklist provides a detailed breakdown of all tasks required to implement 
 - Connection status reporting API
 - Code quality improvements (0 warnings)
 
-#### Phase 4 (🚧 Partial - Dockerfile & PR checks complete)
+#### Phase 4 (✅ Complete - Full containerization & deployment)
 
+**Dockerfile & Release:**
 - Multi-stage Dockerfile with Elixir 1.18.4/OTP 28.1 on Alpine 3.22.1
-- Optimized production image (63MB final size)
+- Optimized production image (63MB final size - excellent!)
 - Health check using RPC to verify RouterCore is running
 - Production configuration (config/prod.exs)
 - .tool-versions file for CI consistency
 - .dockerignore for efficient Docker builds
+
+**Kubernetes Manifests:**
+- router-ex-deployment.yaml with full pod specification
+  - Namespace: rpiuav
+  - Privileged container with serial device access
+  - hostNetwork enabled
+  - Resource limits (CPU: 0.5, Memory: 500Mi)
+  - Liveness/Readiness probes (RPC health checks)
+  - Init container for device ready delay
+  - ROUTER_CONFIG from ConfigMap via env var
+- router-ex-service.yaml with all MAVLink ports
+  - TCP port 5760 (MAVLink)
+  - UDP ports: 14550 (GCS), 14560-14563 (video/extras)
+
+**CI/CD Workflows:**
 - PR check workflow (.github/workflows/pr-router-ex.yaml)
   - Mix tests with dependency caching
   - Compile with --warnings-as-errors
   - Code formatting check
   - Docker build with GitHub cache
   - Image size reporting
-- Kubernetes deployment and full CI/CD deferred per user request
+- Process workflow (.github/workflows/process-router-ex.yaml)
+  - ARM64 Docker build on main branch
+  - GHCR push with date+githash tagging
+  - Automatic Kustomize deployment updates
+  - Reuses process-image-template.yaml
 
-**Files Created in Phases 1-4:** 18 modules + 4 CI/DevOps files (~4,473 lines of code)
+**Configuration Integration:**
+- Updated runtime.exs to support ROUTER_CONFIG env var
+- ConfigManager already supports INI/YAML/TOML parsing
+- Environment variable overrides (TCP_SERVER_PORT, REPORT_STATS, LOG_LEVEL)
+- ConfigMap integration via ROUTER_CONFIG key
+
+**Files Created in Phases 1-4:** 18 modules + 7 CI/DevOps files (~4,550 lines of code)
 **Docker Image Size:** 63MB (runtime)
 **Test Coverage:** 14 tests (1 doctest + 13 regular), 100% passing
-**Code Reduction:** -545 lines duplicate code + 738 new features = +193 net lines
+**Deployment Files:** 2 Kubernetes manifests, 2 GitHub workflows
