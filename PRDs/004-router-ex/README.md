@@ -125,32 +125,30 @@ Router-Ex is an Elixir-based MAVLink message router that will replace the existi
 - Slightly higher CPU usage (~10% vs ~5% idle)
 - Acceptable for the benefits gained
 
-### Configuration Compatibility
+### Configuration Formats
 
-Router-Ex uses the same INI-style configuration format as mavlink-router:
+Router-Ex supports **multiple configuration formats** to provide the best developer experience:
 
-```ini
-[General]
-TcpServerPort=5760
-MavlinkDialect=auto
-
-[UartEndpoint FlightController]
-Device = /dev/serial0
-Baud = 921600
-
-[UdpEndpoint video0]
-Mode = Server
-Address = 0.0.0.0
-Port = 14560
-AllowMsgIdOut = 0,4,76,322,323
-
-[UdpEndpoint GCS]
-Mode = Normal
-Address = 10.10.10.70
-Port = 14550
+**Recommended: Elixir Configuration** (native, type-safe)
+```elixir
+# config/runtime.exs
+config :router_ex,
+  endpoints: [
+    %{name: "FlightController", type: :uart, device: "/dev/serial0", baud: 921_600},
+    %{name: "video0", type: :udp_server, address: "0.0.0.0", port: 14560,
+      allow_msg_ids: [0, 4, 76, 322, 323]},
+    %{name: "GCS", type: :udp_client, address: "10.10.10.70", port: 14550}
+  ]
 ```
 
-This ensures drop-in compatibility with existing deployments.
+**Also Supported:**
+- **YAML** - Kubernetes-native, human-readable
+- **TOML** - Modern alternative to INI
+- **INI** - Backward compatibility with mavlink-router
+
+**Priority:** Elixir > YAML > TOML > INI
+
+See [configuration-formats.md](configuration-formats.md) for complete documentation and examples.
 
 ## Integration Points
 

@@ -28,13 +28,13 @@ This document provides a detailed implementation plan for Router-Ex, an Elixir-b
 
 **Compatibility Goals:**
 1. Drop-in replacement for existing router
-2. Support existing configuration format
+2. Support multiple configuration formats (Elixir-native + backward compatibility)
 3. Maintain same port mappings (5760, 14550, 14560-14563)
 4. Compatible with all existing MAVLink clients
 
 ### Key Design Principles
-1. **Compatibility First:** Maintain behavior parity with mavlink-router
-2. **Configuration Compatible:** Parse existing main.conf format
+1. **Elixir-Native First:** Leverage Elixir's strengths and conventions
+2. **Backward Compatible:** Support existing INI format for migration
 3. **Performance:** Minimize latency, handle high message rates
 4. **Reliability:** Automatic reconnection, fault tolerance
 5. **Observability:** Comprehensive logging and telemetry
@@ -175,7 +175,7 @@ TcpServerPort=5760
 | **Hot Reload** | No (requires restart) | Yes (code reloading) |
 | **Supervision** | Manual | OTP supervision trees |
 | **Telemetry** | Basic stats | Rich telemetry events |
-| **Configuration** | INI file | INI file + runtime env |
+| **Configuration** | INI file | Elixir/YAML/TOML/INI (flexible) |
 | **Memory** | ~10-20 MB | ~30-50 MB (acceptable) |
 | **CPU** | <5% idle | <10% idle (acceptable) |
 | **Integration** | Standalone | Native Elixir ecosystem |
@@ -205,8 +205,11 @@ defp deps do
     # Serial communication
     {:circuits_uart, "~> 1.5"},
 
-    # Configuration parsing
-    {:toml, "~> 0.7"},  # If using TOML, or parse INI manually
+    # Configuration parsing (optional - for backward compatibility)
+    {:yaml_elixir, "~> 2.9", optional: true},  # YAML support
+    {:toml, "~> 0.7", optional: true},         # TOML support
+    # Note: Elixir-native config (recommended) requires no extra deps
+    # Note: INI parsing will be custom implementation for mavlink-router compatibility
 
     # Telemetry
     {:telemetry, "~> 1.2"},
@@ -218,6 +221,8 @@ defp deps do
   ]
 end
 ```
+
+**Note:** The recommended approach is Elixir-native configuration (runtime.exs), which requires no additional dependencies. YAML and TOML support is optional for specific use cases. See [configuration-formats.md](../PRDs/004-router-ex/configuration-formats.md) for detailed comparison and examples.
 
 #### 1.2 Application Structure
 
@@ -257,8 +262,13 @@ end
 ```elixir
 defmodule RouterEx.ConfigManager do
   @moduledoc """
-  Manages router configuration from INI file format.
-  Compatible with mavlink-router main.conf format.
+  Manages router configuration from multiple formats:
+  - Elixir (recommended): config/runtime.exs
+  - YAML: for Kubernetes ConfigMaps
+  - TOML: modern alternative to INI
+  - INI: backward compatibility with mavlink-router
+
+  Priority: Elixir > YAML > TOML > INI
   """
 
   use GenServer
@@ -331,25 +341,61 @@ defmodule RouterEx.ConfigManager do
   # Private Functions
 
   defp load_config do
-    # Load from environment variable or default location
-    config_content = System.get_env("ROUTER_CONFIG") ||
-                     File.read!("/etc/mavlink-router/main.conf")
+    # Priority order: Elixir config > YAML > TOML > INI
+    cond do
+      # 1. Elixir-native configuration (recommended)
+      config = Application.get_env(:router_ex, :config) ->
+        config
 
-    parse_config(config_content)
+      # 2. YAML configuration (Kubernetes-friendly)
+      yaml_content = System.get_env("ROUTER_CONFIG_YAML") ->
+        parse_yaml(yaml_content)
+
+      # 3. TOML configuration (modern alternative)
+      toml_content = System.get_env("ROUTER_CONFIG_TOML") ->
+        parse_toml(toml_content)
+
+      # 4. INI configuration (backward compatibility)
+      ini_content = System.get_env("ROUTER_CONFIG") ->
+        parse_ini(ini_content)
+
+      # Fallback to default config from Application env
+      true ->
+        default_config()
+    end
   end
 
-  defp parse_config(content) do
-    # Parse INI-style configuration
-    # See implementation in Phase 1 detailed tasks
-
+  defp default_config do
     %{
-      general: %{
+      general: [
         tcp_server_port: 5760,
         report_stats: false,
         mavlink_dialect: :auto
-      },
-      endpoints: []
+      ],
+      endpoints: Application.get_env(:router_ex, :endpoints, [])
     }
+  end
+
+  defp parse_yaml(content) when is_binary(content) do
+    # Parse YAML if yaml_elixir is available
+    # Convert to internal format
+    # See configuration-formats.md for details
+    Logger.warning("YAML parsing not yet implemented")
+    default_config()
+  end
+
+  defp parse_toml(content) when is_binary(content) do
+    # Parse TOML if toml is available
+    # Convert to internal format
+    Logger.warning("TOML parsing not yet implemented")
+    default_config()
+  end
+
+  defp parse_ini(content) when is_binary(content) do
+    # Parse INI-style configuration for mavlink-router compatibility
+    # See implementation in Phase 1 detailed tasks
+    Logger.warning("INI parsing not yet implemented")
+    default_config()
   end
 
   defp start_endpoints(endpoints) do
