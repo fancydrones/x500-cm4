@@ -2,6 +2,7 @@ import Config
 
 # Test configuration
 config :video_streamer,
+  env: :test,
   camera: [
     width: 640,
     height: 480,
