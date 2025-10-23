@@ -40,8 +40,9 @@ RUN mix release
 # Stage 2: Runtime
 FROM ${RUNNER_IMAGE} AS app
 
-# Enable testing repository for rpicam-apps
-RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+# Enable testing repository for rpicam-apps and update package index
+RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk update
 
 # Install runtime dependencies including rpicam-apps from testing
 RUN apk add --no-cache \
