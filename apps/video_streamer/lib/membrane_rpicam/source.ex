@@ -153,10 +153,9 @@ defmodule Membrane.Rpicam.Source do
 
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
-    # Using Constrained Baseline Profile for maximum compatibility
-    # Baseline is less efficient than Main but has universal device support
-    # and matches our current SDP parameters
-    "#{app_binary} -t #{timeout} --codec h264 --profile baseline --level 4.0 --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
+    # Using Main Profile for better compression efficiency (~20% bandwidth savings vs Baseline)
+    # Main Profile is supported by all modern devices including iOS
+    "#{app_binary} -t #{timeout} --codec h264 --profile main --level 4.0 --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var
