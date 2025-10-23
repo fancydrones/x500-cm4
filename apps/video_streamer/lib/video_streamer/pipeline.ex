@@ -117,7 +117,9 @@ defmodule VideoStreamer.Pipeline do
         framerate: {camera_config[:framerate], 1},
         verbose: Keyword.get(camera_config, :verbose, false),
         profile: Keyword.get(encoder_config, :profile, :main),
-        level: Keyword.get(encoder_config, :level, "4.1")
+        level: Keyword.get(encoder_config, :level, "4.1"),
+        hflip: Keyword.get(camera_config, :hflip, false),
+        vflip: Keyword.get(camera_config, :vflip, false)
       })
       |> child(:h264_parser, %Membrane.H264.Parser{
         output_alignment: :nalu,

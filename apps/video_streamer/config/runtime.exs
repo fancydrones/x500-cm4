@@ -6,7 +6,9 @@ if config_env() == :prod do
     camera: [
       width: System.get_env("STREAM_WIDTH", "1920") |> String.to_integer(),
       height: System.get_env("STREAM_HEIGHT", "1080") |> String.to_integer(),
-      framerate: System.get_env("STREAM_FPS", "30") |> String.to_integer()
+      framerate: System.get_env("STREAM_FPS", "30") |> String.to_integer(),
+      hflip: System.get_env("CAMERA_HFLIP", "false") == "true",
+      vflip: System.get_env("CAMERA_VFLIP", "false") == "true"
     ],
     rtsp: [
       port: System.get_env("RTSP_PORT", "8554") |> String.to_integer(),
