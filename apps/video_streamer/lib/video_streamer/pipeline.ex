@@ -106,6 +106,7 @@ defmodule VideoStreamer.Pipeline do
 
   defp build_pipeline_spec(camera_config) do
     # Build base pipeline with Tee for multi-client support
+    # Using Tee.Parallel which allows dynamic output pads without requiring master pad
     [
       child(:camera_source, %Membrane.Rpicam.Source{
         width: camera_config[:width],
@@ -118,7 +119,7 @@ defmodule VideoStreamer.Pipeline do
         generate_best_effort_timestamps: %{framerate: {camera_config[:framerate], 1}},
         repeat_parameter_sets: true
       })
-      |> child(:tee, Membrane.Tee.Master)
+      |> child(:tee, Membrane.Tee.Parallel)
     ]
   end
 end
