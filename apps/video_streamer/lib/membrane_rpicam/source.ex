@@ -192,7 +192,23 @@ defmodule Membrane.Rpicam.Source do
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
-    "#{app_binary} -t #{timeout} --codec h264 --profile #{profile} --level #{level} --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{hflip_flag} #{vflip_flag} #{verbose_flag} -o -"
+    [
+      app_binary,
+      "-t", "#{timeout}",
+      "--codec", "h264",
+      "--profile", profile,
+      "--level", "#{level}",
+      "--libav-format", "h264",
+      "--framerate", "#{framerate_float}",
+      "--width", "#{width}",
+      "--height", "#{height}",
+      hflip_flag,
+      vflip_flag,
+      verbose_flag,
+      "-o", "-"
+    ]
+    |> Enum.filter(&(&1 != ""))
+    |> Enum.join(" ")
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var
