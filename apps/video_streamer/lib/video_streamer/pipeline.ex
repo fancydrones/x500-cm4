@@ -105,6 +105,9 @@ defmodule VideoStreamer.Pipeline do
   ## Private Functions
 
   defp build_pipeline_spec(camera_config) do
+    # Get encoder config
+    encoder_config = Application.get_env(:video_streamer, :encoder, [])
+
     # Build base pipeline with Tee for multi-client support
     # Using Tee.Parallel which allows dynamic output pads without requiring master pad
     [
@@ -112,7 +115,9 @@ defmodule VideoStreamer.Pipeline do
         width: camera_config[:width],
         height: camera_config[:height],
         framerate: {camera_config[:framerate], 1},
-        verbose: Keyword.get(camera_config, :verbose, false)
+        verbose: Keyword.get(camera_config, :verbose, false),
+        profile: Keyword.get(encoder_config, :profile, :main),
+        level: Keyword.get(encoder_config, :level, "4.1")
       })
       |> child(:h264_parser, %Membrane.H264.Parser{
         output_alignment: :nalu,

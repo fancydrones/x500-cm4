@@ -71,6 +71,22 @@ defmodule Membrane.Rpicam.Source do
                 Enable verbose output from rpicam-vid (frame statistics, exposure, gain, etc.).
                 When false, suppresses the frame-by-frame debug output.
                 """
+              ],
+              profile: [
+                spec: :baseline | :main | :high,
+                default: :main,
+                description: """
+                H.264 encoding profile (baseline, main, or high).
+                Main profile provides better compression (~20% savings vs baseline).
+                """
+              ],
+              level: [
+                spec: String.t(),
+                default: "4.1",
+                description: """
+                H.264 encoding level (e.g., "3.1", "4.0", "4.1").
+                Level 4.1 supports up to 1080p30, level 3.1 supports up to 720p30.
+                """
               ]
 
   @impl true
@@ -151,11 +167,14 @@ defmodule Membrane.Rpicam.Source do
     # Suppress verbose output unless explicitly enabled
     verbose_flag = if opts.verbose, do: "", else: "--nopreview"
 
+    # Get profile and level from options
+    profile = Atom.to_string(opts.profile)
+    level = opts.level
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
-    # Using Main Profile for better compression efficiency (~20% bandwidth savings vs Baseline)
-    # Main Profile is supported by all modern devices including iOS
-    "#{app_binary} -t #{timeout} --codec h264 --profile main --level 4.0 --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
+    # Profile and level are now configurable for better compatibility
+    "#{app_binary} -t #{timeout} --codec h264 --profile #{profile} --level #{level} --libav-format h264 --framerate #{framerate_float} --width #{width} --height #{height} #{verbose_flag} -o -"
   end
 
   @spec resolve_defaultable_option(:camera_default | x, x) :: x when x: var

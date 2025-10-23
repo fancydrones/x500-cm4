@@ -35,6 +35,10 @@ spec:
               value: "30"
             - name: RTSP_PORT
               value: "8554"
+            - name: H264_PROFILE
+              value: "main"
+            - name: H264_LEVEL
+              value: "4.1"
           resources:
             limits:
               cpu: "2"
