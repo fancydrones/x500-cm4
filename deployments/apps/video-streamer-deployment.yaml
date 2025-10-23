@@ -35,45 +35,42 @@ spec:
         app.kubernetes.io/name: video-streamer-deployment
     spec:
       containers:
-        - name: video-streamer
-          image: ghcr.io/fancydrones/x500-cm4/video-streamer:latest
-          ports:
-            - containerPort: 8554
-              name: rtsp
-              protocol: TCP
-          env:
-            - name: CAMERA_WIDTH
-              value: "1280"
-            - name: CAMERA_HEIGHT
-              value: "720"
-            - name: CAMERA_FRAMERATE
-              value: "30"
-            - name: RTSP_PORT
-              value: "8554"
-            - name: H264_PROFILE
-              value: "main"
-            - name: H264_LEVEL
-              value: "4.1"
-          resources:
-            limits:
-              cpu: "2"
-              memory: 1500Mi
-            requests:
-              cpu: "0.5"
-              memory: 500Mi
-          securityContext:
-            privileged: true
-          volumeMounts:
-            # Mount /run/udev for camera device detection
-            - mountPath: /run/udev
-              name: udev
-              readOnly: true
-            # Mount /dev for direct device access
-            - mountPath: /dev
-              name: dev
-            # Mount /dev/shm for shared memory (camera buffers)
-            - mountPath: /dev/shm
-              name: temp
+      - env:
+        - name: CAMERA_WIDTH
+          value: "1280"
+        - name: CAMERA_HEIGHT
+          value: "720"
+        - name: CAMERA_FRAMERATE
+          value: "30"
+        - name: RTSP_PORT
+          value: "8554"
+        - name: H264_PROFILE
+          value: main
+        - name: H264_LEVEL
+          value: "4.1"
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251023-e9ebc2e
+        name: video-streamer
+        ports:
+        - containerPort: 8554
+          name: rtsp
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "2"
+            memory: 1500Mi
+          requests:
+            cpu: "0.5"
+            memory: 500Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /run/udev
+          name: udev
+          readOnly: true
+        - mountPath: /dev
+          name: dev
+        - mountPath: /dev/shm
+          name: temp
       volumes:
       - hostPath:
           path: /run/udev/
