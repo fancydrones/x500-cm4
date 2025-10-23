@@ -550,6 +550,18 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
 
 ## Future Enhancements (Backlog)
 
+### Docker Image Size Optimization (Medium Priority)
+- [ ] Analyze image size breakdown (current: 257MB)
+- [ ] Investigate minimal runtime-only rpicam-apps build
+- [ ] Consider Alpine stable base with backported rpicam-apps
+- [ ] Explore removing unnecessary ffmpeg codecs/filters
+- [ ] Remove dev dependencies from runtime (libcamera-dev, etc.)
+- [ ] Implement multi-stage build cleanup (remove .a files, headers)
+- [ ] Test distroless or minimal base images
+- [ ] Document size reduction techniques
+- [ ] Target: <150MB final image size
+- **Rationale**: Current 257MB image is larger than desired for embedded deployment. Most size comes from ffmpeg dependencies pulled by rpicam-apps. Optimization could significantly reduce bandwidth and storage requirements.
+
 ### TCP/Interleaved RTSP Transport (High Priority)
 - [ ] Design TCP/interleaved transport architecture
 - [ ] Implement RTP over TCP with 4-byte interleaved framing
