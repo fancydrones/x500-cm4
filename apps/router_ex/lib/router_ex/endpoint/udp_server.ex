@@ -36,6 +36,7 @@ defmodule RouterEx.Endpoint.UdpServer do
 
   use GenServer
   require Logger
+  alias RouterEx.MAVLink.Parser
 
   @client_timeout 60_000
   @cleanup_interval 30_000
@@ -293,121 +294,11 @@ defmodule RouterEx.Endpoint.UdpServer do
 
   defp format_address(addr) when is_binary(addr), do: addr
 
-  # Reuse the same frame parsing logic as Serial endpoint
   defp parse_frames(buffer) do
-    do_parse_frames(buffer, [])
-  end
-
-  defp do_parse_frames(<<>>, frames), do: {Enum.reverse(frames), <<>>}
-
-  defp do_parse_frames(buffer, frames) when byte_size(buffer) < 8 do
-    {Enum.reverse(frames), buffer}
-  end
-
-  defp do_parse_frames(<<0xFD, payload_len, _rest::binary>> = buffer, frames)
-       when byte_size(buffer) >= payload_len + 12 do
-    frame_len = payload_len + 12
-    <<frame_data::binary-size(frame_len), rest::binary>> = buffer
-
-    case parse_mavlink_frame(frame_data) do
-      {:ok, frame} ->
-        do_parse_frames(rest, [frame | frames])
-
-      {:error, _reason} ->
-        <<_::8, rest::binary>> = buffer
-        do_parse_frames(rest, frames)
-    end
-  end
-
-  defp do_parse_frames(<<0xFE, payload_len, _rest::binary>> = buffer, frames)
-       when byte_size(buffer) >= payload_len + 8 do
-    frame_len = payload_len + 8
-    <<frame_data::binary-size(frame_len), rest::binary>> = buffer
-
-    case parse_mavlink_frame(frame_data) do
-      {:ok, frame} ->
-        do_parse_frames(rest, [frame | frames])
-
-      {:error, _reason} ->
-        <<_::8, rest::binary>> = buffer
-        do_parse_frames(rest, frames)
-    end
-  end
-
-  defp do_parse_frames(<<_::8, rest::binary>>, frames) do
-    do_parse_frames(rest, frames)
-  end
-
-  defp parse_mavlink_frame(<<0xFD, payload_len, incompat_flags, compat_flags, seq, sysid, compid,
-                               msg_id::24-little, payload::binary-size(payload_len),
-                               _checksum::16-little, _signature::binary>> = data)
-       when byte_size(data) >= payload_len + 12 do
-    {:ok,
-     %{
-       version: 2,
-       payload_length: payload_len,
-       incompatibility_flags: incompat_flags,
-       compatibility_flags: compat_flags,
-       sequence: seq,
-       source_system: sysid,
-       source_component: compid,
-       message_id: msg_id,
-       payload: payload,
-       raw: data
-     }}
-  end
-
-  defp parse_mavlink_frame(<<0xFE, payload_len, seq, sysid, compid, msg_id,
-                               payload::binary-size(payload_len), _checksum::16-little>> = data)
-       when byte_size(data) >= payload_len + 8 do
-    {:ok,
-     %{
-       version: 1,
-       payload_length: payload_len,
-       sequence: seq,
-       source_system: sysid,
-       source_component: compid,
-       message_id: msg_id,
-       payload: payload,
-       raw: data
-     }}
-  end
-
-  defp parse_mavlink_frame(_data) do
-    {:error, :invalid_frame}
+    Parser.parse_frames(buffer)
   end
 
   defp serialize_frame(frame) do
-    case Map.get(frame, :raw) do
-      nil -> build_mavlink_frame(frame)
-      raw when is_binary(raw) -> {:ok, raw}
-    end
-  end
-
-  defp build_mavlink_frame(%{version: 2} = frame) do
-    payload = Map.get(frame, :payload, <<>>)
-    payload_len = byte_size(payload)
-
-    data =
-      <<0xFD, payload_len, frame.incompatibility_flags, frame.compatibility_flags, frame.sequence,
-        frame.source_system, frame.source_component, frame.message_id::24-little, payload::binary,
-        0::16-little>>
-
-    {:ok, data}
-  end
-
-  defp build_mavlink_frame(%{version: 1} = frame) do
-    payload = Map.get(frame, :payload, <<>>)
-    payload_len = byte_size(payload)
-
-    data =
-      <<0xFE, payload_len, frame.sequence, frame.source_system, frame.source_component,
-        frame.message_id, payload::binary, 0::16-little>>
-
-    {:ok, data}
-  end
-
-  defp build_mavlink_frame(_frame) do
-    {:error, :invalid_frame_format}
+    Parser.serialize_frame(frame)
   end
 end
