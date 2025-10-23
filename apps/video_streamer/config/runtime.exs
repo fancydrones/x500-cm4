@@ -16,7 +16,8 @@ if config_env() == :prod do
       password: System.get_env("RTSP_PASSWORD")
     ],
     encoder: [
-      profile: System.get_env("H264_PROFILE", "baseline") |> String.to_atom(),
+      profile: System.get_env("H264_PROFILE", "main") |> String.to_atom(),
+      level: System.get_env("H264_LEVEL", "4.1"),
       keyframe_interval: System.get_env("KEYFRAME_INTERVAL", "30") |> String.to_integer()
     ]
 end
