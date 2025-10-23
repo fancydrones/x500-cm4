@@ -256,8 +256,9 @@ This checklist tracks the implementation progress of the low-latency RTSP video 
   - ✅ Multi-client working on macOS (2+ VLC instances simultaneously)
   - ✅ No pipeline restarts during client operations
   - ✅ Clean client add/remove working as expected
-  - ⚠️ iOS VLC shows "audio-only" - investigating H.264 profile compatibility (see iOS_VLC_TROUBLESHOOTING.md)
+  - ✅ **FIXED** (commit 0824065): iOS VLC compatibility - switched to H.264 Baseline Profile (42E01F)
   - 📝 Added SDP enhancements (x-dimensions, type:broadcast) for better mobile support
+  - 📝 Camera now uses `--profile baseline` for wider mobile device compatibility
 
 ---
 

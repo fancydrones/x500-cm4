@@ -225,8 +225,28 @@ After fixing, iOS VLC should:
 
 - ✅ Multi-client works (macOS VLC + macOS VLC)
 - ✅ Desktop VLC works
-- ❌ iOS VLC shows only audio track
-- ❓ SDP needs verification
-- ❓ Profile compatibility unclear
+- ✅ **FIXED** (2025-10-22): Switched to H.264 Baseline Profile for iOS compatibility
 
-Let me know what you find in the SDP inspection!
+## Fix Applied
+
+Changed from H.264 High Profile to Baseline Profile:
+- **Camera** (`source.ex`): Added `--profile baseline` parameter to rpicam-vid
+- **SDP** (`sdp.ex`): Changed profile-level-id from `64001F` (High) to `42E01F` (Baseline)
+
+### Deployment Steps
+
+1. Pull latest code (commit `0824065`)
+2. Recompile: `mix compile`
+3. Restart video_streamer service
+4. Test with iOS VLC
+
+### Verification
+
+Check SDP has correct profile:
+```bash
+curl rtsp://<pi-ip>:8554/video -X DESCRIBE -H "Accept: application/sdp" | grep profile-level-id
+```
+
+Should show: `a=fmtp:96 packetization-mode=1;profile-level-id=42E01F`
+
+**iOS VLC should now display video correctly!**
