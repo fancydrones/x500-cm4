@@ -57,6 +57,7 @@ jobs:
 
       - name: Build Docker image for ARM64
         uses: docker/build-push-action@v6
+        id: build
         with:
           context: apps/video_streamer
           file: apps/video_streamer/Dockerfile
@@ -65,3 +66,14 @@ jobs:
           provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/video-streamer-arm64.tar
+
+      - name: Get image size
+        run: |
+          IMAGE_SIZE=$(stat -c%s /tmp/video-streamer-arm64.tar)
+          IMAGE_SIZE_MB=$(echo "scale=2; $IMAGE_SIZE / 1024 / 1024" | bc)
+          echo "::notice title=Docker Image Size::ARM64 image size: ${IMAGE_SIZE_MB} MB (${IMAGE_SIZE} bytes)"
+          echo "### Docker Image Size 📦" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "- **Size**: ${IMAGE_SIZE_MB} MB (tar archive)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bytes**: ${IMAGE_SIZE} bytes" >> $GITHUB_STEP_SUMMARY
