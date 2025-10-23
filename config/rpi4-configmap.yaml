@@ -4,7 +4,7 @@ metadata:
   name: rpi4-config
   namespace: rpiuav
 data:
-  ANNOUNCER_CAMERA_URL: rtsp://10.10.10.2:8554/cam
+  ANNOUNCER_CAMERA_URL: rtsp://video-streamer-service.rpiuav.svc.cluster.local:8554/video
   ANNOUNCER_SYSTEM_ID: "1"
   STREAMER_CONFIG: |
     paths:
