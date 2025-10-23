@@ -81,19 +81,20 @@ defmodule VideoStreamer.RTSP.SDP do
 
   defp build_fmtp_line(payload_type, _width, _height, _framerate, codec_params) do
     # H.264 profile-level-id
-    # Constrained Baseline Profile (42C01F) for maximum compatibility
-    # Format: profile_idc (42) + constraint_flags (C0) + level_idc (1F)
-    # 42 = Baseline Profile, C0 = constrained (no B-frames), 1F = Level 3.1
-    # Level 3.1 supports up to 720p30
-    profile_level_id = Map.get(codec_params, :profile_level_id, "42C01F")
+    # Main Profile (4D4028) for optimal compression with universal compatibility
+    # Format: profile_idc (4D) + constraint_flags (40) + level_idc (28)
+    # 4D = Main Profile (77 decimal), 40 = constraint flags, 28 = Level 4.0 (40 decimal)
+    # Level 4.0 supports up to 1080p30, provides ~20% bandwidth savings vs Baseline
+    profile_level_id = Map.get(codec_params, :profile_level_id, "4D4028")
 
     # packetization-mode: 1 = Non-interleaved mode (most common)
     packetization_mode = Map.get(codec_params, :packetization_mode, 1)
 
-    # SPS/PPS extracted from actual Baseline Profile camera stream
-    # SPS: 26 bytes, Profile 42C01F (Constrained Baseline, Level 3.1)
+    # SPS/PPS extracted from actual Main Profile camera stream (rpicam-vid --profile main)
+    # SPS: 26 bytes, Profile 4D4028 (Main Profile, Level 4.0)
     # PPS: 4 bytes
-    default_sps_pps = "Z0LAH9oBQBbpqAgICgAAAwACAD0JAB4wZUA=,aM4PyA=="
+    # Extracted from live stream on 2025-01-23
+    default_sps_pps = "Z01AKPYCgC3TUBAQFAAAAwAEAHoSADxgxOA=,aO4PyA=="
 
     fmtp_params = [
       "packetization-mode=#{packetization_mode}",
