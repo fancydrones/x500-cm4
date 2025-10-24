@@ -207,7 +207,10 @@ defmodule RouterEx.MAVLink.ParserTest do
 
       # V2 frame
       payload_v2 = <<3, 4>>
-      crc_v2 = Parser.calculate_crc(<<2, 0, 0, 1, 2, 2, 1::24-little, payload_v2::binary>>, 0xFFFF)
+
+      crc_v2 =
+        Parser.calculate_crc(<<2, 0, 0, 1, 2, 2, 1::24-little, payload_v2::binary>>, 0xFFFF)
+
       frame_v2 = <<0xFD, 2, 0, 0, 1, 2, 2, 1::24-little, payload_v2::binary, crc_v2::16-little>>
 
       combined = <<frame_v1::binary, frame_v2::binary>>

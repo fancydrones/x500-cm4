@@ -213,15 +213,15 @@ defmodule RouterEx.ConfigManager do
 
           String.starts_with?(section_content, "UartEndpoint") ->
             name = String.replace_prefix(section_content, "UartEndpoint ", "")
-            parse_ini_sections(rest, :uart, general, endpoints, [name: name])
+            parse_ini_sections(rest, :uart, general, endpoints, name: name)
 
           String.starts_with?(section_content, "UdpEndpoint") ->
             name = String.replace_prefix(section_content, "UdpEndpoint ", "")
-            parse_ini_sections(rest, :udp, general, endpoints, [name: name])
+            parse_ini_sections(rest, :udp, general, endpoints, name: name)
 
           String.starts_with?(section_content, "TcpEndpoint") ->
             name = String.replace_prefix(section_content, "TcpEndpoint ", "")
-            parse_ini_sections(rest, :tcp, general, endpoints, [name: name])
+            parse_ini_sections(rest, :tcp, general, endpoints, name: name)
 
           true ->
             Logger.warning("Unknown section: #{section_content}")
