@@ -384,11 +384,22 @@ defmodule RouterEx.Endpoint.TcpServer do
   defp client_loop(socket, buffer, connection_id, server_pid) do
     receive do
       {:tcp, ^socket, data} ->
+        Logger.debug(
+          "TCP server received #{byte_size(data)} bytes from client (buffer: #{byte_size(buffer)} bytes)"
+        )
+
         # Append to buffer
         new_buffer = buffer <> data
 
         # Parse MAVLink frames
         {frames, remaining_buffer} = parse_frames(new_buffer)
+
+        # Log parsed frames
+        frame_count = length(frames)
+
+        if frame_count > 0 do
+          Logger.debug("TCP server parsed #{frame_count} MAVLink frames from received data")
+        end
 
         # Route each frame to RouterCore
         Enum.each(frames, fn frame ->
