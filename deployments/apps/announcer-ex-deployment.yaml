@@ -29,7 +29,7 @@ spec:
         - name: CAMERA_NAME
           value: Front
         - name: SYSTEM_HOST
-          value: router-service.rpiuav.svc.cluster.local
+          value: router-ex-service.rpiuav.svc.cluster.local
         - name: SYSTEM_PORT
           value: "14560"
         - name: SYSTEM_ID
