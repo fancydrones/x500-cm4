@@ -95,8 +95,11 @@ defmodule RouterEx.Endpoint.TcpServer do
       {:ok, new_state} ->
         Logger.info("TCP server started: #{state.address}:#{state.port}")
 
-        # Start acceptor process
-        acceptor_pid = spawn_link(fn -> accept_loop(new_state.listen_socket, self()) end)
+        # Start acceptor process - pass server PID explicitly
+        server_pid = self()
+        acceptor_pid = spawn_link(fn -> accept_loop(new_state.listen_socket, server_pid) end)
+
+        Logger.info("TCP acceptor loop started (PID: #{inspect(acceptor_pid)})")
 
         {:noreply, %{new_state | acceptor_pid: acceptor_pid}}
 
@@ -251,21 +254,31 @@ defmodule RouterEx.Endpoint.TcpServer do
   end
 
   defp accept_loop(listen_socket, server_pid) do
+    Logger.debug("TCP acceptor waiting for connections on socket #{inspect(listen_socket)}")
+
     case :gen_tcp.accept(listen_socket) do
       {:ok, client_socket} ->
         # Get client info
-        {:ok, {address, port}} = :inet.peername(client_socket)
+        case :inet.peername(client_socket) do
+          {:ok, {address, port}} ->
+            client_info = %{
+              address: format_address(address),
+              port: port
+            }
 
-        client_info = %{
-          address: format_address(address),
-          port: port
-        }
+            Logger.info("TCP acceptor accepted connection from #{client_info.address}:#{client_info.port}")
 
-        # Notify server about new client
-        send(server_pid, {:client_connected, client_socket, client_info})
+            # Notify server about new client
+            send(server_pid, {:client_connected, client_socket, client_info})
 
-        # Continue accepting
-        accept_loop(listen_socket, server_pid)
+            # Continue accepting
+            accept_loop(listen_socket, server_pid)
+
+          {:error, reason} ->
+            Logger.error("Failed to get peer info: #{inspect(reason)}")
+            :gen_tcp.close(client_socket)
+            accept_loop(listen_socket, server_pid)
+        end
 
       {:error, :closed} ->
         Logger.info("TCP accept loop terminated: socket closed")
