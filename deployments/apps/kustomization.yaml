@@ -3,8 +3,8 @@ kind: Kustomization
 resources:
   - rpiuav-namespace.yaml
   - announcer-ex-deployment.yaml
-  - router-deployment.yaml
-  - router-service.yaml
+  - router-ex-deployment.yaml
+  - router-ex-service.yaml
   - video-streamer-deployment.yaml
   - companion-deployment.yaml
   - companion-service.yaml

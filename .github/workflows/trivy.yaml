@@ -100,6 +100,36 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
+  scan-router-ex-image:
+    permissions:
+      contents: write # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Find current image
+        run: |
+          IMAGE_ROUTER=$(cat ./deployments/apps/router-ex-deployment.yaml | grep "image: ghcr.io" | cut -d ':' -f 2-3 | sed 's/^ *//')
+          echo $IMAGE_ROUTER
+          echo "IMAGE_ROUTER=$IMAGE_ROUTER" >> $GITHUB_ENV
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ${{ env.IMAGE_ROUTER }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: "CRITICAL,HIGH"
+          limit-severities-for-sarif: true
+        env:
+          TRIVY_PLATFORM: linux/arm64
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
   scan-streamer-image:
     permissions:
       contents: write # for actions/checkout to fetch code
