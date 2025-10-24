@@ -102,7 +102,7 @@ defmodule Membrane.Rpicam.Source do
                 description: """
                 Keyframe interval in frames (GOP size). Lower values (10-15) improve
                 mobile decoder performance and reduce latency, at cost of higher bandwidth.
-                Android QGC benefits from 10 frames (333ms at 30fps) for lower latency.
+                Android QGC benefits from a keyframe interval of 10 frames (latency ≈ keyframe_interval / framerate seconds; e.g., ~333ms at 30fps) for lower latency.
                 """
               ],
               inline_headers: [

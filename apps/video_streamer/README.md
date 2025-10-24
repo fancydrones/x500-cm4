@@ -129,17 +129,17 @@ H264_PROFILE=main         # Good compression, universal support
 ```
 
 Benefits:
-- **Reduces latency**: 10-frame GOP = 333ms max latency contribution at 30fps
+- **Reduces latency**: 10-frame GOP = 333ms maximum latency contribution at 30fps, but average wait is 5 frames (~167ms)
 - **Eliminates block artifacts**: Frequent keyframes prevent error propagation
 - **Faster decoder recovery**: More I-frames = better error resilience
 - **Immediate output**: Flush mode reduces encoder buffering
 - **Stable performance**: Bitrate limiting prevents network congestion
 
-**Latency Breakdown** (720p30 with these settings):
+**Latency Breakdown** (720p30 with these settings, using average values):
 - Encoding: ~33ms (1 frame)
 - Network: ~10-50ms (WiFi)
-- Keyframe interval: ~167ms (5 frames average to next I-frame)
-- **Total glass-to-glass**: ~210-250ms (optimal for Android)
+- Keyframe interval: ~167ms (average wait: 5 frames to next I-frame at 30fps; maximum possible: 333ms)
+- **Total glass-to-glass**: ~210-250ms (average; optimal for Android)
 
 ### Example Configurations
 
