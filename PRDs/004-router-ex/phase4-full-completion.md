@@ -54,7 +54,7 @@ Phase 4 implementation delivers complete containerization and deployment infrast
 
 3. **apps/router_ex/.tool-versions** (2 lines)
    ```
-   erlang 28.1
+   erlang 28.1.1
    elixir 1.18.4
    ```
 

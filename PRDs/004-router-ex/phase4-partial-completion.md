@@ -61,7 +61,7 @@ router_ex 0.1.0
    - Reduces build context size significantly
 
 2. `apps/router_ex/.tool-versions` - Version consistency
-   - Erlang 28.1
+   - Erlang 28.1.1
    - Elixir 1.18.4
    - Ensures consistent builds across dev/CI/production
 
