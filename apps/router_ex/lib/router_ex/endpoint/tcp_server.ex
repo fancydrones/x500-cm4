@@ -386,7 +386,7 @@ defmodule RouterEx.Endpoint.TcpServer do
   defp client_loop(socket, buffer, connection_id, server_pid) do
     receive do
       {:tcp, ^socket, data} ->
-        Logger.debug(
+        Logger.info(
           "TCP server received #{byte_size(data)} bytes from client (buffer: #{byte_size(buffer)} bytes)"
         )
 
@@ -398,8 +398,9 @@ defmodule RouterEx.Endpoint.TcpServer do
 
         # Log parsed frames
         frame_count = length(frames)
+
         if frame_count > 0 do
-          Logger.debug("TCP server parsed #{frame_count} MAVLink frames from received data")
+          Logger.info("TCP server parsed #{frame_count} MAVLink frames, routing to RouterCore")
         end
 
         # Route each frame to RouterCore
