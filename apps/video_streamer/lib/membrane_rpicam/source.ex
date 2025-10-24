@@ -231,7 +231,7 @@ defmodule Membrane.Rpicam.Source do
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
-    # Added keyframe interval (intraperiod) for better mobile decoder performance
+    # Added keyframe interval (--intra) for better mobile decoder performance
     # Added inline headers for mobile compatibility
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     ([
@@ -240,7 +240,7 @@ defmodule Membrane.Rpicam.Source do
       "--codec", "h264",
       "--profile", profile,
       "--level", "#{level}",
-      "--intraperiod", "#{opts.keyframe_interval}",
+      "--intra", "#{opts.keyframe_interval}",
       "--libav-format", "h264",
       "--framerate", "#{framerate_float}",
       "--width", "#{width}",
