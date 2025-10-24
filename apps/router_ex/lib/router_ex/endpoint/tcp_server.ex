@@ -266,7 +266,9 @@ defmodule RouterEx.Endpoint.TcpServer do
               port: port
             }
 
-            Logger.info("TCP acceptor accepted connection from #{client_info.address}:#{client_info.port}")
+            Logger.info(
+              "TCP acceptor accepted connection from #{client_info.address}:#{client_info.port}"
+            )
 
             # Notify server about new client
             send(server_pid, {:client_connected, client_socket, client_info})
