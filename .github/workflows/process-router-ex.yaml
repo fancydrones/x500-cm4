@@ -1,0 +1,20 @@
+name: Router-Ex image
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "apps/router_ex/**"
+      - ".github/workflows/process-router-ex.yaml"
+      - ".github/workflows/process-image-template.yaml"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  process-image:
+    uses: ./.github/workflows/process-image-template.yaml
+    with:
+      app_name: router-ex
+      runner_label: ubuntu-arm-latest-m
+    secrets: inherit
