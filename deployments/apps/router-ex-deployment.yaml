@@ -35,9 +35,9 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /app/bin/router_ex
-            - rpc
-            - Process.whereis(RouterEx.RouterCore) != nil
+            - pgrep
+            - -f
+            - beam.smp
           failureThreshold: 3
           initialDelaySeconds: 30
           periodSeconds: 30
@@ -65,9 +65,9 @@ spec:
         readinessProbe:
           exec:
             command:
-            - /app/bin/router_ex
-            - rpc
-            - Process.whereis(RouterEx.RouterCore) != nil
+            - pgrep
+            - -f
+            - beam.smp
           failureThreshold: 3
           initialDelaySeconds: 10
           periodSeconds: 10
