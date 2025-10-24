@@ -64,11 +64,11 @@ defmodule RouterEx.MixProject do
         "../../PRDs/004-router-ex/phase5-completion-summary.md": [title: "Testing Summary"]
       ],
       groups_for_extras: [
-        "Guides": ~r/docs\/.*/,
-        "PRDs": ~r/PRDs\/.*/
+        Guides: ~r/docs\/.*/,
+        PRDs: ~r/PRDs\/.*/
       ],
       groups_for_modules: [
-        "Core": [
+        Core: [
           RouterEx,
           RouterEx.Application,
           RouterEx.ConfigManager,
@@ -76,7 +76,7 @@ defmodule RouterEx.MixProject do
           RouterEx.Telemetry,
           RouterEx.HealthMonitor
         ],
-        "Endpoints": [
+        Endpoints: [
           RouterEx.Endpoint.Supervisor,
           RouterEx.Endpoint.Serial,
           RouterEx.Endpoint.Serial.State,

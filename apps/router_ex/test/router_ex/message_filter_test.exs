@@ -39,7 +39,7 @@ defmodule RouterEx.MessageFilterTest do
         port: 14581
       }
 
-      {:ok, filtered_pid} = EndpointSupervisor.start_endpoint(filtered_config)
+      {:ok, _filtered_pid} = EndpointSupervisor.start_endpoint(filtered_config)
       {:ok, _sender_pid} = EndpointSupervisor.start_endpoint(sender_config)
 
       Process.sleep(100)
@@ -209,7 +209,7 @@ defmodule RouterEx.MessageFilterTest do
 
       # Count how many endpoints are actually registered (including from previous tests)
       active_endpoints = EndpointSupervisor.list_endpoints()
-      endpoint_count = length(active_endpoints)
+      _endpoint_count = length(active_endpoints)
 
       # Send various messages
       {:ok, socket} = :gen_udp.open(0, [:binary, {:active, false}])
