@@ -182,7 +182,9 @@ defmodule RouterEx.Endpoint.UdpServer do
     end)
 
     if length(frames) > 0 do
-      Logger.debug("Received #{length(frames)} frames from #{format_address(ip)}:#{port}")
+      Logger.info(
+        "UDP server received #{byte_size(data)} bytes, parsed #{length(frames)} frames from #{format_address(ip)}:#{port}"
+      )
     end
 
     {:noreply, %{state | clients: new_clients, buffer: new_buffers}}
