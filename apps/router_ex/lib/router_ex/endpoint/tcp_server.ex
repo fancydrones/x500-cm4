@@ -37,6 +37,9 @@ defmodule RouterEx.Endpoint.TcpServer do
   require Logger
   alias RouterEx.MAVLink.Parser
 
+  # Timeout for socket ownership transfer (milliseconds)
+  @socket_transfer_timeout 5000
+
   defmodule State do
     @moduledoc false
     defstruct [
@@ -127,24 +130,45 @@ defmodule RouterEx.Endpoint.TcpServer do
         handle_client(client_socket, client_info, state.connection_id, server_pid)
       end)
 
-    # Track this client
-    client_id = make_ref()
+    # Transfer socket ownership to the client handler process
+    # This is CRITICAL - without it, the acceptor process owns the socket
+    # and the client handler won't receive any data!
+    case :gen_tcp.controlling_process(client_socket, client_pid) do
+      :ok ->
+        # Tell the client handler it can now proceed
+        send(client_pid, :socket_ready)
 
-    new_clients =
-      Map.put(state.clients, client_id, %{
-        pid: client_pid,
-        socket: client_socket,
-        info: client_info
-      })
+        # Track this client
+        client_id = make_ref()
 
-    # Maintain reverse index for O(1) lookups
-    new_pid_to_client_id = Map.put(state.pid_to_client_id, client_pid, client_id)
+        new_clients =
+          Map.put(state.clients, client_id, %{
+            pid: client_pid,
+            socket: client_socket,
+            info: client_info
+          })
 
-    Logger.info(
-      "TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)"
-    )
+        # Maintain reverse index for O(1) lookups
+        new_pid_to_client_id = Map.put(state.pid_to_client_id, client_pid, client_id)
 
-    {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
+        Logger.info(
+          "TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)"
+        )
+
+        {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
+
+      {:error, reason} ->
+        Logger.error(
+          "Failed to transfer socket control for #{client_info.address}:#{client_info.port}: #{inspect(reason)}"
+        )
+
+        # Kill the client handler and close the socket
+        Process.exit(client_pid, :kill)
+        :gen_tcp.close(client_socket)
+
+        # Don't track this failed client
+        {:noreply, state}
+    end
   end
 
   @impl true
@@ -374,11 +398,25 @@ defmodule RouterEx.Endpoint.TcpServer do
   defp handle_client(socket, client_info, connection_id, server_pid) do
     Logger.debug("Handling TCP client: #{client_info.address}:#{client_info.port}")
 
-    # Set socket to active mode for this process
-    :inet.setopts(socket, active: true)
+    # Wait for socket ownership transfer to complete
+    receive do
+      :socket_ready ->
+        # Now we own the socket, set it to active mode
+        :inet.setopts(socket, active: true)
+        Logger.info("TCP client handler ready for #{client_info.address}:#{client_info.port}")
 
-    # Enter receive loop
-    client_loop(socket, <<>>, connection_id, server_pid)
+        # Enter receive loop
+        client_loop(socket, <<>>, connection_id, server_pid)
+    after
+      @socket_transfer_timeout ->
+        Logger.error(
+          "Timeout waiting for socket ownership transfer for #{client_info.address}:#{client_info.port}"
+        )
+
+        :gen_tcp.close(socket)
+        # Exit without entering client_loop - the EXIT handler will clean up
+        :ok
+    end
   end
 
   defp client_loop(socket, buffer, connection_id, server_pid) do
