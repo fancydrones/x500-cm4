@@ -55,35 +55,68 @@ defmodule RouterEx.MixProject do
 
   defp docs do
     [
-      main: "readme",
+      main: "RouterEx",
       logo: nil,
       extras: [
-        "README.md"
+        "README.md": [title: "Overview"],
+        "docs/operations.md": [title: "Operations Guide"],
+        "../../PRDs/004-router-ex/README.md": [title: "PRD"],
+        "../../PRDs/004-router-ex/phase5-completion-summary.md": [title: "Testing Summary"]
+      ],
+      groups_for_extras: [
+        "Guides": ~r/docs\/.*/,
+        "PRDs": ~r/PRDs\/.*/
       ],
       groups_for_modules: [
-        Core: [
+        "Core": [
           RouterEx,
           RouterEx.Application,
           RouterEx.ConfigManager,
           RouterEx.RouterCore,
-          RouterEx.Telemetry
+          RouterEx.Telemetry,
+          RouterEx.HealthMonitor
         ],
-        Endpoints: [
+        "Endpoints": [
           RouterEx.Endpoint.Supervisor,
           RouterEx.Endpoint.Serial,
-          RouterEx.Endpoint.UDPServer,
-          RouterEx.Endpoint.UDPClient,
-          RouterEx.Endpoint.TCPServer
+          RouterEx.Endpoint.Serial.State,
+          RouterEx.Endpoint.UdpServer,
+          RouterEx.Endpoint.UdpServer.State,
+          RouterEx.Endpoint.UdpServer.Client,
+          RouterEx.Endpoint.UdpClient,
+          RouterEx.Endpoint.UdpClient.State,
+          RouterEx.Endpoint.TcpServer,
+          RouterEx.Endpoint.TcpServer.State,
+          RouterEx.Endpoint.TcpClient,
+          RouterEx.Endpoint.TcpClient.State
         ],
-        Configuration: [
-          RouterEx.Config.Schema,
-          RouterEx.Config.Validator
-        ],
-        Utilities: [
-          RouterEx.MessageParser,
-          RouterEx.MessageFilter
+        "MAVLink Protocol": [
+          RouterEx.MAVLink.Parser
         ]
-      ]
+      ],
+      # Add custom sections
+      before_closing_head_tag: &before_closing_head_tag/1,
+      before_closing_body_tag: &before_closing_body_tag/1
     ]
   end
+
+  defp before_closing_head_tag(:html) do
+    """
+    <style>
+      .sidebar-listNav { max-height: calc(100vh - 100px); }
+    </style>
+    """
+  end
+
+  defp before_closing_head_tag(_), do: ""
+
+  defp before_closing_body_tag(:html) do
+    """
+    <script>
+      // Custom JavaScript for docs if needed
+    </script>
+    """
+  end
+
+  defp before_closing_body_tag(_), do: ""
 end

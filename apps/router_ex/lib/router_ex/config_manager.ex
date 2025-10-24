@@ -1,33 +1,228 @@
 defmodule RouterEx.ConfigManager do
   @moduledoc """
-  Manages router configuration from multiple formats:
-  - Elixir (recommended): config/runtime.exs
-  - YAML: for Kubernetes ConfigMaps
-  - TOML: modern alternative to INI
-  - INI: backward compatibility with mavlink-router
+  Manages router configuration from multiple formats and sources.
 
-  Priority: Elixir > YAML > TOML > INI
+  ConfigManager is responsible for loading, parsing, and managing the router's
+  configuration. It supports multiple configuration formats for flexibility and
+  backward compatibility with mavlink-router.
 
-  The ConfigManager loads configuration on startup and can reload
-  configuration dynamically when requested.
+  ## Supported Formats
+
+  1. **INI Format** (mavlink-router compatible):
+     ```ini
+     [General]
+     TcpServerPort=5760
+     ReportStats=false
+
+     [UartEndpoint FlightController]
+     Device=/dev/serial0
+     Baud=921600
+
+     [UdpEndpoint GroundStation]
+     Mode=Server
+     Port=14550
+     AllowMsgIdOut=0,1,33
+     ```
+
+  2. **YAML Format** (Kubernetes-friendly):
+     ```yaml
+     general:
+       tcp_server_port: 5760
+       report_stats: false
+     endpoints:
+       - name: FlightController
+         type: uart
+         device: /dev/serial0
+         baud: 921600
+       - name: GroundStation
+         type: udp_server
+         port: 14550
+         allow_msg_ids: [0, 1, 33]
+     ```
+
+  3. **TOML Format** (modern alternative):
+     ```toml
+     [general]
+     tcp_server_port = 5760
+     report_stats = false
+
+     [[endpoints]]
+     name = "FlightController"
+     type = "uart"
+     device = "/dev/serial0"
+     baud = 921600
+     ```
+
+  ## Configuration Sources
+
+  Configuration is loaded in the following priority order (later sources override earlier):
+
+  1. **Application Environment**: `Application.get_env(:router_ex, :endpoints)`
+  2. **INI File**: Parsed from ROUTER_CONFIG env var
+  3. **YAML File**: Parsed from ROUTER_CONFIG env var
+  4. **TOML File**: Parsed from ROUTER_CONFIG env var
+
+  The `ROUTER_CONFIG` environment variable should contain the full configuration
+  as a string in one of the supported formats.
+
+  ## Dynamic Reload
+
+  Configuration can be reloaded at runtime without restarting the application:
+
+      # Reload configuration from source
+      RouterEx.ConfigManager.reload_config()
+
+  Note: Reloading configuration will restart endpoints with new settings.
+
+  ## Endpoint Types
+
+  ### UART (Serial)
+  ```elixir
+  %{
+    name: "FlightController",
+    type: :uart,
+    device: "/dev/serial0",
+    baud: 921600,
+    flow_control: false
+  }
+  ```
+
+  ### UDP Server
+  ```elixir
+  %{
+    name: "GroundStation",
+    type: :udp_server,
+    address: "0.0.0.0",
+    port: 14550
+  }
+  ```
+
+  ### UDP Client
+  ```elixir
+  %{
+    name: "RemoteGCS",
+    type: :udp_client,
+    address: "192.168.1.100",
+    port: 14550
+  }
+  ```
+
+  ### TCP Server
+  ```elixir
+  %{
+    name: "MissionPlanner",
+    type: :tcp_server,
+    address: "0.0.0.0",
+    port: 5760
+  }
+  ```
+
+  ### TCP Client
+  ```elixir
+  %{
+    name: "RemoteServer",
+    type: :tcp_client,
+    address: "192.168.1.200",
+    port: 5760
+  }
+  ```
+
+  ## Message Filtering
+
+  Each endpoint can filter messages using allow lists (whitelist) or block lists (blacklist):
+
+  ### Allow List (Whitelist)
+  Only specified message IDs are forwarded:
+  ```elixir
+  %{
+    name: "FilteredEndpoint",
+    type: :udp_server,
+    port: 14560,
+    allow_msg_ids: [0, 1, 33, 147]  # Only HEARTBEAT, SYS_STATUS, ATTITUDE, BATTERY_STATUS
+  }
+  ```
+
+  ### Block List (Blacklist)
+  All messages except specified IDs are forwarded:
+  ```elixir
+  %{
+    name: "VideoEndpoint",
+    type: :udp_server,
+    port: 14561,
+    block_msg_ids: [263]  # Block CAMERA_IMAGE_CAPTURED
+  }
+  ```
+
+  ### Combined Filtering
+  When both are specified, allow list is checked first, then block list:
+  ```elixir
+  %{
+    allow_msg_ids: [0, 1, 33, 253],
+    block_msg_ids: [253]  # Block STATUSTEXT even though it's in allow list
+  }
+  ```
+
+  ## Examples
+
+      # Get current configuration
+      config = RouterEx.ConfigManager.get_config()
+      # => %{general: [...], endpoints: [...]}
+
+      # Reload configuration
+      :ok = RouterEx.ConfigManager.reload_config()
+
+      # Access endpoint configurations
+      config.endpoints
+      # => [%{name: "FlightController", type: :uart, ...}, ...]
+
   """
 
   use GenServer
   require Logger
 
+  @typedoc """
+  Configuration for a single endpoint.
+
+  ## Fields
+
+  - `:name` - Unique identifier for the endpoint
+  - `:type` - Endpoint type (uart, udp_server, udp_client, tcp_server, tcp_client)
+  - `:device` - Serial device path (for UART endpoints)
+  - `:baud` - Baud rate (for UART endpoints)
+  - `:address` - IP address (for network endpoints)
+  - `:port` - Port number (for network endpoints)
+  - `:allow_msg_ids` - Whitelist of allowed message IDs
+  - `:block_msg_ids` - Blacklist of blocked message IDs
+  """
   @type endpoint_config :: %{
           required(:name) => String.t(),
           required(:type) => :uart | :udp_server | :udp_client | :tcp_server | :tcp_client,
           optional(:device) => String.t(),
           optional(:baud) => pos_integer(),
-          optional(:address) => String.t(),
+          optional(:flow_control) => boolean(),
+          optional(:address) => String.t() | :inet.ip_address(),
           optional(:port) => :inet.port_number(),
           optional(:allow_msg_ids) => [non_neg_integer()],
           optional(:block_msg_ids) => [non_neg_integer()]
         }
 
+  @typedoc """
+  General router configuration settings.
+
+  ## Common Settings
+
+  - `:tcp_server_port` - Port for TCP server (default: 5760)
+  - `:report_stats` - Enable periodic statistics reporting (default: false)
+  - `:mavlink_dialect` - MAVLink dialect (default: "common")
+  - `:log_level` - Logging level (default: :info)
+  """
   @type general_config :: keyword()
 
+  @typedoc """
+  Complete router configuration.
+
+  Contains general settings and list of endpoint configurations.
+  """
   @type config :: %{
           general: general_config(),
           endpoints: [endpoint_config()]
