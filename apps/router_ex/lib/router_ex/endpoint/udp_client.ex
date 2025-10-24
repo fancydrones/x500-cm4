@@ -120,8 +120,10 @@ defmodule RouterEx.Endpoint.UdpClient do
     end)
 
     if length(frames) > 0 do
+      msg_ids = frames |> Enum.map(fn f -> f.message_id end) |> Enum.join(", ")
+
       Logger.info(
-        "UDP client received #{byte_size(data)} bytes, parsed #{length(frames)} frames from #{format_address(ip)}:#{port}"
+        "UDP client received #{byte_size(data)} bytes, parsed #{length(frames)} frames (msg_id: #{msg_ids}) from #{format_address(ip)}:#{port}"
       )
     end
 
