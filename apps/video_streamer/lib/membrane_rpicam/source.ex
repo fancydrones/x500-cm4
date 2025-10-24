@@ -88,6 +88,38 @@ defmodule Membrane.Rpicam.Source do
                 Level 4.1 supports up to 1080p30, level 3.1 supports up to 720p30.
                 """
               ],
+              bitrate: [
+                spec: pos_integer() | :auto,
+                default: :auto,
+                description: """
+                Target bitrate in bits per second. Set to :auto for automatic bitrate.
+                For 720p30, recommend 2-3 Mbps for mobile devices.
+                """
+              ],
+              keyframe_interval: [
+                spec: pos_integer(),
+                default: 10,
+                description: """
+                Keyframe interval in frames (GOP size). Lower values (10-15) improve
+                mobile decoder performance and reduce latency, at cost of higher bandwidth.
+                Android QGC benefits from a keyframe interval of 10 frames (latency ≈ keyframe_interval / framerate seconds; e.g., ~333ms at 30fps) for lower latency.
+                """
+              ],
+              inline_headers: [
+                spec: boolean(),
+                default: true,
+                description: """
+                Insert SPS/PPS before every keyframe for better mobile compatibility.
+                """
+              ],
+              flush: [
+                spec: boolean(),
+                default: true,
+                description: """
+                Flush encoder output immediately to reduce latency. Recommended for
+                low-latency streaming applications.
+                """
+              ],
               hflip: [
                 spec: boolean(),
                 default: false,
@@ -196,25 +228,43 @@ defmodule Membrane.Rpicam.Source do
     hflip_flag = if opts.hflip, do: "--hflip", else: ""
     vflip_flag = if opts.vflip, do: "--vflip", else: ""
 
+    # Build bitrate option
+    bitrate_args = case opts.bitrate do
+      :auto -> []
+      bitrate when is_integer(bitrate) -> ["--bitrate", "#{bitrate}"]
+    end
+
+    # Build inline headers option (for mobile compatibility)
+    inline_headers_flag = if opts.inline_headers, do: "--inline", else: ""
+
+    # Build flush option (for low latency)
+    flush_flag = if opts.flush, do: "--flush", else: ""
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
+    # Added keyframe interval (--intra) for better mobile decoder performance
+    # Added inline headers for mobile compatibility
+    # Added flush for immediate encoder output (reduces latency)
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
-    [
+    ([
       app_binary,
       "-t", "#{timeout}",
       "--codec", "h264",
       "--profile", profile,
       "--level", "#{level}",
+      "--intra", "#{opts.keyframe_interval}",
       "--libav-format", "h264",
       "--framerate", "#{framerate_float}",
       "--width", "#{width}",
       "--height", "#{height}",
       hflip_flag,
       vflip_flag,
+      inline_headers_flag,
+      flush_flag,
       verbose_flag,
       "-o", "-"
-    ]
+    ] ++ bitrate_args)
     |> Enum.filter(&(&1 != ""))
     |> Enum.join(" ")
   end

@@ -6,7 +6,17 @@ config :video_streamer,
     width: 1280,
     height: 720,
     framerate: 30,
-    verbose: false  # Set to true for debugging camera issues
+    verbose: false,  # Set to true for debugging camera issues
+    hflip: false,
+    vflip: false
+  ],
+  encoder: [
+    profile: :main,
+    level: "4.1",
+    keyframe_interval: 10,
+    bitrate: :auto,
+    inline_headers: true,
+    flush: true
   ]
 
 # Enable debug logging in development

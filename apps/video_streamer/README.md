@@ -88,7 +88,10 @@ All configuration is done via environment variables for containerized deployment
 |----------|---------|-------------|--------------|
 | `H264_PROFILE` | main | H.264 encoding profile | baseline/main/high |
 | `H264_LEVEL` | 4.1 | H.264 encoding level | 3.1/4.0/4.1 |
-| `KEYFRAME_INTERVAL` | 30 | Keyframes per GOP (frames) | 1-120 |
+| `KEYFRAME_INTERVAL` | 10 | Keyframes per GOP (frames) | 1-120 |
+| `H264_BITRATE` | auto | Target bitrate in bits/sec | auto or integer (e.g., 2500000) |
+| `H264_INLINE_HEADERS` | true | Insert SPS/PPS before keyframes | true/false |
+| `H264_FLUSH` | true | Flush encoder output immediately | true/false |
 
 **Profile Selection Guide**:
 - **baseline**: Maximum compatibility, higher bandwidth
@@ -108,9 +111,35 @@ For lowest latency, configure:
 KEYFRAME_INTERVAL=15  # More frequent keyframes (reduce to 10-15 for <300ms)
 STREAM_FPS=30         # Higher FPS reduces latency
 H264_PROFILE=baseline # Faster encoding
+H264_INLINE_HEADERS=true # Ensure headers in stream
 ```
 
 Trade-off: More frequent keyframes = higher bandwidth usage
+
+### Android/Mobile Optimization
+
+For best performance on Android devices (QGroundControl, ATAK):
+
+```bash
+KEYFRAME_INTERVAL=10      # Very frequent keyframes (333ms at 30fps) for low latency
+H264_BITRATE=2500000      # 2.5 Mbps target for 720p (prevents spikes)
+H264_INLINE_HEADERS=true  # Better mobile decoder compatibility
+H264_FLUSH=true           # Flush encoder immediately (reduces buffering)
+H264_PROFILE=main         # Good compression, universal support
+```
+
+Benefits:
+- **Reduces latency**: 10-frame GOP = 333ms maximum latency contribution at 30fps, but average wait is 5 frames (~167ms)
+- **Eliminates block artifacts**: Frequent keyframes prevent error propagation
+- **Faster decoder recovery**: More I-frames = better error resilience
+- **Immediate output**: Flush mode reduces encoder buffering
+- **Stable performance**: Bitrate limiting prevents network congestion
+
+**Latency Breakdown** (720p30 with these settings, using average values):
+- Encoding: ~33ms (1 frame)
+- Network: ~10-50ms (WiFi)
+- Keyframe interval: ~167ms (average wait: 5 frames to next I-frame at 30fps; maximum possible: 333ms)
+- **Total glass-to-glass**: ~210-250ms (average; optimal for Android)
 
 ### Example Configurations
 

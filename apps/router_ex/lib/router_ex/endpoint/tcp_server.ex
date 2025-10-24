@@ -240,9 +240,7 @@ defmodule RouterEx.Endpoint.TcpServer do
 
         # Remove failed clients
         new_clients =
-          Enum.reduce(failed_clients, state.clients, fn client_id, clients ->
-            Map.delete(clients, client_id)
-          end)
+          Map.drop(state.clients, failed_clients)
 
         if sent_count > 0 do
           Logger.debug("Sent frame to #{sent_count} TCP clients")
