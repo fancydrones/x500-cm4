@@ -19,8 +19,28 @@ spec:
         app.kubernetes.io/name: router-ex-deployment
     spec:
       containers:
-      - name: router-ex
-        image: ghcr.io/fancydrones/x500-cm4/router-ex:latest
+      - env:
+        - name: RELEASE_NODE
+          value: router_ex@router-ex
+        - name: RELEASE_COOKIE
+          value: router_ex_cookie
+        - name: ROUTER_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              key: ROUTER_CONFIG
+              name: rpi4-config
+        image: ghcr.io/fancydrones/x500-cm4/router-ex:20251024-be53eca
+        livenessProbe:
+          exec:
+            command:
+            - /app/bin/router_ex
+            - rpc
+            - Process.whereis(RouterEx.RouterCore) != nil
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        name: router-ex
         ports:
         - containerPort: 5760
           name: tcp-mavlink
@@ -40,16 +60,16 @@ spec:
         - containerPort: 14563
           name: udp-extra1
           protocol: UDP
-        env:
-        - name: RELEASE_NODE
-          value: "router_ex@router-ex"
-        - name: RELEASE_COOKIE
-          value: "router_ex_cookie"
-        - name: ROUTER_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              name: rpi4-config
-              key: ROUTER_CONFIG
+        readinessProbe:
+          exec:
+            command:
+            - /app/bin/router_ex
+            - rpc
+            - Process.whereis(RouterEx.RouterCore) != nil
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
         resources:
           limits:
             cpu: "0.5"
@@ -60,37 +80,18 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-        - name: serial0
-          mountPath: /dev/serial0
-        livenessProbe:
-          exec:
-            command:
-            - /app/bin/router_ex
-            - rpc
-            - "Process.whereis(RouterEx.RouterCore) != nil"
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          exec:
-            command:
-            - /app/bin/router_ex
-            - rpc
-            - "Process.whereis(RouterEx.RouterCore) != nil"
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
+        - mountPath: /dev/serial0
+          name: serial0
       hostNetwork: true
       initContainers:
-      - name: init-delay
-        image: busybox:1.34
-        command:
+      - command:
         - sh
         - -c
-        - echo "initContainer will delay startup by 20s to ensure serial device is ready" && sleep 20 && echo "exiting"
+        - echo "initContainer will delay startup by 20s to ensure serial device is
+          ready" && sleep 20 && echo "exiting"
+        image: busybox:1.34
+        name: init-delay
       volumes:
-      - name: serial0
-        hostPath:
+      - hostPath:
           path: /dev/serial0
+        name: serial0
