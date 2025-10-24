@@ -20,12 +20,13 @@ if config_env() == :prod do
     encoder: [
       profile: System.get_env("H264_PROFILE", "main") |> String.to_atom(),
       level: System.get_env("H264_LEVEL", "4.1"),
-      keyframe_interval: System.get_env("KEYFRAME_INTERVAL", "15") |> String.to_integer(),
+      keyframe_interval: System.get_env("KEYFRAME_INTERVAL", "10") |> String.to_integer(),
       bitrate: (case System.get_env("H264_BITRATE") do
         nil -> :auto
         "auto" -> :auto
         bitrate_str -> String.to_integer(bitrate_str)
       end),
-      inline_headers: System.get_env("H264_INLINE_HEADERS", "true") == "true"
+      inline_headers: System.get_env("H264_INLINE_HEADERS", "true") == "true",
+      flush: System.get_env("H264_FLUSH", "true") == "true"
     ]
 end

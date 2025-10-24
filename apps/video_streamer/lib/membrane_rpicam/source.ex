@@ -98,10 +98,11 @@ defmodule Membrane.Rpicam.Source do
               ],
               keyframe_interval: [
                 spec: pos_integer(),
-                default: 15,
+                default: 10,
                 description: """
                 Keyframe interval in frames (GOP size). Lower values (10-15) improve
                 mobile decoder performance and reduce latency, at cost of higher bandwidth.
+                Android QGC benefits from 10 frames (333ms at 30fps) for lower latency.
                 """
               ],
               inline_headers: [
@@ -109,6 +110,14 @@ defmodule Membrane.Rpicam.Source do
                 default: true,
                 description: """
                 Insert SPS/PPS before every keyframe for better mobile compatibility.
+                """
+              ],
+              flush: [
+                spec: boolean(),
+                default: true,
+                description: """
+                Flush encoder output immediately to reduce latency. Recommended for
+                low-latency streaming applications.
                 """
               ],
               hflip: [
@@ -228,11 +237,15 @@ defmodule Membrane.Rpicam.Source do
     # Build inline headers option (for mobile compatibility)
     inline_headers_flag = if opts.inline_headers, do: "--inline", else: ""
 
+    # Build flush option (for low latency)
+    flush_flag = if opts.flush, do: "--flush", else: ""
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
     # Added keyframe interval (--intra) for better mobile decoder performance
     # Added inline headers for mobile compatibility
+    # Added flush for immediate encoder output (reduces latency)
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     ([
       app_binary,
@@ -248,6 +261,7 @@ defmodule Membrane.Rpicam.Source do
       hflip_flag,
       vflip_flag,
       inline_headers_flag,
+      flush_flag,
       verbose_flag,
       "-o", "-"
     ] ++ bitrate_args)
