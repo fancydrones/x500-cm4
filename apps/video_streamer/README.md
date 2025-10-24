@@ -88,7 +88,9 @@ All configuration is done via environment variables for containerized deployment
 |----------|---------|-------------|--------------|
 | `H264_PROFILE` | main | H.264 encoding profile | baseline/main/high |
 | `H264_LEVEL` | 4.1 | H.264 encoding level | 3.1/4.0/4.1 |
-| `KEYFRAME_INTERVAL` | 30 | Keyframes per GOP (frames) | 1-120 |
+| `KEYFRAME_INTERVAL` | 15 | Keyframes per GOP (frames) | 1-120 |
+| `H264_BITRATE` | auto | Target bitrate in bits/sec | auto or integer (e.g., 2500000) |
+| `H264_INLINE_HEADERS` | true | Insert SPS/PPS before keyframes | true/false |
 
 **Profile Selection Guide**:
 - **baseline**: Maximum compatibility, higher bandwidth
@@ -108,9 +110,26 @@ For lowest latency, configure:
 KEYFRAME_INTERVAL=15  # More frequent keyframes (reduce to 10-15 for <300ms)
 STREAM_FPS=30         # Higher FPS reduces latency
 H264_PROFILE=baseline # Faster encoding
+H264_INLINE_HEADERS=true # Ensure headers in stream
 ```
 
 Trade-off: More frequent keyframes = higher bandwidth usage
+
+### Android/Mobile Optimization
+
+For best performance on Android devices (QGroundControl, ATAK):
+
+```bash
+KEYFRAME_INTERVAL=15      # Frequent keyframes for better error recovery
+H264_BITRATE=2500000      # 2.5 Mbps target for 720p (prevents spikes)
+H264_INLINE_HEADERS=true  # Better mobile decoder compatibility
+H264_PROFILE=main         # Good compression, universal support
+```
+
+Benefits:
+- Reduces large block artifacts on mobile decoders
+- Improves latency by preventing decoder backlog
+- More stable performance on variable networks
 
 ### Example Configurations
 
