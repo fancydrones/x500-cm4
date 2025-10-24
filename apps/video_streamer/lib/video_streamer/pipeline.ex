@@ -119,8 +119,9 @@ defmodule VideoStreamer.Pipeline do
         profile: Keyword.get(encoder_config, :profile, :main),
         level: Keyword.get(encoder_config, :level, "4.1"),
         bitrate: Keyword.get(encoder_config, :bitrate, :auto),
-        keyframe_interval: Keyword.get(encoder_config, :keyframe_interval, 15),
+        keyframe_interval: Keyword.get(encoder_config, :keyframe_interval, 10),
         inline_headers: Keyword.get(encoder_config, :inline_headers, true),
+        flush: Keyword.get(encoder_config, :flush, true),
         hflip: Keyword.get(camera_config, :hflip, false),
         vflip: Keyword.get(camera_config, :vflip, false)
       })
