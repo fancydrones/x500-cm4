@@ -36,6 +36,10 @@ if config_env() == :prod do
     end
   end
 
+  # Configure Logger for production
+  config :logger,
+    level: String.to_atom(System.get_env("LOG_LEVEL", "info"))
+
   # General configuration
   config :router_ex,
     general: [

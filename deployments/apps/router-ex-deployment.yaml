@@ -74,11 +74,11 @@ spec:
           timeoutSeconds: 5
         resources:
           limits:
-            cpu: "0.5"
-            memory: 500Mi
+            cpu: "1.0"
+            memory: 1Gi
           requests:
             cpu: "0.25"
-            memory: 100Mi
+            memory: 256Mi
         securityContext:
           privileged: true
         volumeMounts:
