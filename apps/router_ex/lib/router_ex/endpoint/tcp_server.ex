@@ -103,9 +103,13 @@ defmodule RouterEx.Endpoint.TcpServer do
       {:ok, new_state} ->
         Logger.info("TCP server started: #{state.address}:#{state.port}")
 
-        # Start acceptor process - pass server PID explicitly
+        # Start acceptor process - pass connection_id to avoid blocking GenServer.call
         server_pid = self()
-        acceptor_pid = spawn_link(fn -> accept_loop(new_state.listen_socket, server_pid) end)
+
+        acceptor_pid =
+          spawn_link(fn ->
+            accept_loop(new_state.listen_socket, server_pid, new_state.connection_id)
+          end)
 
         Logger.info("TCP acceptor loop started (PID: #{inspect(acceptor_pid)})")
 
@@ -328,7 +332,7 @@ defmodule RouterEx.Endpoint.TcpServer do
     end
   end
 
-  defp accept_loop(listen_socket, server_pid) do
+  defp accept_loop(listen_socket, server_pid, connection_id) do
     Logger.debug("TCP acceptor waiting for connections on socket #{inspect(listen_socket)}")
 
     case :gen_tcp.accept(listen_socket) do
@@ -347,15 +351,15 @@ defmodule RouterEx.Endpoint.TcpServer do
 
             # Spawn handler process and transfer socket ownership immediately
             # This must be done in the acceptor process that owns the socket!
-            handle_new_client(client_socket, client_info, server_pid)
+            handle_new_client(client_socket, client_info, server_pid, connection_id)
 
             # Continue accepting
-            accept_loop(listen_socket, server_pid)
+            accept_loop(listen_socket, server_pid, connection_id)
 
           {:error, reason} ->
             Logger.error("Failed to get peer info: #{inspect(reason)}")
             :gen_tcp.close(client_socket)
-            accept_loop(listen_socket, server_pid)
+            accept_loop(listen_socket, server_pid, connection_id)
         end
 
       {:error, :closed} ->
@@ -364,13 +368,12 @@ defmodule RouterEx.Endpoint.TcpServer do
       {:error, reason} ->
         Logger.error("TCP accept error: #{inspect(reason)}")
         Process.sleep(1000)
-        accept_loop(listen_socket, server_pid)
+        accept_loop(listen_socket, server_pid, connection_id)
     end
   end
 
-  defp handle_new_client(client_socket, client_info, server_pid) do
-    # Get connection_id from server (we need this for routing)
-    connection_id = GenServer.call(server_pid, :get_connection_id)
+  defp handle_new_client(client_socket, client_info, server_pid, connection_id) do
+    # connection_id is passed from acceptor to avoid blocking GenServer.call
 
     # Spawn the client handler process
     {client_pid, _monitor_ref} =
