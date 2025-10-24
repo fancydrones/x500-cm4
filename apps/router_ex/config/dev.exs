@@ -1,6 +1,14 @@
 import Config
 
 # Development configuration
+
+# Configure XMAVLink for development
+config :xmavlink,
+  dialect: Common,
+  system_id: 255,
+  component_id: 1,
+  heartbeat_interval_ms: 1000
+
 config :router_ex,
   general: [
     tcp_server_port: 5760,

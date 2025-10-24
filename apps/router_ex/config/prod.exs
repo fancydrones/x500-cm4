@@ -4,6 +4,13 @@ import Config
 # Note: Most production configuration should be in runtime.exs
 # This file is evaluated at build time
 
+# Configure XMAVLink for production
+config :xmavlink,
+  dialect: Common,
+  system_id: 255,
+  component_id: 1,
+  heartbeat_interval_ms: 1000
+
 config :router_ex,
   general: [
     tcp_server_port: 5760,
