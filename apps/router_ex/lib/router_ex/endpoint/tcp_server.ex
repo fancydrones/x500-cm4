@@ -115,9 +115,11 @@ defmodule RouterEx.Endpoint.TcpServer do
   @impl true
   def handle_info({:client_connected, client_socket, client_info}, state) do
     # Spawn a process to handle this client
+    server_pid = self()
+
     client_pid =
       spawn_link(fn ->
-        handle_client(client_socket, client_info, state.connection_id)
+        handle_client(client_socket, client_info, state.connection_id, server_pid)
       end)
 
     # Track this client
@@ -292,17 +294,17 @@ defmodule RouterEx.Endpoint.TcpServer do
     end
   end
 
-  defp handle_client(socket, client_info, connection_id) do
+  defp handle_client(socket, client_info, connection_id, server_pid) do
     Logger.debug("Handling TCP client: #{client_info.address}:#{client_info.port}")
 
     # Set socket to active mode for this process
     :inet.setopts(socket, active: true)
 
     # Enter receive loop
-    client_loop(socket, <<>>, connection_id)
+    client_loop(socket, <<>>, connection_id, server_pid)
   end
 
-  defp client_loop(socket, buffer, connection_id) do
+  defp client_loop(socket, buffer, connection_id, server_pid) do
     receive do
       {:tcp, ^socket, data} ->
         # Append to buffer
@@ -317,16 +319,16 @@ defmodule RouterEx.Endpoint.TcpServer do
         end)
 
         # Continue loop
-        client_loop(socket, remaining_buffer, connection_id)
+        client_loop(socket, remaining_buffer, connection_id, server_pid)
 
       {:tcp_closed, ^socket} ->
         Logger.debug("TCP client closed connection")
-        send(self(), {:client_disconnected, self()})
+        send(server_pid, {:client_disconnected, self()})
 
       {:tcp_error, ^socket, reason} ->
         Logger.error("TCP client error: #{inspect(reason)}")
         :gen_tcp.close(socket)
-        send(self(), {:client_disconnected, self()})
+        send(server_pid, {:client_disconnected, self()})
     end
   end
 
