@@ -24,6 +24,8 @@ spec:
           value: router_ex@router-ex
         - name: RELEASE_COOKIE
           value: router_ex_cookie
+        - name: LOG_LEVEL
+          value: info
         - name: ROUTER_CONFIG
           valueFrom:
             configMapKeyRef:
