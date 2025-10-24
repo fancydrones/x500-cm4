@@ -52,15 +52,7 @@ spec:
           value: main
         - name: H264_LEVEL
           value: "4.1"
-        - name: KEYFRAME_INTERVAL
-          value: "10"
-        - name: H264_BITRATE
-          value: "2500000"
-        - name: H264_INLINE_HEADERS
-          value: "true"
-        - name: H264_FLUSH
-          value: "true"
-        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251024-a44edc6
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251024-b2edd89
         name: video-streamer
         ports:
         - containerPort: 8554

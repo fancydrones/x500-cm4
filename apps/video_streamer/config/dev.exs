@@ -13,10 +13,10 @@ config :video_streamer,
   encoder: [
     profile: :main,
     level: "4.1",
-    keyframe_interval: 10,
+    keyframe_interval: 30,
     bitrate: :auto,
     inline_headers: true,
-    flush: true
+    flush: false
   ]
 
 # Enable debug logging in development
