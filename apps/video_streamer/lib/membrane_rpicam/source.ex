@@ -98,11 +98,10 @@ defmodule Membrane.Rpicam.Source do
               ],
               keyframe_interval: [
                 spec: pos_integer(),
-                default: 10,
+                default: 30,
                 description: """
-                Keyframe interval in frames (GOP size). Lower values (10-15) improve
-                mobile decoder performance and reduce latency, at cost of higher bandwidth.
-                Android QGC benefits from a keyframe interval of 10 frames (latency ≈ keyframe_interval / framerate seconds; e.g., ~333ms at 30fps) for lower latency.
+                Keyframe interval in frames (GOP size). Lower values improve latency and
+                error recovery at cost of higher bandwidth. Default 30 (1 second at 30fps).
                 """
               ],
               inline_headers: [
@@ -114,10 +113,9 @@ defmodule Membrane.Rpicam.Source do
               ],
               flush: [
                 spec: boolean(),
-                default: true,
+                default: false,
                 description: """
-                Flush encoder output immediately to reduce latency. Recommended for
-                low-latency streaming applications.
+                Flush encoder output immediately to reduce latency. May increase bandwidth.
                 """
               ],
               hflip: [
