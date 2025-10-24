@@ -138,19 +138,8 @@ defmodule RouterEx.Endpoint.TcpServer do
         # Tell the client handler it can now proceed
         send(client_pid, :socket_ready)
 
-      {:error, reason} ->
-        Logger.error(
-          "Failed to transfer socket control for #{client_info.address}:#{client_info.port}: #{inspect(reason)}"
-        )
-
-        # Kill the client handler and close the socket
-        Process.exit(client_pid, :kill)
-        :gen_tcp.close(client_socket)
-        {:noreply, state}
-    end
-
-    # Track this client
-    client_id = make_ref()
+        # Track this client
+        client_id = make_ref()
 
         new_clients =
           Map.put(state.clients, client_id, %{
