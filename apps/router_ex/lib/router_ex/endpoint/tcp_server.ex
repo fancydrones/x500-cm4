@@ -373,8 +373,8 @@ defmodule RouterEx.Endpoint.TcpServer do
     connection_id = GenServer.call(server_pid, :get_connection_id)
 
     # Spawn the client handler process
-    client_pid =
-      spawn_link(fn ->
+    {client_pid, _monitor_ref} =
+      spawn_monitor(fn ->
         handle_client(client_socket, client_info, connection_id, server_pid)
       end)
 
