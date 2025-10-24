@@ -159,10 +159,216 @@ defmodule RouterEx.ConfigManager do
   end
 
   defp parse_ini(content) when is_binary(content) do
-    # TODO: Implement INI parsing for mavlink-router compatibility
-    # For now, return default config
-    Logger.warning("INI parsing not yet implemented, using default config")
-    default_config()
+    Logger.info("Parsing INI configuration")
+
+    lines =
+      content
+      |> String.split("\n")
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == "" or String.starts_with?(&1, "#")))
+
+    {general, endpoints} = parse_ini_sections(lines)
+
+    %{
+      general: general,
+      endpoints: endpoints
+    }
+  end
+
+  defp parse_ini_sections(lines) do
+    parse_ini_sections(lines, :none, %{}, [], [])
+  end
+
+  defp parse_ini_sections([], current_section, general, endpoints, current_endpoint) do
+    # Finalize the last endpoint if there is one
+    endpoints =
+      if current_section != :none and current_section != :general and current_endpoint != [] do
+        [finalize_endpoint(current_section, current_endpoint) | endpoints]
+      else
+        endpoints
+      end
+
+    {Map.to_list(general), Enum.reverse(endpoints)}
+  end
+
+  defp parse_ini_sections([line | rest], current_section, general, endpoints, current_endpoint) do
+    cond do
+      # Section header: [SectionName] or [SectionName Value]
+      String.starts_with?(line, "[") and String.ends_with?(line, "]") ->
+        # Save current endpoint if any
+        endpoints =
+          if current_section != :none and current_section != :general and
+               current_endpoint != [] do
+            [finalize_endpoint(current_section, current_endpoint) | endpoints]
+          else
+            endpoints
+          end
+
+        # Parse new section
+        section_content = String.slice(line, 1..-2//1) |> String.trim()
+
+        cond do
+          section_content == "General" ->
+            parse_ini_sections(rest, :general, general, endpoints, [])
+
+          String.starts_with?(section_content, "UartEndpoint") ->
+            name = String.replace_prefix(section_content, "UartEndpoint ", "")
+            parse_ini_sections(rest, :uart, general, endpoints, [name: name])
+
+          String.starts_with?(section_content, "UdpEndpoint") ->
+            name = String.replace_prefix(section_content, "UdpEndpoint ", "")
+            parse_ini_sections(rest, :udp, general, endpoints, [name: name])
+
+          String.starts_with?(section_content, "TcpEndpoint") ->
+            name = String.replace_prefix(section_content, "TcpEndpoint ", "")
+            parse_ini_sections(rest, :tcp, general, endpoints, [name: name])
+
+          true ->
+            Logger.warning("Unknown section: #{section_content}")
+            parse_ini_sections(rest, :unknown, general, endpoints, [])
+        end
+
+      # Key=Value pair
+      String.contains?(line, "=") ->
+        [key, value] = String.split(line, "=", parts: 2)
+        key = String.trim(key)
+        value = String.trim(value)
+
+        case current_section do
+          :general ->
+            general = parse_general_key(general, key, value)
+            parse_ini_sections(rest, current_section, general, endpoints, current_endpoint)
+
+          section when section in [:uart, :udp, :tcp] ->
+            current_endpoint = parse_endpoint_key(current_endpoint, key, value)
+            parse_ini_sections(rest, current_section, general, endpoints, current_endpoint)
+
+          _ ->
+            parse_ini_sections(rest, current_section, general, endpoints, current_endpoint)
+        end
+
+      # Unknown line format
+      true ->
+        Logger.debug("Skipping line: #{line}")
+        parse_ini_sections(rest, current_section, general, endpoints, current_endpoint)
+    end
+  end
+
+  defp parse_general_key(general, "TcpServerPort", value) do
+    Map.put(general, :tcp_server_port, String.to_integer(value))
+  end
+
+  defp parse_general_key(general, "ReportStats", value) do
+    Map.put(general, :report_stats, value in ["true", "True", "1"])
+  end
+
+  defp parse_general_key(general, "MavlinkDialect", value) do
+    Map.put(general, :mavlink_dialect, String.to_atom(value))
+  end
+
+  defp parse_general_key(general, "DebugLogLevel", value) do
+    Map.put(general, :log_level, String.to_atom(value))
+  end
+
+  defp parse_general_key(general, _key, _value) do
+    # Ignore unknown keys
+    general
+  end
+
+  defp parse_endpoint_key(endpoint, "Device", value) do
+    Keyword.put(endpoint, :device, value)
+  end
+
+  defp parse_endpoint_key(endpoint, "Baud", value) do
+    Keyword.put(endpoint, :baud, String.to_integer(value))
+  end
+
+  defp parse_endpoint_key(endpoint, "Mode", value) do
+    Keyword.put(endpoint, :mode, String.downcase(value))
+  end
+
+  defp parse_endpoint_key(endpoint, "Address", value) do
+    Keyword.put(endpoint, :address, value)
+  end
+
+  defp parse_endpoint_key(endpoint, "Port", value) do
+    Keyword.put(endpoint, :port, String.to_integer(value))
+  end
+
+  defp parse_endpoint_key(endpoint, "AllowMsgIdOut", value) do
+    ids =
+      value
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.map(&String.to_integer/1)
+
+    Keyword.put(endpoint, :allow_msg_ids, ids)
+  end
+
+  defp parse_endpoint_key(endpoint, "BlockMsgIdOut", value) do
+    ids =
+      value
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.map(&String.to_integer/1)
+
+    Keyword.put(endpoint, :block_msg_ids, ids)
+  end
+
+  defp parse_endpoint_key(endpoint, _key, _value) do
+    # Ignore unknown keys
+    endpoint
+  end
+
+  defp finalize_endpoint(:uart, config) do
+    %{
+      name: Keyword.fetch!(config, :name),
+      type: :uart,
+      device: Keyword.fetch!(config, :device),
+      baud: Keyword.get(config, :baud, 57_600),
+      allow_msg_ids: Keyword.get(config, :allow_msg_ids),
+      block_msg_ids: Keyword.get(config, :block_msg_ids)
+    }
+  end
+
+  defp finalize_endpoint(:udp, config) do
+    mode = Keyword.get(config, :mode, "normal")
+
+    type =
+      case String.downcase(mode) do
+        "server" -> :udp_server
+        "normal" -> :udp_client
+        _ -> :udp_client
+      end
+
+    %{
+      name: Keyword.fetch!(config, :name),
+      type: type,
+      address: Keyword.get(config, :address, "0.0.0.0"),
+      port: Keyword.fetch!(config, :port),
+      allow_msg_ids: Keyword.get(config, :allow_msg_ids),
+      block_msg_ids: Keyword.get(config, :block_msg_ids)
+    }
+  end
+
+  defp finalize_endpoint(:tcp, config) do
+    mode = Keyword.get(config, :mode, "normal")
+
+    type =
+      case String.downcase(mode) do
+        "server" -> :tcp_server
+        "normal" -> :tcp_client
+        _ -> :tcp_client
+      end
+
+    %{
+      name: Keyword.fetch!(config, :name),
+      type: type,
+      address: Keyword.get(config, :address, "0.0.0.0"),
+      port: Keyword.fetch!(config, :port),
+      allow_msg_ids: Keyword.get(config, :allow_msg_ids),
+      block_msg_ids: Keyword.get(config, :block_msg_ids)
+    }
   end
 
   defp start_endpoints(endpoints) when is_list(endpoints) do

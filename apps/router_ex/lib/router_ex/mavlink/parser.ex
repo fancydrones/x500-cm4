@@ -372,10 +372,8 @@ defmodule RouterEx.MAVLink.Parser do
         frame.sequence, frame.source_system, frame.source_component, frame.message_id::24-little,
         frame.payload::binary>>
 
-    calculated =
-      data
-      |> calculate_crc(0xFFFF)
-      |> accumulate_crc(crc_extra)
+    crc_after_data = calculate_crc(data, 0xFFFF)
+    calculated = accumulate_crc(crc_extra, crc_after_data)
 
     calculated == frame.checksum
   end
@@ -385,10 +383,8 @@ defmodule RouterEx.MAVLink.Parser do
       <<frame.payload_length, frame.sequence, frame.source_system, frame.source_component,
         frame.message_id, frame.payload::binary>>
 
-    calculated =
-      data
-      |> calculate_crc(0xFFFF)
-      |> accumulate_crc(crc_extra)
+    crc_after_data = calculate_crc(data, 0xFFFF)
+    calculated = accumulate_crc(crc_extra, crc_after_data)
 
     calculated == frame.checksum
   end
