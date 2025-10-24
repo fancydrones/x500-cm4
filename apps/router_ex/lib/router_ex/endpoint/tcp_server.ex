@@ -398,6 +398,7 @@ defmodule RouterEx.Endpoint.TcpServer do
 
         # Log parsed frames
         frame_count = length(frames)
+
         if frame_count > 0 do
           Logger.debug("TCP server parsed #{frame_count} MAVLink frames from received data")
         end
