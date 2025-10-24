@@ -36,11 +36,11 @@ spec:
     spec:
       containers:
       - env:
-        - name: CAMERA_WIDTH
+        - name: STREAM_WIDTH
           value: "1280"
-        - name: CAMERA_HEIGHT
+        - name: STREAM_HEIGHT
           value: "720"
-        - name: CAMERA_FRAMERATE
+        - name: STREAM_FPS
           value: "30"
         - name: CAMERA_HFLIP
           value: "true"
