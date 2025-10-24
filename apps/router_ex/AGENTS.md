@@ -33,6 +33,14 @@ Key features include:
       heartbeat_interval_ms: 1000
     ```
 
+- **Development Workflow - IMPORTANT**:
+  - **After EVERY code change**, run these commands in order:
+    1. `mix format` - Format code to ensure consistent style
+    2. `mix compile` - Compile and check for compilation errors
+    3. `mix test` - Run all tests to ensure nothing broke
+  - This workflow is MANDATORY before committing any changes
+  - If any step fails, fix the issues before proceeding
+
 - **Testing**:
   - Run tests with `mix test`
   - Check coverage with `mix test --cover`
@@ -40,8 +48,8 @@ Key features include:
   - Run failed tests with `mix test --failed`
 
 - **Code Quality**:
-  - Format code with `mix format`
-  - Compile with `mix compile`
+  - Always format code with `mix format`
+  - Always compile with `mix compile` to catch errors
   - Generate documentation with `mix docs`
 
 - **Configuration Management**:
