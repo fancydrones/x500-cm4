@@ -27,7 +27,20 @@ defmodule VideoStreamer.RTP.UDPSink do
   def handle_init(_ctx, options) do
     # Open UDP socket on port 50000 (server_port_rtp from RTSP SETUP)
     # This is critical - RTP must be sent from the port advertised in RTSP
-    case :gen_udp.open(50000, [:binary, {:active, false}, {:reuseaddr, true}]) do
+    # Socket options optimized for streaming:
+    # - sndbuf: 256KB send buffer to reduce packet loss
+    # - recbuf: 64KB receive buffer
+    # - priority: High priority for video packets
+    socket_opts = [
+      :binary,
+      {:active, false},
+      {:reuseaddr, true},
+      {:sndbuf, 262_144},    # 256KB send buffer
+      {:recbuf, 65_536},     # 64KB receive buffer
+      {:priority, 6}         # High priority (0-7, higher = more important)
+    ]
+
+    case :gen_udp.open(50000, socket_opts) do
       {:ok, socket} ->
         # Parse IP address
         {:ok, ip_tuple} = :inet.parse_address(String.to_charlist(options.client_ip))
