@@ -48,6 +48,7 @@ defmodule RouterEx.Endpoint.TcpServer do
       :allow_msg_ids,
       :block_msg_ids,
       :clients,
+      :pid_to_client_id,
       :acceptor_pid
     ]
   end
@@ -83,6 +84,7 @@ defmodule RouterEx.Endpoint.TcpServer do
       allow_msg_ids: Map.get(config, :allow_msg_ids),
       block_msg_ids: Map.get(config, :block_msg_ids),
       clients: %{},
+      pid_to_client_id: %{},
       acceptor_pid: nil
     }
 
@@ -135,43 +137,39 @@ defmodule RouterEx.Endpoint.TcpServer do
         info: client_info
       })
 
+    # Maintain reverse index for O(1) lookups
+    new_pid_to_client_id = Map.put(state.pid_to_client_id, client_pid, client_id)
+
     Logger.info(
       "TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)"
     )
 
-    {:noreply, %{state | clients: new_clients}}
+    {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
   end
 
   @impl true
   def handle_info({:client_disconnected, client_pid}, state) do
-    # Remove client from tracking
-    new_clients =
-      state.clients
-      |> Enum.reject(fn {_id, client} -> client.pid == client_pid end)
-      |> Enum.into(%{})
+    # Use reverse index for O(1) lookup
+    case Map.get(state.pid_to_client_id, client_pid) do
+      nil ->
+        Logger.warning("Received disconnection for unknown client PID: #{inspect(client_pid)}")
+        {:noreply, state}
 
-    Logger.info("TCP client disconnected (#{map_size(new_clients)} remaining)")
+      client_id ->
+        # Remove client from tracking
+        new_clients = Map.delete(state.clients, client_id)
+        new_pid_to_client_id = Map.delete(state.pid_to_client_id, client_pid)
 
-    {:noreply, %{state | clients: new_clients}}
+        Logger.info("TCP client disconnected (#{map_size(new_clients)} remaining)")
+
+        {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
+    end
   end
 
   @impl true
   def handle_info({:EXIT, pid, reason}, state) do
-    # Handle client process exits/crashes
-    case Enum.find(state.clients, fn {_id, client} -> client.pid == pid end) do
-      {client_id, client} ->
-        Logger.info(
-          "TCP client handler process exited: #{client.info.address}:#{client.info.port}, reason: #{inspect(reason)}"
-        )
-
-        # Close the socket and remove client from tracking
-        :gen_tcp.close(client.socket)
-
-        new_clients = Map.delete(state.clients, client_id)
-        Logger.info("TCP client removed (#{map_size(new_clients)} remaining)")
-
-        {:noreply, %{state | clients: new_clients}}
-
+    # Handle client process exits/crashes - use reverse index for O(1) lookup
+    case Map.get(state.pid_to_client_id, pid) do
       nil ->
         # This EXIT is for some other process (maybe the acceptor)
         if pid == state.acceptor_pid do
@@ -181,6 +179,34 @@ defmodule RouterEx.Endpoint.TcpServer do
           Logger.warning("Received EXIT from unknown process #{inspect(pid)}: #{inspect(reason)}")
           {:noreply, state}
         end
+
+      client_id ->
+        client = Map.get(state.clients, client_id)
+
+        Logger.info(
+          "TCP client handler process exited: #{client.info.address}:#{client.info.port}, reason: #{inspect(reason)}"
+        )
+
+        # Close the socket (may already be closed, which is fine)
+        case :gen_tcp.close(client.socket) do
+          :ok ->
+            :ok
+
+          {:error, :closed} ->
+            Logger.debug("Socket already closed for #{client.info.address}:#{client.info.port}")
+
+          {:error, close_reason} ->
+            Logger.warning(
+              "Failed to close socket for #{client.info.address}:#{client.info.port}: #{inspect(close_reason)}"
+            )
+        end
+
+        new_clients = Map.delete(state.clients, client_id)
+        new_pid_to_client_id = Map.delete(state.pid_to_client_id, pid)
+
+        Logger.info("TCP client removed (#{map_size(new_clients)} remaining)")
+
+        {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
     end
   end
 
