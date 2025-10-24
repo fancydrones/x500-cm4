@@ -31,7 +31,7 @@ spec:
             configMapKeyRef:
               key: ROUTER_CONFIG
               name: rpi4-config
-        image: ghcr.io/fancydrones/x500-cm4/router-ex:20251024-b9a122b
+        image: ghcr.io/fancydrones/x500-cm4/router-ex:20251024-df3c2ed
         livenessProbe:
           exec:
             command:
