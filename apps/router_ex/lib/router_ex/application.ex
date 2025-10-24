@@ -5,12 +5,12 @@ defmodule RouterEx.Application do
   Router-Ex is an Elixir-based MAVLink message router that intelligently
   routes messages between serial, UDP, and TCP connections.
 
-  The application supervision tree includes:
-  - ConfigManager: Manages router configuration
+  The application supervision tree (in start order):
   - Telemetry: Metrics and monitoring
   - RouterCore: Core message routing logic
   - HealthMonitor: Connection health monitoring
   - Endpoint.Supervisor: Manages connection endpoints
+  - ConfigManager: Manages router configuration and starts endpoints
   """
 
   use Application
@@ -21,9 +21,6 @@ defmodule RouterEx.Application do
     Logger.info("Starting Router-Ex application")
 
     children = [
-      # Configuration manager
-      RouterEx.ConfigManager,
-
       # Telemetry setup
       RouterEx.Telemetry,
 
@@ -34,7 +31,12 @@ defmodule RouterEx.Application do
       RouterEx.HealthMonitor,
 
       # Connection supervisor (manages all endpoint connections)
-      {DynamicSupervisor, name: RouterEx.Endpoint.Supervisor, strategy: :one_for_one}
+      # IMPORTANT: Must start before ConfigManager since ConfigManager starts endpoints
+      {DynamicSupervisor, name: RouterEx.Endpoint.Supervisor, strategy: :one_for_one},
+
+      # Configuration manager
+      # Starts last because it needs Endpoint.Supervisor to be ready
+      RouterEx.ConfigManager
     ]
 
     opts = [strategy: :one_for_one, name: RouterEx.Supervisor]
