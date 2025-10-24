@@ -58,7 +58,7 @@ spec:
           value: "2500000"
         - name: H264_INLINE_HEADERS
           value: "true"
-        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251024-be53eca
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251024-74a728c
         name: video-streamer
         ports:
         - containerPort: 8554
