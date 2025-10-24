@@ -121,54 +121,26 @@ defmodule RouterEx.Endpoint.TcpServer do
   end
 
   @impl true
-  def handle_info({:client_connected, client_socket, client_info}, state) do
-    # Spawn a process to handle this client
-    server_pid = self()
+  def handle_info({:client_ready, client_pid, client_socket, client_info}, state) do
+    # Client handler has taken ownership and is ready
+    # Track this client
+    client_id = make_ref()
 
-    client_pid =
-      spawn_link(fn ->
-        handle_client(client_socket, client_info, state.connection_id, server_pid)
-      end)
+    new_clients =
+      Map.put(state.clients, client_id, %{
+        pid: client_pid,
+        socket: client_socket,
+        info: client_info
+      })
 
-    # Transfer socket ownership to the client handler process
-    # This is CRITICAL - without it, the acceptor process owns the socket
-    # and the client handler won't receive any data!
-    case :gen_tcp.controlling_process(client_socket, client_pid) do
-      :ok ->
-        # Tell the client handler it can now proceed
-        send(client_pid, :socket_ready)
+    # Maintain reverse index for O(1) lookups
+    new_pid_to_client_id = Map.put(state.pid_to_client_id, client_pid, client_id)
 
-        # Track this client
-        client_id = make_ref()
+    Logger.info(
+      "TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)"
+    )
 
-        new_clients =
-          Map.put(state.clients, client_id, %{
-            pid: client_pid,
-            socket: client_socket,
-            info: client_info
-          })
-
-        # Maintain reverse index for O(1) lookups
-        new_pid_to_client_id = Map.put(state.pid_to_client_id, client_pid, client_id)
-
-        Logger.info(
-          "TCP client connected: #{client_info.address}:#{client_info.port} (#{map_size(new_clients)} total)"
-        )
-
-        {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
-
-      {:error, reason} ->
-        Logger.error(
-          "Failed to transfer socket control for #{client_info.address}:#{client_info.port}: #{inspect(reason)}"
-        )
-
-        # Kill the client handler and close the socket
-        Process.exit(client_pid, :kill)
-        :gen_tcp.close(client_socket)
-
-        # Don't track this failed client
-        {:noreply, state}
-    end
+    {:noreply, %{state | clients: new_clients, pid_to_client_id: new_pid_to_client_id}}
   end
 
   @impl true
@@ -373,8 +345,9 @@ defmodule RouterEx.Endpoint.TcpServer do
               "TCP acceptor accepted connection from #{client_info.address}:#{client_info.port}"
             )
 
-            # Notify server about new client
-            send(server_pid, {:client_connected, client_socket, client_info})
+            # Spawn handler process and transfer socket ownership immediately
+            # This must be done in the acceptor process that owns the socket!
+            handle_new_client(client_socket, client_info, server_pid)
 
             # Continue accepting
             accept_loop(listen_socket, server_pid)
@@ -392,6 +365,36 @@ defmodule RouterEx.Endpoint.TcpServer do
         Logger.error("TCP accept error: #{inspect(reason)}")
         Process.sleep(1000)
         accept_loop(listen_socket, server_pid)
+    end
+  end
+
+  defp handle_new_client(client_socket, client_info, server_pid) do
+    # Get connection_id from server (we need this for routing)
+    connection_id = GenServer.call(server_pid, :get_connection_id)
+
+    # Spawn the client handler process
+    client_pid =
+      spawn_link(fn ->
+        handle_client(client_socket, client_info, connection_id, server_pid)
+      end)
+
+    # Transfer socket ownership to the handler process
+    # This MUST be done in the acceptor process that currently owns the socket
+    case :gen_tcp.controlling_process(client_socket, client_pid) do
+      :ok ->
+        # Tell the client handler it can proceed
+        send(client_pid, :socket_ready)
+        # Tell the server to track this client
+        send(server_pid, {:client_ready, client_pid, client_socket, client_info})
+
+      {:error, reason} ->
+        Logger.error(
+          "Failed to transfer socket control for #{client_info.address}:#{client_info.port}: #{inspect(reason)}"
+        )
+
+        # Kill the handler and close the socket
+        Process.exit(client_pid, :kill)
+        :gen_tcp.close(client_socket)
     end
   end
 
