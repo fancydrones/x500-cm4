@@ -333,8 +333,6 @@ defmodule RouterEx.Endpoint.TcpServer do
   end
 
   defp accept_loop(listen_socket, server_pid, connection_id) do
-    Logger.debug("TCP acceptor waiting for connections on socket #{inspect(listen_socket)}")
-
     case :gen_tcp.accept(listen_socket) do
       {:ok, client_socket} ->
         # Get client info
@@ -344,10 +342,6 @@ defmodule RouterEx.Endpoint.TcpServer do
               address: format_address(address),
               port: port
             }
-
-            Logger.info(
-              "TCP acceptor accepted connection from #{client_info.address}:#{client_info.port}"
-            )
 
             # Spawn handler process and transfer socket ownership immediately
             # This must be done in the acceptor process that owns the socket!
@@ -402,14 +396,11 @@ defmodule RouterEx.Endpoint.TcpServer do
   end
 
   defp handle_client(socket, client_info, connection_id, server_pid) do
-    Logger.debug("Handling TCP client: #{client_info.address}:#{client_info.port}")
-
     # Wait for socket ownership transfer to complete
     receive do
       :socket_ready ->
         # Now we own the socket, set it to active mode
         :inet.setopts(socket, active: true)
-        Logger.info("TCP client handler ready for #{client_info.address}:#{client_info.port}")
 
         # Enter receive loop
         client_loop(socket, <<>>, connection_id, server_pid)
@@ -428,22 +419,11 @@ defmodule RouterEx.Endpoint.TcpServer do
   defp client_loop(socket, buffer, connection_id, server_pid) do
     receive do
       {:tcp, ^socket, data} ->
-        Logger.info(
-          "TCP server received #{byte_size(data)} bytes from client (buffer: #{byte_size(buffer)} bytes)"
-        )
-
         # Append to buffer
         new_buffer = buffer <> data
 
         # Parse MAVLink frames
         {frames, remaining_buffer} = parse_frames(new_buffer)
-
-        # Log parsed frames
-        frame_count = length(frames)
-
-        if frame_count > 0 do
-          Logger.info("TCP server parsed #{frame_count} MAVLink frames, routing to RouterCore")
-        end
 
         # Route each frame to RouterCore
         Enum.each(frames, fn frame ->
