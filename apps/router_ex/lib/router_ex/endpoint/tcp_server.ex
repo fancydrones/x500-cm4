@@ -37,6 +37,9 @@ defmodule RouterEx.Endpoint.TcpServer do
   require Logger
   alias RouterEx.MAVLink.Parser
 
+  # Timeout for socket ownership transfer (milliseconds)
+  @socket_transfer_timeout 5000
+
   defmodule State do
     @moduledoc false
     defstruct [
@@ -100,9 +103,13 @@ defmodule RouterEx.Endpoint.TcpServer do
       {:ok, new_state} ->
         Logger.info("TCP server started: #{state.address}:#{state.port}")
 
-        # Start acceptor process - pass server PID explicitly
+        # Start acceptor process - pass connection_id to avoid blocking GenServer.call
         server_pid = self()
-        acceptor_pid = spawn_link(fn -> accept_loop(new_state.listen_socket, server_pid) end)
+
+        acceptor_pid =
+          spawn_link(fn ->
+            accept_loop(new_state.listen_socket, server_pid, new_state.connection_id)
+          end)
 
         Logger.info("TCP acceptor loop started (PID: #{inspect(acceptor_pid)})")
 
@@ -118,15 +125,8 @@ defmodule RouterEx.Endpoint.TcpServer do
   end
 
   @impl true
-  def handle_info({:client_connected, client_socket, client_info}, state) do
-    # Spawn a process to handle this client
-    server_pid = self()
-
-    client_pid =
-      spawn_link(fn ->
-        handle_client(client_socket, client_info, state.connection_id, server_pid)
-      end)
-
+  def handle_info({:client_ready, client_pid, client_socket, client_info}, state) do
+    # Client handler has taken ownership and is ready
     # Track this client
     client_id = make_ref()
 
@@ -332,7 +332,7 @@ defmodule RouterEx.Endpoint.TcpServer do
     end
   end
 
-  defp accept_loop(listen_socket, server_pid) do
+  defp accept_loop(listen_socket, server_pid, connection_id) do
     Logger.debug("TCP acceptor waiting for connections on socket #{inspect(listen_socket)}")
 
     case :gen_tcp.accept(listen_socket) do
@@ -349,16 +349,17 @@ defmodule RouterEx.Endpoint.TcpServer do
               "TCP acceptor accepted connection from #{client_info.address}:#{client_info.port}"
             )
 
-            # Notify server about new client
-            send(server_pid, {:client_connected, client_socket, client_info})
+            # Spawn handler process and transfer socket ownership immediately
+            # This must be done in the acceptor process that owns the socket!
+            handle_new_client(client_socket, client_info, server_pid, connection_id)
 
             # Continue accepting
-            accept_loop(listen_socket, server_pid)
+            accept_loop(listen_socket, server_pid, connection_id)
 
           {:error, reason} ->
             Logger.error("Failed to get peer info: #{inspect(reason)}")
             :gen_tcp.close(client_socket)
-            accept_loop(listen_socket, server_pid)
+            accept_loop(listen_socket, server_pid, connection_id)
         end
 
       {:error, :closed} ->
@@ -367,18 +368,61 @@ defmodule RouterEx.Endpoint.TcpServer do
       {:error, reason} ->
         Logger.error("TCP accept error: #{inspect(reason)}")
         Process.sleep(1000)
-        accept_loop(listen_socket, server_pid)
+        accept_loop(listen_socket, server_pid, connection_id)
+    end
+  end
+
+  defp handle_new_client(client_socket, client_info, server_pid, connection_id) do
+    # connection_id is passed from acceptor to avoid blocking GenServer.call
+
+    # Spawn the client handler process
+    {client_pid, _monitor_ref} =
+      spawn_monitor(fn ->
+        handle_client(client_socket, client_info, connection_id, server_pid)
+      end)
+
+    # Transfer socket ownership to the handler process
+    # This MUST be done in the acceptor process that currently owns the socket
+    case :gen_tcp.controlling_process(client_socket, client_pid) do
+      :ok ->
+        # Tell the client handler it can proceed
+        send(client_pid, :socket_ready)
+        # Tell the server to track this client
+        send(server_pid, {:client_ready, client_pid, client_socket, client_info})
+
+      {:error, reason} ->
+        Logger.error(
+          "Failed to transfer socket control for #{client_info.address}:#{client_info.port}: #{inspect(reason)}"
+        )
+
+        # Kill the handler and close the socket
+        Process.exit(client_pid, :kill)
+        :gen_tcp.close(client_socket)
     end
   end
 
   defp handle_client(socket, client_info, connection_id, server_pid) do
     Logger.debug("Handling TCP client: #{client_info.address}:#{client_info.port}")
 
-    # Set socket to active mode for this process
-    :inet.setopts(socket, active: true)
+    # Wait for socket ownership transfer to complete
+    receive do
+      :socket_ready ->
+        # Now we own the socket, set it to active mode
+        :inet.setopts(socket, active: true)
+        Logger.info("TCP client handler ready for #{client_info.address}:#{client_info.port}")
 
-    # Enter receive loop
-    client_loop(socket, <<>>, connection_id, server_pid)
+        # Enter receive loop
+        client_loop(socket, <<>>, connection_id, server_pid)
+    after
+      @socket_transfer_timeout ->
+        Logger.error(
+          "Timeout waiting for socket ownership transfer for #{client_info.address}:#{client_info.port}"
+        )
+
+        :gen_tcp.close(socket)
+        # Exit without entering client_loop - the EXIT handler will clean up
+        :ok
+    end
   end
 
   defp client_loop(socket, buffer, connection_id, server_pid) do
