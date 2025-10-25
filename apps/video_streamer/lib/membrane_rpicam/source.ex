@@ -22,116 +22,121 @@ defmodule Membrane.Rpicam.Source do
   @fallback_app_name "libcamera-vid"
   @max_retries 3
 
-  def_output_pad :output,
+  def_output_pad(:output,
     accepted_format: %RemoteStream{type: :bytestream, content_format: H264},
     flow_control: :push
+  )
 
-  def_options timeout: [
-                spec: Membrane.Time.non_neg() | :infinity,
-                default: :infinity,
-                description: """
-                Time for which program runs in milliseconds.
-                """
-              ],
-              framerate: [
-                spec: {pos_integer(), pos_integer()} | :camera_default,
-                default: :camera_default,
-                description: """
-                Fixed framerate.
-                """
-              ],
-              width: [
-                spec: pos_integer() | :camera_default,
-                default: :camera_default,
-                description: """
-                Output image width.
-                """
-              ],
-              height: [
-                spec: pos_integer() | :camera_default,
-                default: :camera_default,
-                description: """
-                Output image height.
-                """
-              ],
-              camera_open_delay: [
-                spec: Membrane.Time.non_neg(),
-                default: Membrane.Time.milliseconds(50),
-                inspector: &Membrane.Time.pretty_duration/1,
-                description: """
-                Determines for how long initial opening the camera should be delayed.
-                No delay can cause a crash on Nerves system when initializing the
-                element during the boot sequence of the device.
-                """
-              ],
-              verbose: [
-                spec: boolean(),
-                default: false,
-                description: """
-                Enable verbose output from rpicam-vid (frame statistics, exposure, gain, etc.).
-                When false, suppresses the frame-by-frame debug output.
-                """
-              ],
-              profile: [
-                spec: :baseline | :main | :high,
-                default: :main,
-                description: """
-                H.264 encoding profile (baseline, main, or high).
-                Main profile provides better compression (~20% savings vs baseline).
-                """
-              ],
-              level: [
-                spec: String.t(),
-                default: "4.1",
-                description: """
-                H.264 encoding level (e.g., "3.1", "4.0", "4.1").
-                Level 4.1 supports up to 1080p30, level 3.1 supports up to 720p30.
-                """
-              ],
-              bitrate: [
-                spec: pos_integer() | :auto,
-                default: :auto,
-                description: """
-                Target bitrate in bits per second. Set to :auto for automatic bitrate.
-                For 720p30, recommend 2-3 Mbps for mobile devices.
-                """
-              ],
-              keyframe_interval: [
-                spec: pos_integer(),
-                default: 30,
-                description: """
-                Keyframe interval in frames (GOP size). Lower values improve latency and
-                error recovery at cost of higher bandwidth. Default 30 (1 second at 30fps).
-                """
-              ],
-              inline_headers: [
-                spec: boolean(),
-                default: true,
-                description: """
-                Insert SPS/PPS before every keyframe for better mobile compatibility.
-                """
-              ],
-              flush: [
-                spec: boolean(),
-                default: false,
-                description: """
-                Flush encoder output immediately to reduce latency. May increase bandwidth.
-                """
-              ],
-              hflip: [
-                spec: boolean(),
-                default: false,
-                description: """
-                Flip image horizontally (mirror).
-                """
-              ],
-              vflip: [
-                spec: boolean(),
-                default: false,
-                description: """
-                Flip image vertically (upside down).
-                """
-              ]
+  def_options(
+    timeout: [
+      spec: Membrane.Time.non_neg() | :infinity,
+      default: :infinity,
+      description: """
+      Time for which program runs in milliseconds.
+      """
+    ],
+    framerate: [
+      spec: {pos_integer(), pos_integer()} | :camera_default,
+      default: :camera_default,
+      description: """
+      Fixed framerate.
+      """
+    ],
+    width: [
+      spec: pos_integer() | :camera_default,
+      default: :camera_default,
+      description: """
+      Output image width.
+      """
+    ],
+    height: [
+      spec: pos_integer() | :camera_default,
+      default: :camera_default,
+      description: """
+      Output image height.
+      """
+    ],
+    camera_open_delay: [
+      spec: Membrane.Time.non_neg(),
+      default: Membrane.Time.milliseconds(50),
+      inspector: &Membrane.Time.pretty_duration/1,
+      description: """
+      Determines for how long initial opening the camera should be delayed.
+      No delay can cause a crash on Nerves system when initializing the
+      element during the boot sequence of the device.
+      """
+    ],
+    verbose: [
+      spec: boolean(),
+      default: false,
+      description: """
+      Enable verbose output from rpicam-vid (frame statistics, exposure, gain, etc.).
+      When false, suppresses the frame-by-frame debug output.
+      """
+    ],
+    profile: [
+      spec: :baseline | :main | :high,
+      default: :main,
+      description: """
+      H.264 encoding profile (baseline, main, or high).
+      Main profile provides better compression (~20% savings vs baseline).
+      """
+    ],
+    level: [
+      spec: String.t(),
+      default: "4.1",
+      description: """
+      H.264 encoding level (e.g., "3.1", "4.0", "4.1").
+      Level 4.1 supports up to 1080p30, level 3.1 supports up to 720p30.
+      """
+    ],
+    bitrate: [
+      spec: pos_integer() | :auto,
+      default: :auto,
+      description: """
+      Target bitrate in bits per second. Set to :auto for automatic bitrate.
+      For 720p30, recommend 2-3 Mbps for mobile devices.
+      """
+    ],
+    keyframe_interval: [
+      spec: pos_integer(),
+      default: 10,
+      description: """
+      Keyframe interval in frames (GOP size). Lower values (10-15) improve
+      mobile decoder performance and reduce latency, at cost of higher bandwidth.
+      Android QGC benefits from a keyframe interval of 10 frames (latency ≈ keyframe_interval / framerate seconds; e.g., ~333ms at 30fps) for lower latency.
+      """
+    ],
+    inline_headers: [
+      spec: boolean(),
+      default: true,
+      description: """
+      Insert SPS/PPS before every keyframe for better mobile compatibility.
+      """
+    ],
+    flush: [
+      spec: boolean(),
+      default: true,
+      description: """
+      Flush encoder output immediately to reduce latency. Recommended for
+      low-latency streaming applications.
+      """
+    ],
+    hflip: [
+      spec: boolean(),
+      default: false,
+      description: """
+      Flip image horizontally (mirror).
+      """
+    ],
+    vflip: [
+      spec: boolean(),
+      default: false,
+      description: """
+      Flip image vertically (upside down).
+      """
+    ]
+  )
 
   @impl true
   def handle_init(_ctx, options) do
@@ -227,10 +232,11 @@ defmodule Membrane.Rpicam.Source do
     vflip_flag = if opts.vflip, do: "--vflip", else: ""
 
     # Build bitrate option
-    bitrate_args = case opts.bitrate do
-      :auto -> []
-      bitrate when is_integer(bitrate) -> ["--bitrate", "#{bitrate}"]
-    end
+    bitrate_args =
+      case opts.bitrate do
+        :auto -> []
+        bitrate when is_integer(bitrate) -> ["--bitrate", "#{bitrate}"]
+      end
 
     # Build inline headers option (for mobile compatibility)
     inline_headers_flag = if opts.inline_headers, do: "--inline", else: ""
@@ -246,23 +252,33 @@ defmodule Membrane.Rpicam.Source do
     # Added flush for immediate encoder output (reduces latency)
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     ([
-      app_binary,
-      "-t", "#{timeout}",
-      "--codec", "h264",
-      "--profile", profile,
-      "--level", "#{level}",
-      "--intra", "#{opts.keyframe_interval}",
-      "--libav-format", "h264",
-      "--framerate", "#{framerate_float}",
-      "--width", "#{width}",
-      "--height", "#{height}",
-      hflip_flag,
-      vflip_flag,
-      inline_headers_flag,
-      flush_flag,
-      verbose_flag,
-      "-o", "-"
-    ] ++ bitrate_args)
+       app_binary,
+       "-t",
+       "#{timeout}",
+       "--codec",
+       "h264",
+       "--profile",
+       profile,
+       "--level",
+       "#{level}",
+       "--intra",
+       "#{opts.keyframe_interval}",
+       "--libav-format",
+       "h264",
+       "--framerate",
+       "#{framerate_float}",
+       "--width",
+       "#{width}",
+       "--height",
+       "#{height}",
+       hflip_flag,
+       vflip_flag,
+       inline_headers_flag,
+       flush_flag,
+       verbose_flag,
+       "-o",
+       "-"
+     ] ++ bitrate_args)
     |> Enum.filter(&(&1 != ""))
     |> Enum.join(" ")
   end
@@ -285,8 +301,9 @@ defmodule Membrane.Rpicam.Source do
           nil ->
             Membrane.Logger.warning(
               "Neither #{@app_name} nor #{@fallback_app_name} found in PATH. " <>
-              "Defaulting to #{@app_name}, but this may fail."
+                "Defaulting to #{@app_name}, but this may fail."
             )
+
             @app_name
 
           path ->
