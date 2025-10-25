@@ -122,6 +122,15 @@ defmodule Membrane.Rpicam.Source do
       well. Default false to match MediaMTX behavior and allow encoder buffering.
       """
     ],
+    low_latency: [
+      spec: boolean(),
+      default: true,
+      description: """
+      Enable low-latency mode (rpicam-vid v1.6.0+). Reduces encoding latency from
+      8 frames to 1 frame by disabling B-frames and arithmetic coding. Critical for
+      eliminating keyframe jitter in real-time streaming. Recommended for all streaming.
+      """
+    ],
     hflip: [
       spec: boolean(),
       default: false,
@@ -244,12 +253,16 @@ defmodule Membrane.Rpicam.Source do
     # Build flush option (for low latency)
     flush_flag = if opts.flush, do: "--flush", else: ""
 
+    # Build low-latency option (eliminates keyframe jitter)
+    low_latency_flag = if opts.low_latency, do: "--low-latency", else: ""
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
     # Added keyframe interval (--intra) for better mobile decoder performance
     # Added inline headers for mobile compatibility
     # Added flush for immediate encoder output (reduces latency)
+    # Added low-latency mode to eliminate keyframe jitter in real-time streaming
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     ([
        app_binary,
@@ -275,6 +288,7 @@ defmodule Membrane.Rpicam.Source do
        vflip_flag,
        inline_headers_flag,
        flush_flag,
+       low_latency_flag,
        verbose_flag,
        "-o",
        "-"
