@@ -15,8 +15,36 @@ defmodule VideoStreamer.Pipeline do
   @impl true
   def handle_init(_ctx, _opts) do
     camera_config = Application.get_env(:video_streamer, :camera)
+    encoder_config = Application.get_env(:video_streamer, :encoder, [])
+    rtsp_config = Application.get_env(:video_streamer, :rtsp, [])
 
-    Membrane.Logger.info("Pipeline init - multi-client mode with Tee")
+    Membrane.Logger.info("=== Video Streamer Configuration ===")
+
+    # Log camera settings
+    Membrane.Logger.info("Camera Settings:")
+    Membrane.Logger.info("  Resolution: #{camera_config[:width]}x#{camera_config[:height]}")
+    Membrane.Logger.info("  Framerate: #{camera_config[:framerate]} fps")
+    Membrane.Logger.info("  H-Flip: #{camera_config[:hflip]} (#{get_config_source("CAMERA_HFLIP", camera_config[:hflip], false)})")
+    Membrane.Logger.info("  V-Flip: #{camera_config[:vflip]} (#{get_config_source("CAMERA_VFLIP", camera_config[:vflip], false)})")
+
+    # Log encoder settings
+    Membrane.Logger.info("Encoder Settings:")
+    Membrane.Logger.info("  Profile: #{Keyword.get(encoder_config, :profile, :main)} (#{get_config_source("H264_PROFILE", Keyword.get(encoder_config, :profile), :main)})")
+    Membrane.Logger.info("  Level: #{Keyword.get(encoder_config, :level, "4.1")} (#{get_config_source("H264_LEVEL", Keyword.get(encoder_config, :level), "4.1")})")
+    Membrane.Logger.info("  Bitrate: #{format_bitrate(Keyword.get(encoder_config, :bitrate, :auto))} (#{get_config_source("H264_BITRATE", Keyword.get(encoder_config, :bitrate), :auto)})")
+    Membrane.Logger.info("  Keyframe Interval: #{Keyword.get(encoder_config, :keyframe_interval, 30)} frames (#{get_config_source("KEYFRAME_INTERVAL", Keyword.get(encoder_config, :keyframe_interval), 30)})")
+    Membrane.Logger.info("  Inline Headers: #{Keyword.get(encoder_config, :inline_headers, true)} (#{get_config_source("H264_INLINE_HEADERS", Keyword.get(encoder_config, :inline_headers), true)})")
+    Membrane.Logger.info("  Flush: #{Keyword.get(encoder_config, :flush, false)} (#{get_config_source("H264_FLUSH", Keyword.get(encoder_config, :flush), false)})")
+    Membrane.Logger.info("  Low Latency: #{Keyword.get(encoder_config, :low_latency, true)} (#{get_config_source("H264_LOW_LATENCY", Keyword.get(encoder_config, :low_latency), true)})")
+    Membrane.Logger.info("  Denoise: #{Keyword.get(encoder_config, :denoise, :cdn_off)} (#{get_config_source("H264_DENOISE", Keyword.get(encoder_config, :denoise), :cdn_off)})")
+    Membrane.Logger.info("  Buffer Count: #{Keyword.get(encoder_config, :buffer_count, 6)} (#{get_config_source("H264_BUFFER_COUNT", Keyword.get(encoder_config, :buffer_count), 6)})")
+
+    # Log RTSP settings
+    Membrane.Logger.info("RTSP Settings:")
+    Membrane.Logger.info("  Port: #{Keyword.get(rtsp_config, :port, 8554)}")
+    Membrane.Logger.info("  Path: #{Keyword.get(rtsp_config, :path, "/video")}")
+
+    Membrane.Logger.info("=== Configuration Complete ===")
 
     # Build pipeline spec with Tee for multi-client support
     spec = build_pipeline_spec(camera_config)
@@ -140,5 +168,28 @@ defmodule VideoStreamer.Pipeline do
       })
       |> child(:tee, Membrane.Tee.Parallel)
     ]
+  end
+
+  ## Helper functions for configuration logging
+
+  defp get_config_source(env_var, current_value, default_value) do
+    env_value = System.get_env(env_var)
+
+    cond do
+      env_value != nil ->
+        "env: #{env_var}=#{env_value}"
+
+      current_value == default_value ->
+        "default"
+
+      true ->
+        "config"
+    end
+  end
+
+  defp format_bitrate(:auto), do: "auto"
+  defp format_bitrate(bitrate) when is_integer(bitrate) do
+    mbps = bitrate / 1_000_000
+    "#{bitrate} bps (#{Float.round(mbps, 1)} Mbps)"
   end
 end
