@@ -57,7 +57,7 @@ spec:
         - name: H264_BITRATE
           value: "3000000"
         - name: H264_INLINE_HEADERS
-          value: "false" # from true
+          value: "true" # from true
         - name: H264_FLUSH
           value: "false"
         - name: H264_LOW_LATENCY
