@@ -138,49 +138,61 @@ The following flags are essential for smooth Android streaming:
 - Severe jitter
 - Video drops completely every ~30 seconds
 - Same network as working Samsung A55
+- **VLC works fine on same tablet** (stable video, hardware decoder functional)
 
-**Root Cause:**
+**Root Cause - QGroundControl Issue (NOT Encoder!):**
 
-QGroundControl on Android 10+ has known video decoder issues:
-- Android 10 introduced Codec2.0, replacing ACodec and OpenMAX
-- QGC may not be using hardware acceleration on some Android tablets
-- Falls back to software decoding, causing poor performance
-- GStreamer may not fully support Android's Codec2 API
+The tablet's hardware H.264 decoder **works** (proven by VLC success). The issue is QGroundControl's GStreamer backend:
 
-**Samsung Tab A9 Specific Issues:**
-- MediaTek Helio G99 processor with Mali-G57 MC2 GPU
-- Known GPU driver performance issues on stock firmware
-- Video decoder errors with native resolution support
-- February 2025 update partially addressed performance issues
+**QGC 5.0.8 Android Problems:**
+- Android 10+ introduced Codec2.0 API (replaced ACodec/OpenMAX)
+- QGC's GStreamer may not properly use Codec2 MediaCodec decoder
+- Falls back to software decoding despite hardware being available
+- Known QGC issues: #10301 (soft decoding), #7331 (poor performance)
+- Problem is GStreamer pipeline not detecting/using `amcviddec-*` elements
+
+**Samsung Tab A9 Specifics:**
+- MediaTek Helio G99 with Mali-G57 MC2 GPU
+- Hardware decoder IS functional (VLC confirms this!)
+- February 2025 firmware improved some decoder issues
+
+**Verified Encoder Settings:**
+```bash
+# Actual command verified in pod:
+rpicam-vid --profile baseline --bitrate 3000000 --low-latency ...
+```
+- ✅ Baseline profile is being used correctly
+- ✅ Bitrate is set correctly
+- ✅ Low-latency mode active
+- **The encoder configuration is NOT the problem!**
 
 **Possible Solutions:**
 
-1. **Try Baseline Profile (RECOMMENDED)** ⭐
-   - Change `H264_PROFILE: "main"` → `H264_PROFILE: "baseline"` in deployment
-   - Baseline uses CAVLC entropy coding (simpler than Main's CABAC)
-   - Android officially guarantees hardware decoding for baseline profile
-   - Main profile support varies by device - Tab A9 might lack it
-   - See "Tablet-Optimized Configuration" below
+1. **Disable Low Latency Mode in QGC** (Try First!) ⭐
+   - QGC Settings → Video → Uncheck "Low Latency Mode"
+   - Low latency mode can cause frame loss and choppy video on poor decoders
+   - VLC works because it uses larger buffers
+   - Let QGC buffer more frames to smooth playback
 
-2. **Update QGroundControl** to latest version
+2. **Try UDP RTP instead of RTSP**
+   - QGC Settings → Video → Video Source: UDP RTP Video Stream
+   - Set port to 14550 (same as MAVLink)
+   - Some users report better performance with UDP vs RTSP on Android
+
+3. **Update QGroundControl** to latest version
    - Check if newer QGC versions have better Android decoder support
+   - QGC 5.0.8 is from early 2024, newer builds may improve GStreamer
 
-3. **Update tablet firmware**
+4. **Update tablet firmware**
    - Samsung released updates addressing decoder and performance issues
    - Check for latest Android/One UI updates
 
-4. **Try different H.264 Level**
-   - Can try level 4.0 instead of 4.1
-   - Note: rpicam-vid doesn't support levels below 4.0
-
-5. **Reduce video resolution/bitrate** (if needed)
-   - Try 640x480 or 848x480 instead of 1280x720
-   - Reduce bitrate from 5 Mbps to 2-3 Mbps
-   - These are workarounds, not ideal solutions
-
-6. **Use different Android device**
+5. **Use different Android device** (If nothing works)
    - Samsung A55 works perfectly with current settings
    - Look for devices with Snapdragon processors (better Android codec support)
+   - Avoid cheap MediaTek-based tablets for QGC
+
+**Note:** Since VLC works, the issue is definitely QGC's GStreamer configuration, not the stream quality or encoder settings. The baseline profile and optimized settings are already correct!
 
 7. **Test with different QGC video backend** (if available)
    - Some QGC builds may have different decoder options
