@@ -131,6 +131,16 @@ defmodule Membrane.Rpicam.Source do
       eliminating keyframe jitter in real-time streaming. Recommended for all streaming.
       """
     ],
+    denoise: [
+      spec: :off | :cdn_off | :cdn_fast | :cdn_hq,
+      default: :cdn_off,
+      description: """
+      Denoise operating mode. MediaMTX uses "off" by default, but "cdn_off" is recommended
+      for streaming to disable color denoise while keeping other processing. Using denoise
+      can cause frame jitter and drops, especially at higher framerates.
+      Options: off (all processing off), cdn_off (color denoise off), cdn_fast, cdn_hq.
+      """
+    ],
     hflip: [
       spec: boolean(),
       default: false,
@@ -256,6 +266,9 @@ defmodule Membrane.Rpicam.Source do
     # Build low-latency option (eliminates keyframe jitter)
     low_latency_flag = if opts.low_latency, do: "--low-latency", else: ""
 
+    # Build denoise option (prevents frame jitter from color denoise processing)
+    denoise_flag = "--denoise #{opts.denoise}"
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
@@ -263,6 +276,7 @@ defmodule Membrane.Rpicam.Source do
     # Added inline headers for mobile compatibility
     # Added flush for immediate encoder output (reduces latency)
     # Added low-latency mode to eliminate keyframe jitter in real-time streaming
+    # Added denoise option to prevent frame jitter from color denoise processing
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     ([
        app_binary,
@@ -289,6 +303,7 @@ defmodule Membrane.Rpicam.Source do
        inline_headers_flag,
        flush_flag,
        low_latency_flag,
+       denoise_flag,
        verbose_flag,
        "-o",
        "-"

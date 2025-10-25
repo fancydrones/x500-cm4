@@ -28,6 +28,8 @@ if config_env() == :prod do
           bitrate_str -> String.to_integer(bitrate_str)
         end,
       inline_headers: System.get_env("H264_INLINE_HEADERS", "true") == "true",
-      flush: System.get_env("H264_FLUSH", "false") == "true"
+      flush: System.get_env("H264_FLUSH", "false") == "true",
+      low_latency: System.get_env("H264_LOW_LATENCY", "true") == "true",
+      denoise: System.get_env("H264_DENOISE", "cdn_off") |> String.to_atom()
     ]
 end
