@@ -30,6 +30,7 @@ if config_env() == :prod do
       inline_headers: System.get_env("H264_INLINE_HEADERS", "true") == "true",
       flush: System.get_env("H264_FLUSH", "false") == "true",
       low_latency: System.get_env("H264_LOW_LATENCY", "true") == "true",
-      denoise: System.get_env("H264_DENOISE", "cdn_off") |> String.to_atom()
+      denoise: System.get_env("H264_DENOISE", "cdn_off") |> String.to_atom(),
+      buffer_count: System.get_env("H264_BUFFER_COUNT", "6") |> String.to_integer()
     ]
 end
