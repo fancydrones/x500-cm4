@@ -58,7 +58,7 @@ defmodule VideoStreamer.Pipeline do
       spec = [
         get_child(:tee)
         |> child({:rtp_stream, client_id}, %Membrane.RTP.StreamSendBin{
-          payloader: %Membrane.RTP.H264.Payloader{max_payload_size: 1000},
+          payloader: %Membrane.RTP.H264.Payloader{max_payload_size: 800},
           payload_type: 96,
           ssrc: ssrc,
           clock_rate: 90_000,
