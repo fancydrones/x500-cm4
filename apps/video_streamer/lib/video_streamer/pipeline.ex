@@ -58,7 +58,7 @@ defmodule VideoStreamer.Pipeline do
       spec = [
         get_child(:tee)
         |> child({:rtp_stream, client_id}, %Membrane.RTP.StreamSendBin{
-          payloader: %Membrane.RTP.H264.Payloader{max_payload_size: 1200},
+          payloader: %Membrane.RTP.H264.Payloader{max_payload_size: 1000},
           payload_type: 96,
           ssrc: ssrc,
           clock_rate: 90_000,
@@ -70,9 +70,12 @@ defmodule VideoStreamer.Pipeline do
         })
       ]
 
-      new_clients = Map.put(state.clients, client_id, %{ip: client_ip, port: client_port, ssrc: ssrc})
+      new_clients =
+        Map.put(state.clients, client_id, %{ip: client_ip, port: client_port, ssrc: ssrc})
 
-      Membrane.Logger.info("Client #{client_id} added with SSRC #{ssrc}. Active clients: #{map_size(new_clients)}")
+      Membrane.Logger.info(
+        "Client #{client_id} added with SSRC #{ssrc}. Active clients: #{map_size(new_clients)}"
+      )
 
       {[spec: spec], %{state | clients: new_clients}}
     end
@@ -93,7 +96,9 @@ defmodule VideoStreamer.Pipeline do
 
       new_clients = Map.delete(state.clients, client_id)
 
-      Membrane.Logger.info("Client #{client_id} removed. Active clients: #{map_size(new_clients)}")
+      Membrane.Logger.info(
+        "Client #{client_id} removed. Active clients: #{map_size(new_clients)}"
+      )
 
       {actions, %{state | clients: new_clients}}
     else
