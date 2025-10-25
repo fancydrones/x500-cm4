@@ -60,7 +60,7 @@ spec:
           value: "true"
         - name: H264_FLUSH
           value: "false"
-        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-d86bafa
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-0d5edbe
         name: video-streamer
         ports:
         - containerPort: 8554
