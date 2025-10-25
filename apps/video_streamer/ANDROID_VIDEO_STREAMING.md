@@ -169,9 +169,9 @@ QGroundControl on Android 10+ has known video decoder issues:
    - Samsung released updates addressing decoder and performance issues
    - Check for latest Android/One UI updates
 
-4. **Reduce H.264 Level**
-   - Change from level 4.1 to 3.1 (both support 720p30)
-   - Lower levels may have better hardware support
+4. **Try different H.264 Level**
+   - Can try level 4.0 instead of 4.1
+   - Note: rpicam-vid doesn't support levels below 4.0
 
 5. **Reduce video resolution/bitrate** (if needed)
    - Try 640x480 or 848x480 instead of 1280x720
@@ -193,7 +193,7 @@ For Samsung Galaxy Tab A9 and other devices with limited codec support, try thes
 ```yaml
 # Tablet-friendly encoder settings
 H264_PROFILE: "baseline"          # Changed from "main" - better hardware support
-H264_LEVEL: "3.1"                 # Changed from "4.1" - sufficient for 720p30
+H264_LEVEL: "4.0"                 # Can try 4.0 or keep 4.1 (rpicam doesn't support 3.1)
 H264_BITRATE: "3000000"           # Reduced from 5000000 (3 Mbps)
 KEYFRAME_INTERVAL: "30"           # Keep at 1 second
 STREAM_WIDTH: "1280"              # Keep same
