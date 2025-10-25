@@ -53,7 +53,7 @@ spec:
         - name: H264_LEVEL
           value: "4.1"
         - name: KEYFRAME_INTERVAL
-          value: "60"
+          value: "30"
         - name: H264_BITRATE
           value: "5000000"
         - name: H264_INLINE_HEADERS
