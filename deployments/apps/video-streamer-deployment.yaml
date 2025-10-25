@@ -57,13 +57,13 @@ spec:
         - name: H264_BITRATE
           value: "3000000"
         - name: H264_INLINE_HEADERS
-          value: "true" # from true
+          value: "true"
         - name: H264_FLUSH
           value: "false"
         - name: H264_LOW_LATENCY
           value: "true"
         - name: H264_DENOISE
-          value: off # from cdn_off
+          value: cdn_off
         - name: H264_BUFFER_COUNT
           value: "12"
         image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-c522105
