@@ -33,7 +33,9 @@ defmodule VideoAnnotator.MixProject do
       # Video processing (for Phase 0 local development)
       {:membrane_camera_capture_plugin, "~> 0.7"},
       {:membrane_h264_ffmpeg_plugin, "~> 0.32"},
-      {:membrane_core, "~> 1.1"}
+      {:membrane_core, "~> 1.1"},
+      {:membrane_fake_plugin, "~> 0.11"},
+      {:membrane_sdl_plugin, "~> 0.18"}
     ]
   end
 end
