@@ -100,11 +100,11 @@ defmodule Membrane.Rpicam.Source do
     ],
     keyframe_interval: [
       spec: pos_integer(),
-      default: 10,
+      default: 60,
       description: """
-      Keyframe interval in frames (GOP size). Lower values (10-15) improve
-      mobile decoder performance and reduce latency, at cost of higher bandwidth.
-      Android QGC benefits from a keyframe interval of 10 frames (latency ≈ keyframe_interval / framerate seconds; e.g., ~333ms at 30fps) for lower latency.
+      Keyframe interval in frames (GOP size / IDR period). MediaMTX uses 60 frames
+      (2 seconds at 30fps) which provides smooth Android playback with less bandwidth.
+      Matches MediaMTX rpiCameraIDRPeriod default.
       """
     ],
     inline_headers: [
@@ -116,10 +116,10 @@ defmodule Membrane.Rpicam.Source do
     ],
     flush: [
       spec: boolean(),
-      default: true,
+      default: false,
       description: """
-      Flush encoder output immediately to reduce latency. Recommended for
-      low-latency streaming applications.
+      Flush encoder output immediately. MediaMTX doesn't use flush mode and works
+      well. Default false to match MediaMTX behavior and allow encoder buffering.
       """
     ],
     hflip: [
