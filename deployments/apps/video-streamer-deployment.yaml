@@ -51,7 +51,7 @@ spec:
         - name: H264_PROFILE
           value: baseline #from main
         - name: H264_LEVEL
-          value: "3.1" # from 4.1
+          value: "4.1"
         - name: KEYFRAME_INTERVAL
           value: "30"
         - name: H264_BITRATE
