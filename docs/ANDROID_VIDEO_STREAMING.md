@@ -155,25 +155,70 @@ QGroundControl on Android 10+ has known video decoder issues:
 
 **Possible Solutions:**
 
-1. **Update QGroundControl** to latest version
+1. **Try Baseline Profile (RECOMMENDED)** ⭐
+   - Change `H264_PROFILE: "main"` → `H264_PROFILE: "baseline"` in deployment
+   - Baseline uses CAVLC entropy coding (simpler than Main's CABAC)
+   - Android officially guarantees hardware decoding for baseline profile
+   - Main profile support varies by device - Tab A9 might lack it
+   - See "Tablet-Optimized Configuration" below
+
+2. **Update QGroundControl** to latest version
    - Check if newer QGC versions have better Android decoder support
 
-2. **Update tablet firmware**
+3. **Update tablet firmware**
    - Samsung released updates addressing decoder and performance issues
    - Check for latest Android/One UI updates
 
-3. **Reduce video resolution/bitrate** (if needed)
+4. **Reduce H.264 Level**
+   - Change from level 4.1 to 3.1 (both support 720p30)
+   - Lower levels may have better hardware support
+
+5. **Reduce video resolution/bitrate** (if needed)
    - Try 640x480 or 848x480 instead of 1280x720
    - Reduce bitrate from 5 Mbps to 2-3 Mbps
    - These are workarounds, not ideal solutions
 
-4. **Use different Android device**
+6. **Use different Android device**
    - Samsung A55 works perfectly with current settings
    - Look for devices with Snapdragon processors (better Android codec support)
 
-5. **Test with different QGC video backend** (if available)
+7. **Test with different QGC video backend** (if available)
    - Some QGC builds may have different decoder options
    - Check QGC settings for hardware acceleration toggles
+
+### Tablet-Optimized Configuration
+
+For Samsung Galaxy Tab A9 and other devices with limited codec support, try these settings:
+
+```yaml
+# Tablet-friendly encoder settings
+H264_PROFILE: "baseline"          # Changed from "main" - better hardware support
+H264_LEVEL: "3.1"                 # Changed from "4.1" - sufficient for 720p30
+H264_BITRATE: "3000000"           # Reduced from 5000000 (3 Mbps)
+KEYFRAME_INTERVAL: "30"           # Keep at 1 second
+STREAM_WIDTH: "1280"              # Keep same
+STREAM_HEIGHT: "720"              # Keep same
+STREAM_FPS: "30"                  # Keep same
+
+# Keep all other optimization flags
+H264_LOW_LATENCY: "true"
+H264_DENOISE: "cdn_off"
+H264_BUFFER_COUNT: "12"
+H264_INLINE_HEADERS: "true"
+H264_FLUSH: "false"
+```
+
+**Profile Comparison:**
+
+| Feature | Baseline | Main | Impact |
+|---------|----------|------|--------|
+| Entropy Coding | CAVLC | CABAC | CABAC 10-15% better compression |
+| Computational Complexity | Low | Medium | Baseline easier to decode |
+| Android Hardware Support | Guaranteed | Varies | Baseline more compatible |
+| B-frames | No | Yes | Not used with --low-latency anyway |
+| File Size | +10-15% | Baseline | Acceptable trade-off for compatibility |
+
+Since we're using `--low-latency` mode (which already disables B-frames), switching to baseline profile mainly affects entropy coding. The ~10-15% bitrate increase is acceptable for ensuring hardware decoding works.
 
 ### References
 
