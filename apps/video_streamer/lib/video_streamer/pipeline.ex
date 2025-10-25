@@ -127,6 +127,8 @@ defmodule VideoStreamer.Pipeline do
         keyframe_interval: Keyword.get(encoder_config, :keyframe_interval, 30),
         inline_headers: Keyword.get(encoder_config, :inline_headers, true),
         flush: Keyword.get(encoder_config, :flush, false),
+        low_latency: Keyword.get(encoder_config, :low_latency, true),
+        denoise: Keyword.get(encoder_config, :denoise, :cdn_off),
         hflip: Keyword.get(camera_config, :hflip, false),
         vflip: Keyword.get(camera_config, :vflip, false)
       })
