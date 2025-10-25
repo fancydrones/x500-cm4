@@ -100,11 +100,12 @@ defmodule Membrane.Rpicam.Source do
     ],
     keyframe_interval: [
       spec: pos_integer(),
-      default: 60,
+      default: 30,
       description: """
-      Keyframe interval in frames (GOP size / IDR period). MediaMTX uses 60 frames
-      (2 seconds at 30fps) which provides smooth Android playback with less bandwidth.
-      Matches MediaMTX rpiCameraIDRPeriod default.
+      Keyframe interval in frames (GOP size / IDR period). Industry standard for streaming
+      is 1-2 seconds. Using 30 frames (1 second at 30fps) provides better stream recovery,
+      lower latency, and smoother playback on mobile devices. While MediaMTX defaults to
+      60 frames, testing shows 30 frames eliminates periodic jitter on Android QGC.
       """
     ],
     inline_headers: [
