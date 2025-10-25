@@ -49,7 +49,7 @@ spec:
         - name: RTSP_PORT
           value: "8554"
         - name: H264_PROFILE
-          value: main # from baseline
+          value: baseline # from main
         - name: H264_LEVEL
           value: "4.1"
         - name: KEYFRAME_INTERVAL
