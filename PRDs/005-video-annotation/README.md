@@ -44,6 +44,16 @@ This project establishes a **pluggable neural network architecture** that enable
   - Graceful degradation if inference fails
   - Automatic recovery from model errors
 
+## Future Enhancements
+
+### RF-DETR Integration (Post Phase 3)
+Consider migrating from YOLOX to [RF-DETR](https://github.com/roboflow/rf-detr) for improved accuracy:
+- **Better Accuracy:** RF-DETR-Nano achieves 48.4 AP vs YOLOX-Nano's 25.8 mAP (~2x improvement)
+- **Modern Architecture:** Transformer-based real-time detection (2025, Apache 2.0 license)
+- **ONNX Support:** Pre-converted models available on [Hugging Face](https://huggingface.co/PierreMarieCurie/rf-detr-onnx)
+- **Implementation:** Would require custom pre/postprocessing with Ortex+Nx (no dedicated Elixir library yet)
+- **Potential:** Could be extracted into `rf_detr_elixir` library for community benefit
+
 ## Architecture Highlights
 
 ```
