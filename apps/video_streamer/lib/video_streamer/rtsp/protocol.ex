@@ -17,19 +17,19 @@ defmodule VideoStreamer.RTSP.Protocol do
   @server_name "VideoStreamer/0.1.0"
 
   @type request :: %{
-    method: String.t(),
-    uri: String.t(),
-    version: String.t(),
-    headers: %{String.t() => String.t()},
-    body: String.t()
-  }
+          method: String.t(),
+          uri: String.t(),
+          version: String.t(),
+          headers: %{String.t() => String.t()},
+          body: String.t()
+        }
 
   @type response :: %{
-    status: integer(),
-    reason: String.t(),
-    headers: %{String.t() => String.t()},
-    body: String.t()
-  }
+          status: integer(),
+          reason: String.t(),
+          headers: %{String.t() => String.t()},
+          body: String.t()
+        }
 
   ## Request Parsing
 
@@ -62,13 +62,14 @@ defmodule VideoStreamer.RTSP.Protocol do
       [request_line | header_lines] ->
         with {:ok, method, uri, version} <- parse_request_line(request_line),
              {:ok, headers} <- parse_headers(header_lines) do
-          {:ok, %{
-            method: method,
-            uri: uri,
-            version: version,
-            headers: headers,
-            body: body
-          }}
+          {:ok,
+           %{
+             method: method,
+             uri: uri,
+             version: version,
+             headers: headers,
+             body: body
+           }}
         end
 
       _ ->

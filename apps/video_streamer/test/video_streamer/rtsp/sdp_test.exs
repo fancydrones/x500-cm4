@@ -86,6 +86,7 @@ defmodule VideoStreamer.RTSP.SDPTest do
       server_ip = "192.168.1.100"
       stream_path = "/video"
       video_config = %{width: 1280, height: 720, framerate: 30}
+
       codec_params = %{
         profile_level_id: "42E01F",
         packetization_mode: 0,
@@ -126,7 +127,8 @@ defmodule VideoStreamer.RTSP.SDPTest do
 
     test "generates different IDs when called multiple times" do
       id1 = SDP.session_id()
-      Process.sleep(1000)  # Wait 1 second
+      # Wait 1 second
+      Process.sleep(1000)
       id2 = SDP.session_id()
 
       # IDs should be different (unless called in same second)

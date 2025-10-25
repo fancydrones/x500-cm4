@@ -9,7 +9,8 @@ config :video_streamer,
     framerate: 15
   ],
   rtsp: [
-    port: 8555,  # Different port for testing
+    # Different port for testing
+    port: 8555,
     path: "/test",
     enable_auth: false
   ]

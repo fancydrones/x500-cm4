@@ -10,18 +10,21 @@ defmodule VideoStreamer.RTP.UDPSink do
 
   alias Membrane.{RemoteStream, RTP}
 
-  def_input_pad :input,
+  def_input_pad(:input,
     accepted_format: %RemoteStream{type: :packetized, content_format: RTP},
     flow_control: :auto
+  )
 
-  def_options client_ip: [
-                spec: String.t(),
-                description: "Client IP address"
-              ],
-              client_port: [
-                spec: pos_integer(),
-                description: "Client RTP port"
-              ]
+  def_options(
+    client_ip: [
+      spec: String.t(),
+      description: "Client IP address"
+    ],
+    client_port: [
+      spec: pos_integer(),
+      description: "Client RTP port"
+    ]
+  )
 
   @impl true
   def handle_init(_ctx, options) do
@@ -35,9 +38,12 @@ defmodule VideoStreamer.RTP.UDPSink do
       :binary,
       {:active, false},
       {:reuseaddr, true},
-      {:sndbuf, 262_144},    # 256KB send buffer
-      {:recbuf, 65_536},     # 64KB receive buffer
-      {:priority, 6}         # High priority (0-7, higher = more important)
+      # 256KB send buffer
+      {:sndbuf, 262_144},
+      # 64KB receive buffer
+      {:recbuf, 65_536},
+      # High priority (0-7, higher = more important)
+      {:priority, 6}
     ]
 
     case :gen_udp.open(50000, socket_opts) do
@@ -45,7 +51,9 @@ defmodule VideoStreamer.RTP.UDPSink do
         # Parse IP address
         {:ok, ip_tuple} = :inet.parse_address(String.to_charlist(options.client_ip))
 
-        Membrane.Logger.info("Opened UDP socket on port 50000, sending RTP to #{options.client_ip}:#{options.client_port}")
+        Membrane.Logger.info(
+          "Opened UDP socket on port 50000, sending RTP to #{options.client_ip}:#{options.client_port}"
+        )
 
         state = %{
           socket: socket,
@@ -71,7 +79,9 @@ defmodule VideoStreamer.RTP.UDPSink do
 
     # Log every 100 packets
     if rem(new_state.packet_count, 100) == 0 do
-      Membrane.Logger.debug("Sent #{new_state.packet_count} RTP packets to #{:inet.ntoa(state.client_ip)}:#{state.client_port}")
+      Membrane.Logger.debug(
+        "Sent #{new_state.packet_count} RTP packets to #{:inet.ntoa(state.client_ip)}:#{state.client_port}"
+      )
     end
 
     {[], new_state}

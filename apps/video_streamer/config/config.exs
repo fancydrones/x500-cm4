@@ -6,7 +6,8 @@ config :video_streamer,
     width: 1920,
     height: 1080,
     framerate: 30,
-    verbose: false  # Set to true to see frame statistics from rpicam-vid
+    # Set to true to see frame statistics from rpicam-vid
+    verbose: false
   ],
   rtsp: [
     port: 8554,
@@ -15,7 +16,8 @@ config :video_streamer,
   ],
   encoder: [
     profile: :baseline,
-    keyframe_interval: 30  # Every 1 second at 30fps
+    # Every 1 second at 30fps
+    keyframe_interval: 30
   ]
 
 # Import environment-specific config
