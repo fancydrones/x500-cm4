@@ -87,7 +87,7 @@ defmodule Membrane.Rpicam.Source do
       default: "4.1",
       description: """
       H.264 encoding level (e.g., "4.0", "4.1", "4.2").
-      Level 4.0 supports 720p60 / 1080p30, Level 4.1 supports 1080p30, Level 4.2 supports 1080p60.
+      Level 4.0 supports 720p60 / 1080p30, Level 4.1 supports 1080p30 / 720p60, Level 4.2 supports 1080p60.
       rpicam-vid supports levels 4.0 and above.
       """
     ],
