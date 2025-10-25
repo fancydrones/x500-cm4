@@ -4,7 +4,8 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
 
   describe "parse_request/1" do
     test "parses OPTIONS request" do
-      request = "OPTIONS rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 1\r\nUser-Agent: VLC/3.0.18\r\n\r\n"
+      request =
+        "OPTIONS rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 1\r\nUser-Agent: VLC/3.0.18\r\n\r\n"
 
       assert {:ok, parsed} = Protocol.parse_request(request)
       assert parsed.method == "OPTIONS"
@@ -16,7 +17,8 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
     end
 
     test "parses DESCRIBE request" do
-      request = "DESCRIBE rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 2\r\nAccept: application/sdp\r\n\r\n"
+      request =
+        "DESCRIBE rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 2\r\nAccept: application/sdp\r\n\r\n"
 
       assert {:ok, parsed} = Protocol.parse_request(request)
       assert parsed.method == "DESCRIBE"
@@ -24,7 +26,8 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
     end
 
     test "parses SETUP request with Transport header" do
-      request = "SETUP rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 3\r\nTransport: RTP/AVP;unicast;client_port=50000-50001\r\n\r\n"
+      request =
+        "SETUP rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 3\r\nTransport: RTP/AVP;unicast;client_port=50000-50001\r\n\r\n"
 
       assert {:ok, parsed} = Protocol.parse_request(request)
       assert parsed.method == "SETUP"
@@ -32,7 +35,8 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
     end
 
     test "parses PLAY request" do
-      request = "PLAY rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 4\r\nSession: 12345678\r\n\r\n"
+      request =
+        "PLAY rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 4\r\nSession: 12345678\r\n\r\n"
 
       assert {:ok, parsed} = Protocol.parse_request(request)
       assert parsed.method == "PLAY"
@@ -40,7 +44,8 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
     end
 
     test "parses TEARDOWN request" do
-      request = "TEARDOWN rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 5\r\nSession: 12345678\r\n\r\n"
+      request =
+        "TEARDOWN rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 5\r\nSession: 12345678\r\n\r\n"
 
       assert {:ok, parsed} = Protocol.parse_request(request)
       assert parsed.method == "TEARDOWN"
@@ -54,7 +59,9 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
 
     test "handles request with body" do
       body = "test body content"
-      request = "POST rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 1\r\nContent-Length: #{byte_size(body)}\r\n\r\n#{body}"
+
+      request =
+        "POST rtsp://10.10.10.2:8554/video RTSP/1.0\r\nCSeq: 1\r\nContent-Length: #{byte_size(body)}\r\n\r\n#{body}"
 
       assert {:ok, parsed} = Protocol.parse_request(request)
       assert parsed.method == "POST"
@@ -109,6 +116,7 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
     test "builds SETUP response with session and transport" do
       cseq = "3"
       session_id = "abcd1234"
+
       transport_params = %{
         protocol: "RTP/AVP",
         unicast: true,
@@ -199,6 +207,7 @@ defmodule VideoStreamer.RTSP.ProtocolTest do
 
     test "serializes response with body" do
       body = "test body"
+
       response = %{
         status: 200,
         reason: "OK",

@@ -28,11 +28,11 @@ defmodule VideoStreamer.RTSP.Server do
     ]
 
     @type t :: %__MODULE__{
-      listen_socket: :gen_tcp.socket() | nil,
-      port: integer(),
-      max_clients: integer(),
-      sessions: MapSet.t()
-    }
+            listen_socket: :gen_tcp.socket() | nil,
+            port: integer(),
+            max_clients: integer(),
+            sessions: MapSet.t()
+          }
   end
 
   ## Client API
@@ -58,12 +58,12 @@ defmodule VideoStreamer.RTSP.Server do
     Logger.info("Starting RTSP server on port #{port}")
 
     case :gen_tcp.listen(port, [
-      :binary,
-      {:packet, :raw},
-      {:active, false},
-      {:reuseaddr, true},
-      {:backlog, 10}
-    ]) do
+           :binary,
+           {:packet, :raw},
+           {:active, false},
+           {:reuseaddr, true},
+           {:backlog, 10}
+         ]) do
       {:ok, listen_socket} ->
         Logger.info("RTSP server listening on port #{port}")
 
@@ -110,7 +110,10 @@ defmodule VideoStreamer.RTSP.Server do
               Process.monitor(session_pid)
 
               new_sessions = MapSet.put(state.sessions, session_pid)
-              Logger.info("Accepted connection from #{client_ip_str} (#{MapSet.size(new_sessions)}/#{state.max_clients})")
+
+              Logger.info(
+                "Accepted connection from #{client_ip_str} (#{MapSet.size(new_sessions)}/#{state.max_clients})"
+              )
 
               # Continue accepting
               send(self(), :accept)

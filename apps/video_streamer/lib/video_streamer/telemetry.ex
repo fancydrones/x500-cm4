@@ -48,11 +48,14 @@ defmodule VideoStreamer.Telemetry do
   end
 
   def handle_event(event, measurements, metadata, _config) do
-    Logger.debug("Telemetry event: #{inspect(event)}, measurements: #{inspect(measurements)}, metadata: #{inspect(metadata)}")
+    Logger.debug(
+      "Telemetry event: #{inspect(event)}, measurements: #{inspect(measurements)}, metadata: #{inspect(metadata)}"
+    )
   end
 
   def measure_memory do
     memory = :erlang.memory()
+
     %{
       total: memory[:total],
       processes: memory[:processes],

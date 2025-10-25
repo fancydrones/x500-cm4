@@ -13,7 +13,8 @@ defmodule VideoStreamer.RTSP.Session do
 
   alias VideoStreamer.RTSP.{Protocol, SDP}
 
-  @session_timeout 60_000  # 60 seconds
+  # 60 seconds
+  @session_timeout 60_000
 
   defmodule State do
     @moduledoc false
@@ -31,17 +32,17 @@ defmodule VideoStreamer.RTSP.Session do
     ]
 
     @type t :: %__MODULE__{
-      socket: :gen_tcp.socket() | nil,
-      session_id: String.t() | nil,
-      client_ip: String.t(),
-      client_port_rtp: integer() | nil,
-      client_port_rtcp: integer() | nil,
-      server_port_rtp: integer() | nil,
-      server_port_rtcp: integer() | nil,
-      state: :init | :ready | :playing,
-      stream_path: String.t(),
-      buffer: binary()
-    }
+            socket: :gen_tcp.socket() | nil,
+            session_id: String.t() | nil,
+            client_ip: String.t(),
+            client_port_rtp: integer() | nil,
+            client_port_rtcp: integer() | nil,
+            server_port_rtp: integer() | nil,
+            server_port_rtcp: integer() | nil,
+            state: :init | :ready | :playing,
+            stream_path: String.t(),
+            buffer: binary()
+          }
   end
 
   ## Client API
@@ -64,7 +65,8 @@ defmodule VideoStreamer.RTSP.Session do
       session_id: nil,
       client_ip: client_ip,
       state: :init,
-      stream_path: "/video",  # Default stream path
+      # Default stream path
+      stream_path: "/video",
       buffer: ""
     }
 
@@ -169,6 +171,7 @@ defmodule VideoStreamer.RTSP.Session do
 
     # Get video configuration
     camera_config = Application.get_env(:video_streamer, :camera)
+
     video_config = %{
       width: camera_config[:width] || 1280,
       height: camera_config[:height] || 720,
@@ -199,7 +202,7 @@ defmodule VideoStreamer.RTSP.Session do
 
         # Check if this is interleaved/TCP mode or UDP mode
         # If client doesn't specify client_port, reject (we only support UDP RTP)
-        if transport_params[:interleaved] || (transport_params[:client_port_rtp] == nil) do
+        if transport_params[:interleaved] || transport_params[:client_port_rtp] == nil do
           Logger.warning("Client requested non-UDP transport or didn't specify client_port")
           error_response = Protocol.build_error_response(cseq, 461, "Unsupported Transport")
           send_response(error_response, state.socket)
@@ -218,18 +221,20 @@ defmodule VideoStreamer.RTSP.Session do
             server_port_rtp: server_port_rtp,
             server_port_rtcp: server_port_rtcp
           }
+
           Logger.debug("Transport response params: #{inspect(transport_response_params)}")
 
           response = Protocol.build_setup_response(cseq, session_id, transport_response_params)
           send_response(response, state.socket)
 
-          new_state = %{state |
-            session_id: session_id,
-            client_port_rtp: transport_params[:client_port_rtp],
-            client_port_rtcp: transport_params[:client_port_rtcp],
-            server_port_rtp: server_port_rtp,
-            server_port_rtcp: server_port_rtcp,
-            state: :ready
+          new_state = %{
+            state
+            | session_id: session_id,
+              client_port_rtp: transport_params[:client_port_rtp],
+              client_port_rtcp: transport_params[:client_port_rtcp],
+              server_port_rtp: server_port_rtp,
+              server_port_rtcp: server_port_rtcp,
+              state: :ready
           }
 
           {:ok, new_state}
@@ -252,9 +257,15 @@ defmodule VideoStreamer.RTSP.Session do
       # Add this client to the pipeline's Tee (multi-client support)
       client_id = session_id
 
-      Logger.info("PLAY: Adding client #{client_id} to pipeline: #{state.client_ip}:#{state.client_port_rtp}")
+      Logger.info(
+        "PLAY: Adding client #{client_id} to pipeline: #{state.client_ip}:#{state.client_port_rtp}"
+      )
 
-      case VideoStreamer.PipelineManager.add_client(client_id, state.client_ip, state.client_port_rtp) do
+      case VideoStreamer.PipelineManager.add_client(
+             client_id,
+             state.client_ip,
+             state.client_port_rtp
+           ) do
         {:ok, :client_added} ->
           response = Protocol.build_play_response(cseq, session_id)
           send_response(response, state.socket)

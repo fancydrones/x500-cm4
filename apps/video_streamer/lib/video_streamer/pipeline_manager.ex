@@ -10,10 +10,10 @@ defmodule VideoStreamer.PipelineManager do
   alias VideoStreamer.Pipeline
 
   @type state :: %{
-    pipeline: pid() | nil,
-    config: map(),
-    status: :stopped | :starting | :running | :error
-  }
+          pipeline: pid() | nil,
+          config: map(),
+          status: :stopped | :starting | :running | :error
+        }
 
   ## Client API
 
@@ -105,7 +105,9 @@ defmodule VideoStreamer.PipelineManager do
     # Update config if provided
     config = new_config || state.config
 
-    Logger.info("Restarting pipeline with config: #{inspect(Map.take(config, [:client_ip, :client_port]))}")
+    Logger.info(
+      "Restarting pipeline with config: #{inspect(Map.take(config, [:client_ip, :client_port]))}"
+    )
 
     # Start new pipeline
     case start_pipeline(config) do
@@ -153,11 +155,15 @@ defmodule VideoStreamer.PipelineManager do
   @impl true
   def handle_info(:auto_start, state) do
     Logger.info("Auto-starting streaming pipeline")
+
     {:noreply, state}
     |> then(fn {:noreply, s} ->
       case start_pipeline(s.config) do
-        {:ok, _supervisor_pid, pipeline_pid} -> {:noreply, %{s | pipeline: pipeline_pid, status: :running}}
-        {:error, _} -> {:noreply, %{s | status: :error}}
+        {:ok, _supervisor_pid, pipeline_pid} ->
+          {:noreply, %{s | pipeline: pipeline_pid, status: :running}}
+
+        {:error, _} ->
+          {:noreply, %{s | status: :error}}
       end
     end)
   end
