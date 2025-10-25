@@ -66,7 +66,7 @@ spec:
           value: cdn_off
         - name: H264_BUFFER_COUNT
           value: "12"
-        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-c582a69
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-14f5468
         name: video-streamer
         ports:
         - containerPort: 8554
