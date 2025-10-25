@@ -1,59 +1,68 @@
-# Model Export Guide: YOLOv11 to ONNX
+# Model Export Guide: YOLO Models for VideoAnnotator
 
-This guide explains how to export YOLOv11 models from PyTorch format to ONNX format for use with the VideoAnnotator application.
+This guide explains how to obtain YOLO models in ONNX format for use with the VideoAnnotator application.
+
+**Two Options:**
+1. **YOLOv11 Export (Recommended):** Export latest YOLOv11 models from PyTorch to ONNX
+2. **Pre-converted YOLOX:** Use pre-converted YOLOX models (quick alternative, no export needed)
 
 ## Prerequisites
 
-### Software Requirements
+### Software Requirements (Option 1 only)
 - Python 3.10 or later
-- PyTorch 2.0+
-- Ultralytics package (`pip install ultralytics`)
-- ONNX Runtime (`pip install onnxruntime`)
+- pip (Python package manager)
 
 ### Hardware Requirements
 - Any development machine (export doesn't require GPU)
 - ~2GB free disk space for models and dependencies
 
-## Quick Start
+## Option 1: Export YOLOv11 Models (Recommended)
 
-### 1. Install Dependencies
+### Why YOLOv11?
+
+**Advantages:**
+- ✅ **Latest YOLO architecture** - State-of-the-art performance (2024)
+- ✅ **Better accuracy** - YOLOv11n: 39.5% mAP vs YOLOX-Nano: 25.8% mAP
+- ✅ **More features** - Pose estimation, segmentation, oriented bounding boxes
+- ✅ **Custom training** - Easy to fine-tune on your own dataset
+- ✅ **Active development** - Regular updates from Ultralytics
+
+**When to use YOLOX instead:**
+- Want pre-converted models (no Python setup)
+- Need to get started in <5 minutes
+- Prefer smaller model files
+
+### Quick Export (CLI Method)
+
+```bash
+# Install Ultralytics
+pip install ultralytics
+
+# Export YOLOv11n to ONNX
+yolo export model=yolo11n.pt format=onnx imgsz=640 simplify=True
+
+# Model will be saved as yolo11n.onnx (~6 MB)
+```
+
+### Detailed Export Process
+
+#### 1. Install Dependencies
 
 ```bash
 # Create virtual environment (recommended)
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install Ultralytics (includes all dependencies)
+# Install Ultralytics (includes PyTorch and all dependencies)
 pip install ultralytics
 
 # Optional: Install ONNX Runtime for validation
 pip install onnxruntime
 ```
 
-### 2. Export YOLOv11n Model
+#### 2. Export Model Using Python Script
 
-```bash
-# Export using CLI
-yolo export model=yolo11n.pt format=onnx imgsz=640 simplify=True opset=12
-
-# Or using Python script (see below)
-python scripts/export_yolo11.py
-```
-
-### 3. Verify Exported Model
-
-```bash
-# Check ONNX model
-python scripts/verify_onnx.py yolo11n.onnx
-```
-
-## Detailed Export Process
-
-### Python Script Method
-
-Create a Python script for reproducible exports:
-
-**File:** `scripts/export_yolo11.py`
+Create `scripts/export_yolo11.py`:
 
 ```python
 #!/usr/bin/env python3
@@ -88,8 +97,7 @@ def export_yolo_to_onnx(model_name, imgsz=640, simplify=True, opset=12):
     print(f"  Simplify: {simplify}")
     print(f"  Opset: {opset}")
 
-    # Load pretrained model
-    # Will auto-download if not cached
+    # Load pretrained model (auto-downloads if not cached)
     model = YOLO(f'{model_name}.pt')
 
     # Export to ONNX
@@ -102,44 +110,7 @@ def export_yolo_to_onnx(model_name, imgsz=640, simplify=True, opset=12):
     )
 
     print(f"✓ Model exported successfully to: {export_path}")
-
-    # Verify exported model
-    verify_onnx_model(export_path)
-
     return export_path
-
-
-def verify_onnx_model(onnx_path):
-    """Verify ONNX model can be loaded and basic structure is correct."""
-    try:
-        import onnx
-        import onnxruntime as ort
-
-        # Check ONNX model structure
-        onnx_model = onnx.load(onnx_path)
-        onnx.checker.check_model(onnx_model)
-        print("✓ ONNX model structure valid")
-
-        # Check inference session can be created
-        session = ort.InferenceSession(onnx_path)
-        print(f"✓ ONNX Runtime session created")
-
-        # Print input/output info
-        print("\nModel Details:")
-        print("Inputs:")
-        for input in session.get_inputs():
-            print(f"  - {input.name}: {input.shape} ({input.type})")
-
-        print("Outputs:")
-        for output in session.get_outputs():
-            print(f"  - {output.name}: {output.shape} ({output.type})")
-
-    except ImportError:
-        print("⚠ ONNX/ONNXRuntime not installed, skipping verification")
-        print("  Install with: pip install onnx onnxruntime")
-    except Exception as e:
-        print(f"✗ Error verifying model: {e}")
-        raise
 
 
 def main():
@@ -169,9 +140,11 @@ if __name__ == '__main__':
     main()
 ```
 
-Make script executable:
+Run the export:
+
 ```bash
 chmod +x scripts/export_yolo11.py
+python scripts/export_yolo11.py --model yolo11n --size 640
 ```
 
 ### Model Variants
@@ -180,277 +153,200 @@ YOLOv11 comes in 5 sizes:
 
 | Model | Params | mAP (COCO) | Speed (CPU) | Recommended Use |
 |-------|--------|------------|-------------|-----------------|
-| yolo11n | 2.6M | 39.5% | **Fastest** | **Raspberry Pi (Recommended)** |
-| yolo11s | 9.4M | 47.0% | Fast | Good balance |
-| yolo11m | 20.1M | 51.5% | Medium | Desktop inference |
-| yolo11l | 25.3M | 53.4% | Slow | High accuracy needed |
+| **yolo11n** | 2.6M | 39.5% | **Good** | **Raspberry Pi (Recommended)** |
+| yolo11s | 9.4M | 47.0% | Medium | Good balance |
+| yolo11m | 20.1M | 51.5% | Slow | Desktop inference |
+| yolo11l | 25.3M | 53.4% | Slower | High accuracy needed |
 | yolo11x | 56.9M | 54.7% | Slowest | Maximum accuracy |
 
-**For Raspberry Pi 5/CM5:** Use `yolo11n` (nano) for best performance (≥8 FPS).
+**For Raspberry Pi 5/CM5:** Use `yolo11n` (nano) for best performance (~8 FPS).
 
-### Image Size Trade-offs
-
-| Size | Speed | Accuracy | Memory | Recommendation |
-|------|-------|----------|--------|----------------|
-| 320 | Fastest | Lower | Lowest | Low latency critical |
-| 416 | Fast | Good | Low | Good balance |
-| **640** | Medium | **Best** | Medium | **Default (Recommended)** |
-
-## Verification Script
-
-**File:** `scripts/verify_onnx.py`
-
-```python
-#!/usr/bin/env python3
-"""
-Verify ONNX model and test inference.
-
-Usage:
-    python scripts/verify_onnx.py model.onnx [--image test.jpg]
-"""
-
-import argparse
-import numpy as np
-import onnxruntime as ort
-from PIL import Image
-
-
-def verify_and_test_model(onnx_path, test_image=None):
-    """Verify ONNX model and optionally run test inference."""
-
-    print(f"Loading ONNX model: {onnx_path}")
-
-    # Create inference session
-    session = ort.InferenceSession(onnx_path)
-
-    # Print model info
-    print("\n=== Model Information ===")
-    print(f"Providers: {session.get_providers()}")
-
-    print("\nInputs:")
-    for inp in session.get_inputs():
-        print(f"  {inp.name}: shape={inp.shape}, type={inp.type}")
-
-    print("\nOutputs:")
-    for out in session.get_outputs():
-        print(f"  {out.name}: shape={out.shape}, type={out.type}")
-
-    # Test inference if image provided
-    if test_image:
-        print(f"\n=== Running Test Inference ===")
-        test_inference(session, test_image)
-    else:
-        print(f"\n=== Running Test with Random Data ===")
-        test_random_inference(session)
-
-
-def test_inference(session, image_path):
-    """Run inference on a real image."""
-    from PIL import Image
-    import numpy as np
-
-    # Load and preprocess image
-    img = Image.open(image_path).convert('RGB')
-    img = img.resize((640, 640))
-
-    # Convert to numpy array and preprocess
-    img_array = np.array(img).astype(np.float32)
-    img_array = img_array / 255.0  # Normalize to [0, 1]
-
-    # Transpose to (C, H, W) format
-    img_array = np.transpose(img_array, (2, 0, 1))
-
-    # Add batch dimension
-    img_array = np.expand_dims(img_array, axis=0)
-
-    print(f"Input shape: {img_array.shape}")
-
-    # Run inference
-    input_name = session.get_inputs()[0].name
-    outputs = session.run(None, {input_name: img_array})
-
-    print(f"Output shape: {outputs[0].shape}")
-    print("✓ Inference successful!")
-
-
-def test_random_inference(session):
-    """Run inference with random data to verify model loads."""
-    # Get expected input shape
-    input_shape = session.get_inputs()[0].shape
-
-    # Handle dynamic batch dimension
-    if isinstance(input_shape[0], str):
-        input_shape = [1] + input_shape[1:]
-
-    print(f"Creating random input: {input_shape}")
-
-    # Create random input
-    random_input = np.random.rand(*input_shape).astype(np.float32)
-
-    # Run inference
-    input_name = session.get_inputs()[0].name
-    outputs = session.run(None, {input_name: random_input})
-
-    print(f"Output shape: {outputs[0].shape}")
-    print("✓ Model loaded and inference successful!")
-
-
-def main():
-    parser = argparse.ArgumentParser(description='Verify ONNX model')
-    parser.add_argument('model', type=str, help='Path to ONNX model')
-    parser.add_argument('--image', type=str, help='Test image (optional)')
-
-    args = parser.parse_args()
-
-    verify_and_test_model(args.model, args.image)
-
-
-if __name__ == '__main__':
-    main()
-```
-
-## Deployment to VideoAnnotator
-
-### 1. Copy Model to Application
+### Download COCO Classes
 
 ```bash
-# From repository root
-cp yolo11n.onnx apps/video_annotator/priv/models/
-
-# Verify model is in place
-ls -lh apps/video_annotator/priv/models/yolo11n.onnx
+# Download class labels
+curl -L -o coco_classes.json https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.json
 ```
 
-### 2. Configure VideoAnnotator
+### Move to VideoAnnotator
 
-**File:** `config/runtime.exs`
+```bash
+# Create models directory
+mkdir -p apps/video_annotator/priv/models
+
+# Move exported model and classes
+mv yolo11n.onnx apps/video_annotator/priv/models/
+mv coco_classes.json apps/video_annotator/priv/models/
+
+# Verify
+ls -lh apps/video_annotator/priv/models/
+```
+
+### Use in yolo_elixir
 
 ```elixir
-if config_env() == :prod do
-  config :video_annotator,
-    models_dir: "/app/priv/models",
-    default_model: "yolo11n",
-    confidence_threshold: 0.5
-end
+# Load YOLOv11 model
+model = YOLO.load(
+  model_impl: YOLO.Models.Ultralytics,
+  model_path: "priv/models/yolo11n.onnx",
+  classes_path: "priv/models/coco_classes.json"
+)
+
+# Run detection
+detections = model
+  |> YOLO.detect(image_tensor)
+  |> YOLO.to_detected_objects(model.classes)
 ```
 
-### 3. Test in Development
+---
+
+## Option 2: Pre-Converted YOLOX Models (Quick Alternative)
+
+### Why YOLOX as Alternative?
+
+**Advantages:**
+- ✅ **No Python setup required** - Just download and use
+- ✅ **Pre-tested** with yolo_elixir library
+- ✅ **Smaller models** - YOLOX-Nano (0.91M params) vs YOLOv11n (2.6M params)
+- ✅ **Faster iteration** - Get started in <5 minutes
+- ✅ **Slightly faster inference** - ~12 FPS vs ~8 FPS on Pi 5
+
+**Trade-offs:**
+- Lower accuracy (25.8% vs 39.5% mAP)
+- Older architecture (2021 vs 2024)
+- Fewer features (no pose/segmentation)
+
+### Download Pre-Converted YOLOX Models
+
+Available models from [YOLOX GitHub](https://github.com/Megvii-BaseDetection/YOLOX/releases):
+
+| Model | Size | mAP (COCO) | Speed (Pi 5)* | Recommended For |
+|-------|------|-----------|---------------|-----------------|
+| **YOLOX-Nano** | 0.91M | 25.8% | ~12 FPS | **Quick start, development** |
+| YOLOX-Tiny | 5.06M | 32.8% | ~10 FPS | Good accuracy/speed balance |
+| YOLOX-S | 9.0M | 40.5% | ~6 FPS | Better accuracy |
+| YOLOX-M | 25.3M | 47.2% | ~3 FPS | High accuracy |
+| YOLOX-L | 54.2M | 50.1% | ~1 FPS | Maximum accuracy |
+
+\* Estimated FPS on Raspberry Pi 5
+
+### Quick Download Script
+
+```bash
+# Create models directory
+mkdir -p apps/video_annotator/priv/models
+cd apps/video_annotator/priv/models
+
+# Download YOLOX-Nano (recommended for quick start)
+curl -L -O https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_nano.onnx
+
+# Download COCO classes
+curl -L -o coco_classes.json https://raw.githubusercontent.com/amikelive/coco-labels/master/coco-labels-2014_2017.json
+
+# Verify download
+ls -lh
+# Expected:
+# yolox_nano.onnx (~3.8 MB)
+# coco_classes.json (~2 KB)
+```
+
+### Use in yolo_elixir
 
 ```elixir
-# In IEx
-{:ok, model} = VideoAnnotator.ModelLoader.load_model("yolo11n")
-
-# Test inference
-test_image = Nx.random_uniform({1, 3, 640, 640})
-result = Nx.Serving.batched_run(:yolo_detection, test_image)
-```
-
-## Advanced: Custom Model Export
-
-### Export Custom Trained Model
-
-If you've trained a custom YOLOv11 model:
-
-```python
-from ultralytics import YOLO
-
-# Load your custom model
-model = YOLO('path/to/your/best.pt')
-
-# Export to ONNX
-model.export(
-    format='onnx',
-    imgsz=640,
-    simplify=True,
-    opset=12,
-    # Include custom class names
-    data='path/to/your/dataset.yaml'
+# Load YOLOX model
+model = YOLO.load(
+  model_impl: YOLO.Models.YOLOX,
+  model_path: "priv/models/yolox_nano.onnx",
+  classes_path: "priv/models/coco_classes.json"
 )
+
+# Run detection
+detections = model
+  |> YOLO.detect(image_tensor)
+  |> YOLO.to_detected_objects(model.classes)
 ```
 
-### Export with INT8 Quantization
+**Note:** YOLOX expects 416x416 input (vs 640x640 for YOLOv11)
 
-For better performance on embedded devices:
+---
 
-```python
-model = YOLO('yolo11n.pt')
+## Comparison: YOLOv11 vs YOLOX
 
-model.export(
-    format='onnx',
-    imgsz=640,
-    simplify=True,
-    opset=12,
-    int8=True,  # Enable INT8 quantization
-    data='coco128.yaml'  # Calibration dataset
-)
-```
-
-**Note:** INT8 quantization requires calibration dataset and may reduce accuracy slightly (1-2% mAP drop) for significant speed improvements.
+| Aspect | YOLOv11n | YOLOX-Nano |
+|--------|----------|------------|
+| **Setup Time** | ~10 mins (export) | ~2 mins (download) |
+| **Python Required** | Yes (one-time) | No |
+| **Model Size** | ~6 MB | ~3.8 MB |
+| **Parameters** | 2.6M | 0.91M |
+| **mAP (COCO)** | **39.5%** ✅ | 25.8% |
+| **FPS (Pi 5)** | ~8 FPS | **~12 FPS** ✅ |
+| **Input Size** | 640x640 | 416x416 |
+| **Features** | Pose, segmentation, OBB | Detection only |
+| **Architecture** | 2024 (latest) | 2021 |
+| **Recommended For** | **Production** | Quick start/dev |
 
 ## Troubleshooting
 
-### Issue: Model download fails
+### Model Export Fails
 
-**Solution:** Download manually from [Ultralytics releases](https://github.com/ultralytics/assets/releases):
+**Error:** `ModuleNotFoundError: No module named 'ultralytics'`
 
+**Solution:**
 ```bash
-wget https://github.com/ultralytics/assets/releases/download/v0.0.0/yolo11n.pt
+pip install ultralytics
 ```
 
-### Issue: ONNX export fails with opset error
+### ONNX Export Error
+
+**Error:** `ONNX export failed with opset error`
 
 **Solution:** Try different opset version:
-
-```python
-model.export(format='onnx', opset=11)  # Try opset 11 instead of 12
-```
-
-### Issue: Exported model too large
-
-**Solution:** Use a smaller variant or enable simplification:
-
-```python
-# Use nano model
-model = YOLO('yolo11n.pt')
-
-# Ensure simplify=True
-model.export(format='onnx', simplify=True)
-```
-
-### Issue: Runtime error in ONNX Runtime
-
-**Solution:** Verify ONNX Runtime version compatibility:
-
 ```bash
-pip install onnxruntime==1.16.0  # Known working version
+yolo export model=yolo11n.pt format=onnx opset=11
 ```
+
+### Model Too Large
+
+**Error:** Out of memory on Raspberry Pi
+
+**Solution:** Use smaller model variant:
+- Try `yolo11n` instead of `yolo11s`
+- Or use YOLOX-Nano (smallest available)
 
 ## Performance Benchmarks
 
-Expected inference times (single image, 640x640):
+Expected inference times (single image):
 
-| Platform | Model | Format | Inference Time |
-|----------|-------|--------|----------------|
-| Raspberry Pi 5 | yolo11n | ONNX | ~94ms |
-| Raspberry Pi 5 | yolo11n | ONNX (INT8) | ~60ms |
-| Desktop CPU (Intel i7) | yolo11n | ONNX | ~25ms |
-| Desktop GPU (RTX 3080) | yolo11n | ONNX | ~3ms |
+### YOLOv11n (640x640)
+| Platform | Format | Inference Time | FPS |
+|----------|--------|----------------|-----|
+| Raspberry Pi 5 | ONNX | ~125ms | ~8 |
+| macOS (M1, CoreML) | ONNX | ~50ms | ~20 |
+| Desktop (i7 CPU) | ONNX | ~80ms | ~12 |
+
+### YOLOX-Nano (416x416)
+| Platform | Format | Inference Time | FPS |
+|----------|--------|----------------|-----|
+| Raspberry Pi 5 | ONNX | ~80ms | ~12 |
+| macOS (M1, CoreML) | ONNX | ~30ms | ~30 |
+| Desktop (i7 CPU) | ONNX | ~50ms | ~20 |
 
 ## References
 
 - [Ultralytics YOLOv11 Documentation](https://docs.ultralytics.com/models/yolo11/)
 - [ONNX Export Guide](https://docs.ultralytics.com/modes/export/)
+- [YOLOX GitHub](https://github.com/Megvii-BaseDetection/YOLOX)
+- [yolo_elixir Documentation](https://hexdocs.pm/yolo_elixir)
 - [ONNX Runtime Documentation](https://onnxruntime.ai/docs/)
-- [Ortex Documentation](https://hexdocs.pm/ortex)
 
 ## Next Steps
 
-After exporting your model:
+After obtaining your model:
 
-1. Verify model works with verification script
-2. Copy model to `apps/video_annotator/priv/models/`
-3. Test inference in Elixir with Ortex
+1. Verify model works (optional Python test)
+2. Move model to `apps/video_annotator/priv/models/`
+3. Test inference in Elixir with yolo_elixir
 4. Integrate with VideoAnnotator application
 5. Deploy to Raspberry Pi and test performance
 
-For questions or issues, refer to the [implementation plan](implementation_plan.md).
+For questions or issues, refer to the [implementation plan](implementation_plan.md) or [phase0-quickstart.md](phase0-quickstart.md).
