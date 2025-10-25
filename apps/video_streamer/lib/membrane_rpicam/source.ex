@@ -141,6 +141,15 @@ defmodule Membrane.Rpicam.Source do
       Options: off (all processing off), cdn_off (color denoise off), cdn_fast, cdn_hq.
       """
     ],
+    buffer_count: [
+      spec: pos_integer(),
+      default: 6,
+      description: """
+      Number of buffers to allocate for video. Default is 6 for video recording.
+      Increasing this can help reduce frame drops and smooth out keyframe bursts,
+      particularly at higher framerates or with large GOP sizes.
+      """
+    ],
     hflip: [
       spec: boolean(),
       default: false,
@@ -269,6 +278,9 @@ defmodule Membrane.Rpicam.Source do
     # Build denoise option (prevents frame jitter from color denoise processing)
     denoise_flag = "--denoise #{opts.denoise}"
 
+    # Build buffer-count option (smooths out keyframe bursts)
+    buffer_count_flag = "--buffer-count #{opts.buffer_count}"
+
     # PATCHED: Added --codec h264 and --libav-format h264 to fix libav output format error
     # The --libav-format parameter is required when outputting to stdout (-o -)
     # Profile, level, and flip options are now configurable for better compatibility
@@ -277,6 +289,7 @@ defmodule Membrane.Rpicam.Source do
     # Added flush for immediate encoder output (reduces latency)
     # Added low-latency mode to eliminate keyframe jitter in real-time streaming
     # Added denoise option to prevent frame jitter from color denoise processing
+    # Added buffer-count option to smooth out keyframe bursts
     # libcamera INFO/WARN messages are suppressed via LIBCAMERA_LOG_LEVELS env var (set in open_port/2)
     ([
        app_binary,
@@ -298,6 +311,7 @@ defmodule Membrane.Rpicam.Source do
        "#{width}",
        "--height",
        "#{height}",
+       buffer_count_flag,
        hflip_flag,
        vflip_flag,
        inline_headers_flag,

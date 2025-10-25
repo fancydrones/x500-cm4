@@ -129,13 +129,14 @@ defmodule VideoStreamer.Pipeline do
         flush: Keyword.get(encoder_config, :flush, false),
         low_latency: Keyword.get(encoder_config, :low_latency, true),
         denoise: Keyword.get(encoder_config, :denoise, :cdn_off),
+        buffer_count: Keyword.get(encoder_config, :buffer_count, 6),
         hflip: Keyword.get(camera_config, :hflip, false),
         vflip: Keyword.get(camera_config, :vflip, false)
       })
       |> child(:h264_parser, %Membrane.H264.Parser{
         output_alignment: :nalu,
         generate_best_effort_timestamps: %{framerate: {camera_config[:framerate], 1}},
-        repeat_parameter_sets: true
+        repeat_parameter_sets: false
       })
       |> child(:tee, Membrane.Tee.Parallel)
     ]

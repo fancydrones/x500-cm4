@@ -63,8 +63,10 @@ spec:
         - name: H264_LOW_LATENCY
           value: "true"
         - name: H264_DENOISE
-          value: cdn_off
-        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-727043c
+          value: "cdn_off"
+        - name: H264_BUFFER_COUNT
+          value: "12"
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:20251025-d86bafa
         name: video-streamer
         ports:
         - containerPort: 8554
