@@ -6,4 +6,4 @@ This needs to be a flexible architecture allowing for a plugable network, for ea
 
 This architecture will in first version be a drone operator assistance tool, but will in near future be extended to run logic on drone for AI-driven navigation. The last part is out of scope for this PRD, but should be possible to extend later.
 
-Initial research for Raspberry pi CM5 and networks can be found at @PRDs/005-video-annotation/initial-research.pdf  . Use this as starting point for inspiration, but run own investigation, if needed. 
+Initial research for Raspberry Pi CM5 and networks can be found at @PRDs/005-video-annotation/initial-research.pdf  . Use this as starting point for inspiration, but run own investigation, if needed. 
