@@ -221,14 +221,23 @@ Phase 0 established the core annotation pipeline on macOS for development and te
 
 ## Implementation Phases
 
-### Phase 1: ONNX Model Setup & Integration (Week 1-2)
+### Phase 1: Raspberry Pi Deployment with ARM Acceleration (Week 1-3)
 
 #### Goals
-- Set up VideoAnnotator umbrella application
-- Integrate Ortex and yolo_elixir dependencies
-- Export YOLOv11n model to ONNX format
-- Implement basic inference with Nx.Serving
-- Verify inference accuracy and performance
+- Adapt Phase 0 code for Raspberry Pi deployment
+- Build ONNX Runtime with ARM Compute Library (ACL) for hardware acceleration
+- Deploy to Raspberry Pi and benchmark performance
+- Achieve 6-10 FPS minimum viable performance (2-3x speedup over CPU)
+
+#### Rationale: Hardware Acceleration is Critical
+
+Phase 0 proved hardware acceleration provides massive speedup:
+- **macOS CPU (EXLA)**: 3.7 FPS baseline
+- **macOS GPU (EMLX/Metal)**: 11.5 FPS → **3.1x speedup** 🚀
+
+This validates investing in ARM acceleration for Raspberry Pi:
+- **RPi CPU (EXLA)**: 2-4 FPS estimated
+- **RPi ACL (ARM NEON)**: 6-10 FPS target → **2-3x speedup** 🎯
 
 #### Tasks
 
@@ -543,14 +552,93 @@ defmodule VideoAnnotator.ModelLoaderTest do
 end
 ```
 
+**1.8 Build Docker Image with ARM Compute Library (ACL)**
+
+**Critical for Raspberry Pi performance!**
+
+Phase 0 proved hardware acceleration is essential:
+- macOS: EMLX provided 3.1x speedup (3.7 → 11.5 FPS)
+- RPi needs similar: ACL expected to provide 2-3x speedup
+
+**File:** `apps/video_streamer/Dockerfile.acl`
+
+Multi-stage build (see [PRDs/005-video-annotation/Dockerfile.acl](Dockerfile.acl)):
+1. Build ARM Compute Library from source
+2. Build ONNX Runtime with ACL support (~45 min first time)
+3. Build Elixir app with custom ONNX Runtime
+4. Create lightweight runtime image
+
+**Build command:**
+```bash
+# Copy Dockerfile to video_streamer
+cp PRDs/005-video-annotation/Dockerfile.acl apps/video_streamer/
+
+# Build for ARM64 with ACL
+docker buildx build \
+  --platform linux/arm64 \
+  --file apps/video_streamer/Dockerfile.acl \
+  --tag ghcr.io/fancydrones/x500-cm4/video-streamer:acl-$(git rev-parse --short HEAD) \
+  --tag ghcr.io/fancydrones/x500-cm4/video-streamer:acl-latest \
+  --cache-from type=registry,ref=ghcr.io/fancydrones/x500-cm4/video-streamer:acl-buildcache \
+  --cache-to type=registry,ref=ghcr.io/fancydrones/x500-cm4/video-streamer:acl-buildcache,mode=max \
+  --push \
+  apps/video_streamer
+```
+
+**1.9 Configure Application for ACL**
+
+Update YOLO model loading to use ACL execution provider:
+
+```elixir
+# apps/video_annotator/lib/video_annotator/yolo_detector.ex (line ~90)
+
+model = YOLO.load(
+  model_path: state.model_path,
+  classes_path: state.classes_path,
+  model_impl: YOLO.Models.YOLOX,
+  eps: [:acl, :cpu]  # Try ACL first, fallback to CPU
+)
+```
+
+**1.10 Deploy and Benchmark on Raspberry Pi**
+
+Deploy ACL-enabled image:
+```bash
+kubectl set image deployment/video-streamer \
+  video-streamer=ghcr.io/fancydrones/x500-cm4/video-streamer:acl-latest
+```
+
+Monitor performance:
+```bash
+kubectl logs -f deployment/video-streamer | grep -E "(Frame [0-9]+:|FPS)"
+```
+
+Expected output:
+```
+[info] Using execution providers: [:acl, :cpu]
+[info] Loaded model with [:acl] execution providers
+[info] Frame 30: ... avg 200ms (5.0 FPS)   # 2.5x over CPU baseline!
+[info] Frame 60: ... avg 166ms (6.0 FPS)
+[info] Frame 90: ... avg 142ms (7.0 FPS)
+```
+
+**Reference Documentation:**
+- [ACL Research Findings](ACL_RESEARCH_FINDINGS.md)
+- [ACL Implementation Plan](ACL_IMPLEMENTATION_PLAN.md)
+- [RPi Hardware Acceleration Options](rpi_hardware_acceleration_research.md)
+
 #### Success Criteria for Phase 1
 - [ ] VideoAnnotator application created and compiles
 - [ ] YOLOX-Nano model downloaded and integrated
 - [ ] Model loads successfully via YOLO library
 - [ ] YOLO.detect() runs on test images
-- [ ] Inference latency 130-180ms per frame on macOS (300-500ms expected on RPi)
+- [ ] Inference latency 130-180ms per frame on macOS (300-500ms expected on RPi without ACL)
 - [ ] Detection accuracy validated with Phase 0 reference
 - [ ] Web preview server working with live FPS display (development tool)
+- [ ] **Docker image with ACL builds successfully** ⭐
+- [ ] **ACL execution provider loads on Raspberry Pi** ⭐
+- [ ] **Achieves 6-10 FPS on RPi 4 (2-3x speedup over CPU)** ⭐
+- [ ] **Falls back to CPU gracefully if ACL unavailable** ⭐
 
 ---
 

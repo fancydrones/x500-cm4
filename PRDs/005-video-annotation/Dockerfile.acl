@@ -1,0 +1,231 @@
+# Multi-stage Dockerfile for video annotation with ARM Compute Library (ACL) support
+#
+# Stages:
+#   1. ACL Builder: Compile ARM Compute Library
+#   2. ONNX Runtime Builder: Compile ONNX Runtime with ACL support
+#   3. Elixir Builder: Build Elixir release with custom ONNX Runtime
+#   4. Runtime: Final lightweight image with rpicam-apps and ACL
+#
+# Build time: ~45-60 minutes (cache subsequent builds)
+# Speedup: Expected 2-3x inference performance on Raspberry Pi
+
+ARG ELIXIR_VERSION=1.18.4
+ARG OTP_VERSION=28.1.1
+ARG ALPINE_VERSION=3.22.2
+
+# Builder images
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION}"
+ARG RUNNER_IMAGE="alpine:edge"
+
+# ONNX Runtime and ACL versions
+ARG ONNXRUNTIME_VERSION=1.20.1
+ARG ACL_VERSION=v24.11
+
+################################################################################
+# Stage 1: Build ARM Compute Library
+################################################################################
+FROM ${BUILDER_IMAGE} AS acl-builder
+
+WORKDIR /build
+
+# Install ACL build dependencies
+RUN apk add --no-cache \
+    git \
+    scons \
+    g++ \
+    python3 \
+    cmake \
+    make
+
+# Clone and build ARM Compute Library
+ARG ACL_VERSION
+RUN git clone --branch ${ACL_VERSION} --depth 1 \
+    https://github.com/ARM-software/ComputeLibrary.git acl && \
+    cd acl && \
+    scons \
+        Werror=0 \
+        debug=0 \
+        neon=1 \
+        opencl=0 \
+        os=linux \
+        arch=armv8a \
+        build=native \
+        -j$(nproc)
+
+################################################################################
+# Stage 2: Build ONNX Runtime with ACL Support
+################################################################################
+FROM ${BUILDER_IMAGE} AS onnxruntime-builder
+
+WORKDIR /build
+
+# Install ONNX Runtime build dependencies
+RUN apk add --no-cache \
+    git \
+    cmake \
+    make \
+    g++ \
+    python3 \
+    py3-pip \
+    ninja \
+    linux-headers \
+    protobuf-dev
+
+# Install Python dependencies for ONNX Runtime build
+RUN pip3 install --no-cache-dir numpy packaging
+
+# Copy ACL from previous stage
+COPY --from=acl-builder /build/acl /build/acl
+
+# Clone ONNX Runtime
+ARG ONNXRUNTIME_VERSION
+RUN git clone --branch v${ONNXRUNTIME_VERSION} --recursive --depth 1 \
+    https://github.com/Microsoft/onnxruntime.git onnxruntime
+
+WORKDIR /build/onnxruntime
+
+# Build ONNX Runtime with ACL execution provider
+# This takes ~30-45 minutes on Raspberry Pi
+RUN ./build.sh \
+    --config Release \
+    --build_shared_lib \
+    --parallel $(nproc) \
+    --skip_tests \
+    --use_acl \
+    --acl_home=/build/acl \
+    --acl_libs=/build/acl/build \
+    --cmake_extra_defines \
+        CMAKE_INSTALL_PREFIX=/usr/local \
+        onnxruntime_BUILD_UNIT_TESTS=OFF
+
+# Install built libraries to /usr/local
+RUN cd build/Linux/Release && \
+    mkdir -p /usr/local/lib /usr/local/include && \
+    cp libonnxruntime*.so* /usr/local/lib/ && \
+    cp -r ../../../include/onnxruntime /usr/local/include/ && \
+    ldconfig /usr/local/lib
+
+################################################################################
+# Stage 3: Build Elixir Application with Custom ONNX Runtime
+################################################################################
+FROM ${BUILDER_IMAGE} AS elixir-builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    git \
+    linux-headers \
+    cmake \
+    rust \
+    cargo
+
+# Copy ONNX Runtime libraries from previous stage
+COPY --from=onnxruntime-builder /usr/local/lib/libonnxruntime*.so* /usr/local/lib/
+COPY --from=onnxruntime-builder /usr/local/include/onnxruntime /usr/local/include/onnxruntime
+
+# Copy ACL libraries (runtime dependency)
+COPY --from=acl-builder /build/acl/build/libarm_compute*.so* /usr/local/lib/
+
+# Configure linker
+RUN ldconfig /usr/local/lib
+
+# Set environment variables for Ortex to use system ONNX Runtime
+ENV ONNXRUNTIME_STRATEGY=system
+ENV ONNXRUNTIME_LIB_DIR=/usr/local/lib
+ENV ONNXRUNTIME_INCLUDE_DIR=/usr/local/include
+
+# Install hex and rebar
+RUN mix local.hex --force && mix local.rebar --force
+
+# Copy dependency files
+COPY mix.exs mix.lock ./
+RUN mix deps.get --only prod
+
+# Compile dependencies with custom ONNX Runtime
+RUN mix deps.compile
+
+# Copy application files
+COPY lib ./lib
+COPY config ./config
+
+# Compile and build release
+ENV MIX_ENV=prod
+RUN mix compile
+RUN mix release
+
+################################################################################
+# Stage 4: Runtime Image
+################################################################################
+FROM ${RUNNER_IMAGE} AS app
+
+# Enable testing repository for rpicam-apps
+RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk update
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    libstdc++ \
+    openssl \
+    ncurses-libs \
+    libcamera \
+    libcamera-ipa \
+    rpicam-apps@testing \
+    libgomp \
+    protobuf
+
+WORKDIR /app
+
+# Copy ONNX Runtime libraries
+COPY --from=onnxruntime-builder /usr/local/lib/libonnxruntime*.so* /usr/local/lib/
+
+# Copy ACL libraries
+COPY --from=acl-builder /build/acl/build/libarm_compute*.so* /usr/local/lib/
+
+# Configure linker
+RUN ldconfig /usr/local/lib
+
+# Copy Elixir release
+COPY --from=elixir-builder /app/_build/prod/rel/video_streamer ./
+
+# RTSP port
+EXPOSE 8554
+
+# Health check endpoint (if you add one to the app)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+#   CMD ["/app/bin/video_streamer", "rpc", "1 + 1"]
+
+CMD ["/app/bin/video_streamer", "start"]
+
+################################################################################
+# Build Instructions
+################################################################################
+#
+# Build for ARM64 (Raspberry Pi):
+#   docker buildx build \
+#     --platform linux/arm64 \
+#     --file Dockerfile.acl \
+#     --tag ghcr.io/fancydrones/x500-cm4/video-streamer:acl-latest \
+#     --push \
+#     .
+#
+# Build and cache to registry (recommended):
+#   docker buildx build \
+#     --platform linux/arm64 \
+#     --file Dockerfile.acl \
+#     --tag ghcr.io/fancydrones/x500-cm4/video-streamer:acl-$(git rev-parse --short HEAD) \
+#     --tag ghcr.io/fancydrones/x500-cm4/video-streamer:acl-latest \
+#     --cache-from type=registry,ref=ghcr.io/fancydrones/x500-cm4/video-streamer:acl-buildcache \
+#     --cache-to type=registry,ref=ghcr.io/fancydrones/x500-cm4/video-streamer:acl-buildcache,mode=max \
+#     --push \
+#     .
+#
+# Test locally (without ACL - CPU only):
+#   docker build -f Dockerfile.acl -t video-streamer-acl:test .
+#   docker run --rm -it video-streamer-acl:test /app/bin/video_streamer version
+#
+# Debugging:
+#   docker run --rm -it video-streamer-acl:test sh
+#   ldd /usr/local/lib/libonnxruntime.so  # Check ACL linking
+#
