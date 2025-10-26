@@ -168,5 +168,6 @@ defmodule VideoStreamer.RTSP.SDP do
     "#{profile_hex}#{constraints_hex}#{level_hex}"
   end
 
-  defp extract_profile_level_id(_), do: "42E01F"  # Default: Baseline level 3.1
+  # Default: Baseline level 3.1
+  defp extract_profile_level_id(_), do: "42E01F"
 end

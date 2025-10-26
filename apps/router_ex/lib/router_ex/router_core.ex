@@ -222,16 +222,6 @@ defmodule RouterEx.RouterCore do
       send_to_connection(conn_id, conn_info, frame)
     end)
 
-    # Log routing for message ID 69 (MANUAL_CONTROL - gimbal commands)
-    if Map.get(frame, :message_id) == 69 do
-      target_names =
-        Enum.map(target_conns, fn {conn_id, _} -> inspect(conn_id) end) |> Enum.join(", ")
-
-      Logger.info(
-        "Routing msg_id 69 from #{inspect(source_conn_id)} to: #{target_names} (filtered: #{filtered_count})"
-      )
-    end
-
     # Calculate bytes (rough estimate based on message size)
     message_bytes = byte_size(inspect(frame))
 

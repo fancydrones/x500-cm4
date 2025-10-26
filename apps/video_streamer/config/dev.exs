@@ -6,7 +6,8 @@ config :video_streamer,
     width: 1280,
     height: 720,
     framerate: 30,
-    verbose: false,  # Set to true for debugging camera issues
+    # Set to true for debugging camera issues
+    verbose: false,
     hflip: false,
     vflip: false
   ],

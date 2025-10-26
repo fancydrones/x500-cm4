@@ -44,10 +44,14 @@ defmodule VideoStreamer.MixProject do
       {:membrane_tcp_plugin, "~> 0.6.0"},
 
       # Utilities
-      {:membrane_file_plugin, "~> 0.17.0"},  # Future recording
-      {:membrane_tee_plugin, "~> 0.12.0"},   # Future multi-output
-      {:membrane_h26x_plugin, "~> 0.10.5"},  # H.26x parser
-      {:membrane_fake_plugin, "~> 0.11.0"},  # Fake sink for Phase 1 testing
+      # Future recording
+      {:membrane_file_plugin, "~> 0.17.0"},
+      # Future multi-output
+      {:membrane_tee_plugin, "~> 0.12.0"},
+      # H.26x parser
+      {:membrane_h26x_plugin, "~> 0.10.5"},
+      # Fake sink for Phase 1 testing
+      {:membrane_fake_plugin, "~> 0.11.0"},
 
       # Configuration & telemetry
       {:telemetry, "~> 1.2"},
