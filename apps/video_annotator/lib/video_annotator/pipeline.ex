@@ -19,6 +19,7 @@ defmodule VideoAnnotator.Pipeline do
     classes_path = opts[:classes_path] || "priv/models/coco_classes.json"
     output_path = opts[:output_path] || "priv/output/webcam_annotated.h264"
     preview = opts[:preview] || false
+    preview_interval = opts[:preview_interval] || 10
 
     Logger.info("Starting VideoAnnotator Pipeline")
     Logger.info("Camera: #{camera}")
@@ -42,7 +43,8 @@ defmodule VideoAnnotator.Pipeline do
         model_path: model_path,
         classes_path: classes_path,
         preview: preview,
-        preview_dir: if(preview, do: "priv/preview", else: nil)
+        preview_dir: if(preview, do: "priv/preview", else: nil),
+        preview_interval: preview_interval
       })
       # Use Fake sink to consume frames (preview is file-based)
       |> child(:sink, Membrane.Fake.Sink.Buffers)

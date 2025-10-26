@@ -17,11 +17,13 @@ defmodule VideoAnnotator.WebcamTest do
     * `:classes_path` - Path to classes JSON
     * `:output_path` - Path for output video file
     * `:preview` - Show live preview with annotations (default: false)
+    * `:preview_interval` - Save preview every N frames (default: 10 = ~3 FPS)
 
   ## Example
 
       VideoAnnotator.WebcamTest.start(duration: 30, camera: "FaceTime HD Camera")
       VideoAnnotator.WebcamTest.start(camera: "FaceTime HD Camera", preview: true)
+      VideoAnnotator.WebcamTest.start(camera: "FaceTime HD Camera", preview: true, preview_interval: 1)
   """
   def start(opts \\ []) do
     duration = Keyword.get(opts, :duration, 10)
@@ -30,6 +32,7 @@ defmodule VideoAnnotator.WebcamTest do
     classes_path = Keyword.get(opts, :classes_path, "priv/models/coco_classes.json")
     output_path = Keyword.get(opts, :output_path, "priv/output/webcam_annotated.h264")
     preview = Keyword.get(opts, :preview, false)
+    preview_interval = Keyword.get(opts, :preview_interval, 10)
 
     # Resolve paths relative to app directory
     model_path = Path.expand(model_path)
@@ -57,7 +60,8 @@ defmodule VideoAnnotator.WebcamTest do
             model_path: model_path,
             classes_path: classes_path,
             output_path: output_path,
-            preview: preview
+            preview: preview,
+            preview_interval: preview_interval
           )
 
         Logger.info("Pipeline started: #{inspect(pipeline_pid)}")

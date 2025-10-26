@@ -34,6 +34,11 @@ defmodule VideoAnnotator.YoloDetector do
                 spec: String.t() | nil,
                 description: "Directory to save preview frames",
                 default: nil
+              ],
+              preview_interval: [
+                spec: pos_integer(),
+                description: "Save preview every N frames (default: 10 = ~3 FPS at 30 FPS input)",
+                default: 10
               ]
 
   @impl true
@@ -43,6 +48,7 @@ defmodule VideoAnnotator.YoloDetector do
       classes_path: opts.classes_path,
       preview: opts.preview,
       preview_dir: opts.preview_dir,
+      preview_interval: opts.preview_interval,
       model: nil,
       classes: nil,
       frame_count: 0,
@@ -118,8 +124,8 @@ defmodule VideoAnnotator.YoloDetector do
         rgb_mat
       end
 
-    # Save annotated preview if enabled (save all frames for live feed)
-    if state.preview && state.preview_dir do
+    # Save annotated preview if enabled (only every N frames to avoid I/O bottleneck)
+    if state.preview && state.preview_dir && rem(state.frame_count, state.preview_interval) == 0 do
       save_preview_frame(annotated_mat, state.preview_dir, state.frame_count, length(detections))
     end
 
@@ -193,19 +199,8 @@ defmodule VideoAnnotator.YoloDetector do
           raise "Unsupported pixel format: #{inspect(other)}"
       end
 
-    # Save first few frames to disk for debugging
-    if frame_count < 3 do
-      output_dir = "priv/debug_frames"
-      File.mkdir_p!(output_dir)
-      frame_path = "#{output_dir}/frame_#{frame_count + 1}.jpg"
-      Evision.imwrite(frame_path, rgb_mat)
-      Logger.info("Saved frame to: #{frame_path}")
-    end
-
     # Run YOLO detection
-    Logger.debug("Running YOLO on RGB mat: #{inspect(Evision.Mat.shape(rgb_mat))}")
     detections = YOLO.detect(model, rgb_mat)
-    Logger.debug("Got #{length(detections)} detections")
 
     {detections, rgb_mat}
   rescue
@@ -219,17 +214,11 @@ defmodule VideoAnnotator.YoloDetector do
 
   # Private helper to save preview frame (already annotated)
   # Saves frames to a fixed filename for live viewing
-  defp save_preview_frame(annotated_mat, preview_dir, frame_count, detection_count) do
+  # Only saves the live preview to minimize I/O overhead
+  defp save_preview_frame(annotated_mat, preview_dir, _frame_count, _detection_count) do
     # Use a fixed filename so viewers can refresh to see latest frame
     preview_path = "#{preview_dir}/live_preview.jpg"
     Evision.imwrite(preview_path, annotated_mat)
-
-    # Also save numbered frames for debugging/review
-    if rem(frame_count, 30) == 0 or detection_count > 0 do
-      numbered_path = "#{preview_dir}/frame_#{frame_count}.jpg"
-      Evision.imwrite(numbered_path, annotated_mat)
-      Logger.info("Saved preview frame #{frame_count} with #{detection_count} detections")
-    end
   end
 
   # Draw bounding boxes and labels on image
