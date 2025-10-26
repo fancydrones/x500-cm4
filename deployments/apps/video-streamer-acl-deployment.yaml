@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: video-streamer-service
+  namespace: rpiuav
+spec:
+  ports:
+  - name: rtsp
+    port: 8554
+    protocol: TCP
+    targetPort: 8554
+  selector:
+    app: video-streamer-replicaset
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: video-streamer-deployment
+    name: video-streamer
+  name: video-streamer
+  namespace: rpiuav
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-streamer-replicaset
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: video-streamer-replicaset
+        app.kubernetes.io/name: video-streamer-deployment
+      annotations:
+        # ACL-enabled build with ARM NEON acceleration
+        # Expected 2-3x inference speedup vs CPU-only
+        description: "Video streamer with ARM Compute Library support"
+    spec:
+      containers:
+      - env:
+        - name: STREAM_WIDTH
+          value: "1280"
+        - name: STREAM_HEIGHT
+          value: "720"
+        - name: STREAM_FPS
+          value: "30"
+        - name: CAMERA_HFLIP
+          value: "true"
+        - name: CAMERA_VFLIP
+          value: "true"
+        - name: RTSP_PORT
+          value: "8554"
+        - name: H264_PROFILE
+          value: main
+        - name: H264_LEVEL
+          value: "4.1"
+        - name: KEYFRAME_INTERVAL
+          value: "30"
+        - name: H264_BITRATE
+          value: "3000000"
+        - name: H264_INLINE_HEADERS
+          value: "true"
+        - name: H264_FLUSH
+          value: "false"
+        - name: H264_LOW_LATENCY
+          value: "true"
+        - name: H264_DENOISE
+          value: cdn_off
+        - name: H264_BUFFER_COUNT
+          value: "12"
+        # ACL-specific: Use ACL execution provider with CPU fallback
+        - name: ONNX_EXECUTION_PROVIDERS
+          value: "acl,cpu"
+        image: ghcr.io/fancydrones/x500-cm4/video-streamer:acl-latest
+        imagePullPolicy: Always
+        name: video-streamer
+        ports:
+        - containerPort: 8554
+          name: rtsp
+          protocol: TCP
+        resources:
+          limits:
+            # Increased CPU limit for ACL-accelerated inference
+            cpu: "4"
+            memory: 3072Mi
+          requests:
+            # Higher baseline for ACL library overhead
+            cpu: "1"
+            memory: 1024Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /run/udev
+          name: udev
+          readOnly: true
+        - mountPath: /dev
+          name: dev
+        - mountPath: /dev/shm
+          name: temp
+      hostNetwork: true
+      volumes:
+      - hostPath:
+          path: /run/udev/
+          type: Directory
+        name: udev
+      - hostPath:
+          path: /dev
+          type: Directory
+        name: dev
+      - emptyDir:
+          medium: Memory
+        name: temp

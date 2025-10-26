@@ -1,0 +1,42 @@
+# Elixir build artifacts
+_build/
+deps/
+*.ez
+*.beam
+erl_crash.dump
+
+# Mix artifacts
+.fetch
+
+# Development files
+.elixir_ls/
+.vscode/
+.idea/
+
+# Test artifacts
+cover/
+doc/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile*
+
+# Documentation and notes
+README.md
+*.md
+PRDs/
+
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ACL build artifacts (if building locally)
+acl/
+ComputeLibrary/
+onnxruntime/
