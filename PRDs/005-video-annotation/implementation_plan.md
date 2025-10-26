@@ -13,7 +13,40 @@ This document provides a detailed implementation plan for PRD-005: Video Annotat
 - **Deployment:** K3s cluster on companion computer
 - **Software Stack:** Elixir + Nx + Ortex + Membrane Framework
 - **Container Base:** Alpine Linux
-- **Neural Network:** YOLOv11 in ONNX format
+- **Neural Network:** YOLOX-Nano in ONNX format (proven in Phase 0, YOLOv11 future option)
+
+### Phase 0: Development Pipeline (Completed)
+
+**Status**: ✅ COMPLETE (October 26, 2025)
+
+Phase 0 established the core annotation pipeline on macOS for development and testing.
+
+#### Key Components Developed:
+- ✅ `YoloDetector` - Filter with time-based adaptive frame skipping
+- ✅ `WebPreview` - Bandit MJPEG server for development monitoring
+- ✅ `Pipeline` - Camera → Toilet → YoloDetector → Sink
+- ✅ `test_web_preview.exs` - Development start script
+
+#### Proven Architecture Patterns:
+1. **Auto flow control** with `toilet_capacity: 1`
+2. **Time-based frame skipping** (270ms target on macOS)
+3. **Two-level frame dropping** (toilet + time-based)
+4. **Frame-ID tracking** for low-latency preview
+5. **Evision** for image processing (better than Vix for video)
+
+#### Performance Achieved:
+- macOS: 6-7 FPS adaptive processing
+- Inference: 130-180ms per frame
+- Preview latency: <100ms
+- Memory: Stable, no leaks
+
+**Reference Implementation**: [apps/video_annotator/](../../apps/video_annotator/)
+
+**Documentation**:
+- [PIPELINE_ARCHITECTURE.md](../../apps/video_annotator/PIPELINE_ARCHITECTURE.md)
+- [README_PIPELINE.md](../../apps/video_annotator/README_PIPELINE.md)
+- [PHASE_0_COMPLETE.md](../../apps/video_annotator/PHASE_0_COMPLETE.md)
+- [phase_0_learnings_update.md](phase_0_learnings_update.md)
 
 ### Rationale for ONNX + Ortex Approach
 
@@ -34,7 +67,7 @@ This document provides a detailed implementation plan for PRD-005: Video Annotat
 1. Extend existing video-streamer without breaking original stream
 2. Support multiple neural network models via pluggable architecture
 3. Enable hot-swapping of models without restart
-4. Maintain performance: ≥8 FPS annotated stream on Raspberry Pi 5
+4. Maintain performance: 2-4 FPS annotated stream on Raspberry Pi 4/5 (adaptive, based on Phase 0 learnings)
 
 ### Key Design Principles
 1. **Non-Breaking Extension:** Original stream unchanged, annotated stream additive
@@ -209,13 +242,18 @@ mix new video_annotator --sup
 ```elixir
 defp deps do
   [
-    # Neural network inference
+    # Neural network inference (proven in Phase 0)
+    {:yolo, ">= 0.2.0"},  # Use yolo (supports YOLOX), not yolo_elixir
     {:ortex, "~> 0.1"},
     {:nx, "~> 0.7"},
-    {:yolo_elixir, "~> 0.1"},  # Check latest version
+    {:exla, "~> 0.9"},  # CPU backend
 
-    # Image processing
-    {:vix, "~> 0.26"},  # For overlay rendering
+    # Image processing (Evision better than Vix for video)
+    {:evision, "~> 0.2"},
+
+    # Web preview (development only)
+    {:plug, "~> 1.15", only: :dev},
+    {:bandit, "~> 1.0", only: :dev},
 
     # Configuration & telemetry
     {:telemetry, "~> 1.2"},
@@ -227,9 +265,15 @@ defp deps do
 end
 ```
 
-**1.2 Export YOLOv11n to ONNX**
+**1.2 Download/Export YOLOX-Nano Model**
 
-Create Python script for model export:
+**Recommended (Proven in Phase 0)**: Use YOLOX-Nano
+- Download from: https://github.com/Megvii-BaseDetection/YOLOX
+- Model size: 3.5MB
+- Already in ONNX format
+- Works with `{:yolo, ">= 0.2.0"}` library
+
+**Alternative (Future)**: Export YOLOv11n to ONNX
 ```python
 # scripts/export_yolo11.py
 from ultralytics import YOLO
@@ -252,7 +296,9 @@ print("Model exported to yolo11n.onnx")
 Store model artifacts:
 ```
 apps/video_annotator/priv/models/
-  └── yolo11n.onnx
+  ├── yolox_nano.onnx  # Recommended (Phase 0 proven)
+  ├── coco_classes.json
+  └── yolo11n.onnx  # Alternative (future)
 ```
 
 **1.3 Implement Model Loader**
@@ -499,11 +545,12 @@ end
 
 #### Success Criteria for Phase 1
 - [ ] VideoAnnotator application created and compiles
-- [ ] YOLOv11n exported to ONNX format
-- [ ] Model loads successfully via Ortex
-- [ ] Nx.Serving inference runs on test images
-- [ ] Inference latency <100ms per frame (640x640)
-- [ ] Detection accuracy >0.5 mAP on sample COCO images
+- [ ] YOLOX-Nano model downloaded and integrated
+- [ ] Model loads successfully via YOLO library
+- [ ] YOLO.detect() runs on test images
+- [ ] Inference latency 130-180ms per frame on macOS (300-500ms expected on RPi)
+- [ ] Detection accuracy validated with Phase 0 reference
+- [ ] Web preview server working with live FPS display (development tool)
 
 ---
 
@@ -521,110 +568,129 @@ end
 **2.1 Create Annotation Filter**
 
 **File:** `apps/video_streamer/lib/video_streamer/annotation_filter.ex`
+
+**IMPORTANT**: This implementation is based on proven Phase 0 architecture. Do NOT use manual flow control.
+
 ```elixir
 defmodule VideoStreamer.AnnotationFilter do
   @moduledoc """
-  Custom Membrane filter for video annotation.
+  Custom Membrane filter for video annotation with adaptive processing.
 
-  Pipeline:
-  1. Receive H.264 buffer
-  2. Decode to raw frame (YUV/RGB)
-  3. Send frame to inference service
-  4. Receive detections
-  5. Overlay bounding boxes and labels
-  6. Output annotated raw frame
+  Key Features (Proven in Phase 0):
+  - Auto flow control (not manual)
+  - Time-based adaptive frame skipping
+  - Direct YOLO integration (no separate serving needed)
+  - Low-latency processing
   """
 
   use Membrane.Filter
 
   def_input_pad :input,
-    accepted_format: %Membrane.H264{alignment: :nalu}
+    accepted_format: Membrane.RawVideo,
+    flow_control: :auto  # IMPORTANT: Use auto, not manual
 
   def_output_pad :output,
-    accepted_format: %Membrane.RawVideo{pixel_format: :I420}
+    accepted_format: Membrane.RawVideo,
+    flow_control: :auto
 
-  def_options serving_name: [
-    spec: atom(),
-    default: :yolo_detection,
-    description: "Name of Nx.Serving process for inference"
+  def_options model_path: [
+    spec: String.t(),
+    description: "Path to ONNX model file"
   ],
-  confidence_threshold: [
-    spec: float(),
-    default: 0.5,
-    description: "Minimum confidence for displaying detections"
+  classes_path: [
+    spec: String.t(),
+    description: "Path to class labels JSON"
   ],
-  skip_frames: [
-    spec: integer(),
-    default: 3,
-    description: "Run inference every N frames (1 = every frame)"
+  target_interval_ms: [
+    spec: pos_integer(),
+    default: 500,  # 500ms for RPi (~2 FPS)
+    description: "Minimum time between frame processing (adaptive threshold)"
   ]
 
   @impl true
   def handle_init(_ctx, opts) do
     state = %{
-      serving_name: opts.serving_name,
-      confidence_threshold: opts.confidence_threshold,
-      skip_frames: opts.skip_frames,
+      model_path: opts.model_path,
+      classes_path: opts.classes_path,
+      target_interval_ms: opts.target_interval_ms,
+      model: nil,
+      classes: nil,
       frame_count: 0,
-      last_detections: []  # Cache for frame skipping
+      last_process_time: 0,
+      total_inference_time: 0
     }
 
     {:ok, state}
   end
 
   @impl true
-  def handle_buffer(:input, buffer, _ctx, state) do
-    # Increment frame counter
-    new_count = state.frame_count + 1
+  def handle_playing(_ctx, state) do
+    # Load YOLO model
+    Logger.info("Loading YOLO model from: #{state.model_path}")
 
-    # Decide whether to run inference
-    run_inference? = rem(new_count, state.skip_frames) == 0
+    model = YOLO.load(
+      model_path: state.model_path,
+      classes_path: state.classes_path,
+      model_impl: YOLO.Models.YOLOX
+    )
 
-    if run_inference? do
-      # Run inference on this frame
-      detections = perform_inference(buffer.payload, state)
-      new_state = %{state | frame_count: new_count, last_detections: detections}
+    {:ok, classes_json} = File.read(state.classes_path)
+    classes = Jason.decode!(classes_json)
 
-      # Overlay detections
-      annotated_buffer = overlay_detections(buffer, detections)
+    Logger.info("YOLO model loaded successfully")
 
-      {:ok, [buffer: {:output, annotated_buffer}], new_state}
+    {[], %{state | model: model, classes: classes}}
+  end
+
+  @impl true
+  def handle_buffer(:input, buffer, ctx, state) do
+    current_time = System.monotonic_time(:millisecond)
+    time_since_last = current_time - state.last_process_time
+
+    # TIME-BASED ADAPTIVE SKIPPING - Critical for low latency!
+    if time_since_last < state.target_interval_ms && state.frame_count > 0 do
+      # Skip this frame - too soon since last processing
+      {[buffer: {:output, buffer}], state}
     else
-      # Use cached detections
-      annotated_buffer = overlay_detections(buffer, state.last_detections)
-      new_state = %{state | frame_count: new_count}
+      # Process this frame
+      start_time = current_time
 
-      {:ok, [buffer: {:output, annotated_buffer}], new_state}
+      # Run YOLO detection (handles preprocessing internally)
+      detections = YOLO.detect(state.model, buffer.payload)
+
+      inference_time = System.monotonic_time(:millisecond) - start_time
+
+      # Draw annotations
+      annotated_buffer = draw_detections(buffer, detections, state.classes)
+
+      # Update stats
+      frame_count = state.frame_count + 1
+      total_time = state.total_inference_time + inference_time
+
+      if rem(frame_count, 30) == 0 do
+        avg_time = total_time / frame_count
+        fps = 1000.0 / avg_time
+        Logger.info("Frame #{frame_count}: #{length(detections)} detections, " <>
+                    "#{inference_time}ms, avg #{Float.round(avg_time, 1)}ms (#{Float.round(fps, 1)} FPS)")
+      end
+
+      new_state = %{
+        state
+        | frame_count: frame_count,
+          total_inference_time: total_time,
+          last_process_time: current_time
+      }
+
+      {[buffer: {:output, annotated_buffer}], new_state}
     end
   end
 
-  defp perform_inference(frame_data, state) do
-    # Preprocess frame
-    tensor = preprocess_frame(frame_data)
-
-    # Request inference from Nx.Serving
-    batch = Nx.Batch.concatenate([tensor])
-    result = Nx.Serving.batched_run(state.serving_name, batch)
-
-    # Filter by confidence threshold
-    result
-    |> Enum.filter(fn det -> det.confidence >= state.confidence_threshold end)
-  end
-
-  defp preprocess_frame(frame_data) do
-    # Decode H.264 frame to raw RGB
-    # Resize to 640x640
-    # Normalize to [0, 1]
-    # Convert to Nx tensor
-    # TODO: Implement full preprocessing
-    Nx.tensor([[[]]])
-  end
-
-  defp overlay_detections(buffer, detections) do
-    # Use Vix (libvips) to overlay bounding boxes
-    # Draw rectangles for each detection
-    # Add class labels and confidence scores
-    # TODO: Implement full overlay rendering
+  defp draw_detections(buffer, detections, classes) do
+    # Use Evision to draw bounding boxes
+    # Convert buffer to Evision Mat
+    # Draw rectangles and labels
+    # Convert back to buffer
+    # See Phase 0 reference: apps/video_annotator/lib/video_annotator/yolo_detector.ex
     buffer
   end
 end
@@ -671,7 +737,11 @@ defmodule VideoStreamer.AnnotationPipeline do
         framerate: {30, 1}
       })
 
-      # Annotation filter
+      # CRITICAL: toilet_capacity: 1 drops old frames before processor
+      # This is essential for low-latency preview (proven in Phase 0)
+      |> via_in(:input, toilet_capacity: 1)
+
+      # Annotation filter with time-based skipping
       |> child(:annotator, VideoStreamer.AnnotationFilter)
 
       # Re-encode to H.264
@@ -687,17 +757,19 @@ defmodule VideoStreamer.AnnotationPipeline do
 end
 ```
 
-**2.3 Overlay Rendering with Vix**
+**2.3 Overlay Rendering with Evision**
 
 **File:** `apps/video_streamer/lib/video_streamer/overlay_renderer.ex`
+
+**NOTE**: Use Evision (not Vix) - proven better for video in Phase 0
+
 ```elixir
 defmodule VideoStreamer.OverlayRenderer do
   @moduledoc """
-  Renders bounding boxes and labels on video frames using Vix (libvips).
-  """
+  Renders bounding boxes and labels on video frames using Evision (OpenCV).
 
-  alias Vix.Vips.Image
-  alias Vix.Vips.Operation
+  Based on proven Phase 0 implementation.
+  """
 
   @type detection :: %{
     class: String.t(),
@@ -705,50 +777,50 @@ defmodule VideoStreamer.OverlayRenderer do
     bbox: {x :: integer(), y :: integer(), w :: integer(), h :: integer()}
   }
 
-  def overlay_detections(image_data, detections, opts \\ []) do
-    {:ok, image} = Image.new_from_buffer(image_data)
-
-    # Overlay each detection
-    annotated_image = Enum.reduce(detections, image, fn detection, img ->
-      draw_detection(img, detection, opts)
+  def overlay_detections(mat, detections, classes, opts \\ []) do
+    # Iterate through detections and draw on mat
+    Enum.reduce(detections, mat, fn detection, img ->
+      draw_detection(img, detection, classes, opts)
     end)
-
-    # Convert back to buffer
-    {:ok, buffer} = Image.write_to_buffer(annotated_image, ".jpg")
-    buffer
   end
 
-  defp draw_detection(image, detection, opts) do
-    {x, y, w, h} = detection.bbox
-    color = Keyword.get(opts, :color, [0, 255, 0])  # Green default
+  defp draw_detection(mat, detection, classes, opts) do
+    %{class_id: class_id, confidence: conf, bbox: {x, y, w, h}} = detection
+
+    color = Keyword.get(opts, :color, {0, 255, 0})  # Green default
     thickness = Keyword.get(opts, :thickness, 2)
 
+    class_name = Map.get(classes, class_id, "unknown")
+
     # Draw bounding box
-    {:ok, with_box} = Operation.draw_rect(image, color, x, y, w, h,
-      fill: false
+    mat = Evision.rectangle(mat, {x, y}, {x + w, y + h}, color,
+      thickness: thickness
     )
 
-    # Draw label background
-    label = "#{detection.class} #{Float.round(detection.confidence, 2)}"
-    label_bg_height = 20
-    {:ok, with_label_bg} = Operation.draw_rect(with_box, [0, 0, 0],
-      x, y - label_bg_height, String.length(label) * 8, label_bg_height,
-      fill: true
+    # Draw label with background
+    label = "#{class_name} #{Float.round(conf, 2)}"
+    font = Evision.Constant.cv_FONT_HERSHEY_SIMPLEX()
+    font_scale = 0.5
+
+    # Get text size for background rectangle
+    {{text_w, text_h}, _baseline} = Evision.getTextSize(label, font, font_scale, 1)
+
+    # Draw label background (black rectangle)
+    mat = Evision.rectangle(mat, {x, y - text_h - 4}, {x + text_w, y}, {0, 0, 0},
+      thickness: -1  # Filled rectangle
     )
 
-    # Draw label text
-    {:ok, with_text} = Operation.draw_text(with_label_bg, label,
-      x: x + 2,
-      y: y - label_bg_height + 2,
-      fontsize: 12,
-      rgba: true,
-      rgba_color: [255, 255, 255, 255]
+    # Draw label text (white)
+    mat = Evision.putText(mat, label, {x, y - 2}, font, font_scale, {255, 255, 255},
+      thickness: 1
     )
 
-    with_text
+    mat
   end
 end
 ```
+
+**Reference**: See [apps/video_annotator/lib/video_annotator/yolo_detector.ex](../../apps/video_annotator/lib/video_annotator/yolo_detector.ex) lines 230-280 for working implementation.
 
 **2.4 Update Main Pipeline**
 
@@ -825,9 +897,12 @@ end
 - [ ] Annotation filter compiles and integrates with Membrane
 - [ ] H.264 decoding/encoding pipeline functional
 - [ ] Frame preprocessing for inference works correctly
-- [ ] Bounding boxes and labels render correctly
-- [ ] End-to-end latency <300ms (decode + inference + overlay + encode)
+- [ ] Bounding boxes and labels render correctly using Evision
+- [ ] End-to-end latency <600ms on RPi (adaptive, based on Phase 0 learnings)
+- [ ] No "Toilet overflow" errors in logs (verify auto flow control working)
+- [ ] Preview shows current frames with <200ms lag when moving camera
 - [ ] No memory leaks over extended operation
+- [ ] Time-based adaptive skipping working (verified by log output)
 
 ---
 
@@ -1070,23 +1145,46 @@ Create test plan document:
    - Widget 1: rtsp://10.5.0.26:8554/video
    - Widget 2: rtsp://10.5.0.26:8554/video_annotated
 
+## Expected Performance
+
+Based on Phase 0 learnings:
+
+| Stream | Frame Rate | Latency | Notes |
+|--------|-----------|---------|-------|
+| Original | 25-30 FPS | <100ms | Unchanged |
+| Annotated | 2-4 FPS (adaptive) | <600ms | Varies with CPU load |
+
+**Important**: Annotated stream FPS will vary based on:
+- CPU load and scene complexity
+- Number of detected objects
+- This is expected behavior due to adaptive processing
+
 ## Test Cases
 
 ### TC1: Original Stream Quality
 - Verify original stream unchanged from previous version
 - Check latency, frame rate, quality
+- Expected: 25-30 FPS, <100ms latency
 
 ### TC2: Annotated Stream Display
 - Verify annotated stream shows bounding boxes
 - Check label readability
 - Verify confidence scores displayed
+- Expected: 2-4 FPS adaptive, bounding boxes accurate
 
-### TC3: Simultaneous Streams
+### TC3: Adaptive Performance
+- Monitor FPS during varying CPU load
+- Verify preview shows current frames (move camera, check lag <200ms)
+- Check logs for "Toilet overflow" errors (should be none)
+- Verify time-based skipping in logs
+
+### TC4: Simultaneous Streams
 - Both streams playing simultaneously
-- No frame drops on either stream
+- No frame drops on original stream
 - Independent playback controls
+- Verify no performance degradation on original stream
 
-### TC4: Client Connect/Disconnect
+### TC5: Client Connect/Disconnect
 - Connect/disconnect clients from each stream
 - Verify no impact on other stream
 - Check resource cleanup
@@ -1110,19 +1208,29 @@ See [full implementation plan continues with Phases 4-6, risk mitigation, depend
 
 ## Timeline & Milestones
 
-| Week | Phase | Key Deliverables |
-|------|-------|------------------|
-| 1-2  | 1 | ONNX model integration, basic inference working |
-| 3-4  | 2 | Membrane pipeline with annotation filter |
-| 5-6  | 3 | Dual RTSP streams functional |
-| 7-8  | 4 | Pluggable architecture implemented |
-| 9-10 | 5 | Performance optimizations complete |
-| 11-12 | 6 | Testing, documentation, deployment |
+| Week | Phase | Key Deliverables | Notes |
+|------|-------|------------------|-------|
+| 0 (Done) | 0 | macOS development pipeline, web preview | ✅ COMPLETE |
+| 1-2  | 1 | RPi model setup, adapt Phase 0 code | Use Phase 0 as starting point |
+| 3-4  | 2 | Integrate with video-streamer pipeline | Apply Phase 0 patterns |
+| 5-6  | 3 | Dual RTSP streams functional | - |
+| 7-8  | 4 | Pluggable architecture implemented | - |
+| 9-10 | 5 | Performance optimizations complete | - |
+| 11-12 | 6 | Testing, documentation, deployment | - |
+
+**Time Saved**: ~2 weeks due to Phase 0 proving the core architecture
 
 ## Next Steps
 
-1. Review and approve implementation plan
-2. Set up development environment with Ortex
-3. Export YOLOv11n model to ONNX
-4. Begin Phase 1 implementation
+1. ✅ **Phase 0 Complete** - macOS development pipeline validated
+2. Review updated implementation plan with Phase 0 learnings
+3. Begin Phase 1 implementation using Phase 0 code as foundation:
+   - Copy proven components from `apps/video_annotator/`
+   - Adjust `target_interval_ms` from 270ms to 500-600ms for RPi
+   - Test with Raspberry Pi camera format (likely I420, not NV12)
+4. Apply Phase 0 architecture patterns:
+   - Auto flow control with `toilet_capacity: 1`
+   - Time-based adaptive frame skipping
+   - Evision for image processing
+   - Web preview for development (optional but recommended)
 5. Schedule weekly progress reviews
