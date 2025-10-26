@@ -25,8 +25,8 @@ defmodule VideoAnnotator.MixProject do
       # Neural network inference
       {:yolo, ">= 0.2.0"},
       {:nx, "~> 0.7"},
-      {:exla, "~> 0.9"},
-      {:emlx, "~> 0.2", only: :dev},  # Metal GPU acceleration for macOS development
+      {:exla, "~> 0.9"},  # CPU backend (Linux/RPi)
+      {:emlx, "~> 0.2"},  # Metal GPU acceleration (macOS, 1.8x speedup)
 
       # Image processing
       {:evision, "~> 0.2"},

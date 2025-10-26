@@ -7,10 +7,11 @@ defmodule VideoAnnotator.Application do
 
   @impl true
   def start(_type, _args) do
-    # Set EXLA as the default backend for Nx
-    # This enables JIT compilation with XLA for much faster tensor operations
-    # Note: EMLX (Metal GPU) was tested but has kernel compilation issues with our operations
-    Nx.global_default_backend(EXLA.Backend)
+    # Use EMLX (Metal GPU) on macOS for 1.8x speedup, EXLA (CPU) elsewhere
+    # Benchmark: EMLX 57.4ms vs EXLA 103.3ms (80% faster!)
+    backend = select_backend()
+    Nx.global_default_backend(backend)
+    IO.puts("Using Nx backend: #{inspect(backend)}")
 
     children =
       [
@@ -23,5 +24,28 @@ defmodule VideoAnnotator.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: VideoAnnotator.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  # Select best backend for platform
+  # Runtime detection with optional config override
+  defp select_backend do
+    # Check if backend explicitly configured
+    case Application.get_env(:video_annotator, :nx_backend) do
+      nil ->
+        # Auto-detect based on OS (recommended)
+        case :os.type() do
+          {:unix, :darwin} ->
+            # macOS - use Metal GPU acceleration (1.8x faster)
+            EMLX.Backend
+
+          _ ->
+            # Linux (Raspberry Pi) - use CPU
+            EXLA.Backend
+        end
+
+      backend when is_atom(backend) ->
+        # Use explicitly configured backend
+        backend
+    end
   end
 end

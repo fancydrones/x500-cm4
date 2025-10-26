@@ -1,8 +1,8 @@
 # Test script for webcam with web preview
 # Usage: mix run test_web_preview.exs
 
-# Set Nx backend
-Nx.global_default_backend(EXLA.Backend)
+# Don't set backend here - let Application.start() choose based on OS
+# Application will use EMLX on macOS (1.8x faster) or EXLA on Linux
 
 IO.puts """
 =======================================================================
