@@ -642,7 +642,184 @@ Expected output:
 
 ---
 
-### Phase 2: Membrane Pipeline Integration (Week 3-4)
+### Phase 1.5: Dual-Path Pipeline for Smooth Piloting (Week 4)
+
+#### Goals
+- Provide smooth 30 FPS original stream for drone piloting
+- Overlay 2-4 FPS annotations on separate RTSP stream
+- QGroundControl compatibility with dual video widgets
+- Server-side rendering (no client-side JavaScript required)
+
+#### Rationale: Pilot Needs Smooth Video
+
+**Current limitation**: 2-4 FPS annotated video too slow for navigation
+
+**User requirement**:
+- Pilot needs **smooth 30 FPS** for drone control
+- Annotations useful but can be delayed (250-500ms acceptable)
+
+**Solution**: Split camera stream into two paths
+1. **Original path**: 30 FPS, no processing → `/video` (piloting)
+2. **Detection path**: 2-4 FPS with annotations → `/video_annotated` (situational awareness)
+
+#### Architecture
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                   Raspberry Pi Camera                       │
+│                      (30 FPS NV12)                          │
+└──────────────────────┬─────────────────────────────────────┘
+                       │
+                       │ Membrane.Tee (split stream)
+                       │
+        ┌──────────────┴──────────────┐
+        │                              │
+        ▼                              ▼
+┌───────────────────┐        ┌─────────────────────┐
+│  Original Path    │        │   Detection Path    │
+│    (30 FPS)       │        │     (2-4 FPS)       │
+├───────────────────┤        ├─────────────────────┤
+│ • H.264 encode    │        │ • Toilet (drop old) │
+│ • No processing   │        │ • YOLO detection    │
+│ • Direct to RTP   │        │ • Draw annotations  │
+└────────┬──────────┘        └──────────┬──────────┘
+         │                              │
+         │                              │
+         └─────────────────┬────────────┘
+                           ▼
+                  ┌─────────────────┐
+                  │  RTSP Server    │
+                  │  (Two streams)  │
+                  ├─────────────────┤
+                  │ • /video (30 FPS)
+                  │ • /video_annotated (2-4 FPS)
+                  └─────────────────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │  QGroundControl │
+                  │  (Two widgets)  │
+                  ├─────────────────┤
+                  │ Widget 1: Original (smooth piloting)
+                  │ Widget 2: Annotated (object detection)
+                  └─────────────────┘
+```
+
+#### Tasks
+
+**1.5.1 Extend Pipeline with Membrane.Tee**
+
+**File**: `apps/video_streamer/lib/video_streamer/pipeline.ex`
+
+Add Tee to split camera stream:
+
+```elixir
+spec = [
+  child(:camera, %Membrane.Rpicam.Source{...})
+  |> child(:h264_parser, %Membrane.H264.Parser{...})
+  |> child(:tee, Membrane.Tee.Parallel)
+]
+
+# Original path (30 FPS) - No processing
+spec = spec ++ [
+  get_child(:tee)
+  |> via_out(Pad.ref(:output, 0))
+  # Direct to RTP packaging, no processing
+  |> child(:rtp_original, %Membrane.RTP.StreamSendBin{...})
+  # ... RTSP sink for /video
+]
+
+# Detection path (2-4 FPS) - Process and annotate
+spec = spec ++ [
+  get_child(:tee)
+  |> via_out(Pad.ref(:output, 1))
+  |> child(:decoder, %Membrane.H264.FFmpeg.Decoder{...})
+  |> via_in(:input, toilet_capacity: 1)  # Drop old frames
+  |> child(:annotator, %VideoStreamer.AnnotationFilter{
+      model_path: opts[:model_path],
+      classes_path: opts[:classes_path],
+      eps: [:acl, :cpu]  # Use ACL acceleration
+    })
+  |> child(:encoder, %Membrane.H264.FFmpeg.Encoder{...})
+  |> child(:rtp_annotated, %Membrane.RTP.StreamSendBin{...})
+  # ... RTSP sink for /video_annotated
+]
+```
+
+**1.5.2 Adapt AnnotationFilter for Server-Side Rendering**
+
+Based on Phase 0 YoloDetector, create server-side annotation filter:
+- Auto flow control (proven in Phase 0)
+- Time-based adaptive frame skipping
+- Server-side drawing with Evision
+- Output annotated raw frames (for re-encoding)
+
+See [Phase 0 YoloDetector](../../apps/video_annotator/lib/video_annotator/yolo_detector.ex) for reference implementation.
+
+**1.5.3 QGroundControl Configuration**
+
+No code changes needed - QGC already supports dual video widgets!
+
+**Configuration**:
+- Widget 1: `rtsp://10.5.0.26:8554/video` (30 FPS original)
+- Widget 2: `rtsp://10.5.0.26:8554/video_annotated` (2-4 FPS with boxes)
+
+**Testing**:
+- Deploy to drone
+- Configure QGC dual widgets
+- Verify smooth piloting with original stream
+- Verify annotations visible on secondary stream
+
+**Reference Documentation**:
+- [DUAL_PATH_DECISION.md](DUAL_PATH_DECISION.md) - Complete implementation plan
+- [DUAL_PATH_PIPELINE_ANALYSIS.md](DUAL_PATH_PIPELINE_ANALYSIS.md) - Architecture analysis
+
+#### Performance Impact
+
+**CPU usage** (with ACL):
+- Original path: ~5-10% (H.264 encode only)
+- Detection path: ~35-40% (decode + ACL + annotate + encode)
+- **Total: ~45-50% CPU** (acceptable on RPi 4/5)
+
+**Network bandwidth**:
+- Original stream: ~6 Mbps (1552x1552 @ 30 FPS)
+- Annotated stream: ~2 Mbps (1552x1552 @ 2-4 FPS or 640x640 compressed)
+- **Total: ~8 Mbps** (acceptable on WiFi)
+
+**User experience**:
+- **Pilot**: Smooth 30 FPS navigation ✅
+- **Situational awareness**: Detection boxes visible with slight delay (250-500ms)
+- **QGC compatibility**: Standard RTSP, no modifications needed ✅
+
+#### Future Enhancement
+
+**Autonomous Navigation Output** (Future PRD):
+
+Detection metadata can be output separately for autopilot:
+```
+Detection Path
+   ├─→ Annotated video → Pilot (visual)
+   └─→ Detection metadata → Autopilot (navigation)
+       ├─→ Object positions (x, y, z)
+       ├─→ Collision risk assessment
+       └─→ MAVLink commands
+```
+
+**Not in current scope** - focus on pilot-visible annotations first.
+
+#### Success Criteria for Phase 1.5
+- [ ] Original stream maintains **30 FPS** smooth video
+- [ ] Annotated stream shows **2-4 FPS** with visible detection boxes
+- [ ] Both RTSP streams accessible simultaneously
+- [ ] QGC dual widget configuration working
+- [ ] CPU usage < 50%
+- [ ] Network bandwidth < 10 Mbps
+- [ ] No frame drops on original stream
+- [ ] Annotations appear within 500ms of detection
+
+---
+
+### Phase 2: Membrane Pipeline Integration (Week 5-6)
 
 #### Goals
 - Create Annotation Membrane filter
