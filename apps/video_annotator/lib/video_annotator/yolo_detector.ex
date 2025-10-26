@@ -52,7 +52,9 @@ defmodule VideoAnnotator.YoloDetector do
       model: nil,
       classes: nil,
       frame_count: 0,
-      total_inference_time: 0
+      total_inference_time: 0,
+      last_process_time: 0,
+      target_interval_ms: 270  # Target ~3.7 FPS, skip frames arriving faster
     }
 
     # Create preview directory if needed
@@ -105,56 +107,68 @@ defmodule VideoAnnotator.YoloDetector do
 
   @impl true
   def handle_buffer(:input, buffer, ctx, state) do
-    # Extract raw frame data and stream format
-    %Membrane.Buffer{payload: raw_frame} = buffer
+    current_time = System.monotonic_time(:millisecond)
+    time_since_last = current_time - state.last_process_time
 
-    # Get stream format from context
-    stream_format = ctx.pads.input.stream_format
+    # Skip frame if we processed one too recently (for low latency)
+    # This prevents processing buffered old frames
+    if time_since_last < state.target_interval_ms && state.frame_count > 0 do
+      # Drop this frame - pass through without processing
+      {[buffer: {:output, buffer}], state}
+    else
+      # Extract raw frame data and stream format
+      %Membrane.Buffer{payload: raw_frame} = buffer
 
-    # Run inference
-    start_time = System.monotonic_time(:millisecond)
+      # Get stream format from context
+      stream_format = ctx.pads.input.stream_format
+
+      # Run inference
+      start_time = current_time
     {detections, rgb_mat} = run_detection(raw_frame, stream_format, state.model, state.frame_count)
     inference_time = System.monotonic_time(:millisecond) - start_time
 
-    # Annotate the frame with bounding boxes
-    annotated_mat =
-      if length(detections) > 0 do
-        draw_detections(rgb_mat, detections, state.classes)
-      else
-        rgb_mat
+      # Annotate the frame with bounding boxes
+      annotated_mat =
+        if length(detections) > 0 do
+          draw_detections(rgb_mat, detections, state.classes)
+        else
+          rgb_mat
+        end
+
+      # Update statistics first so we can send FPS to preview
+      frame_count = state.frame_count + 1
+      total_time = state.total_inference_time + inference_time
+      avg_time = total_time / frame_count
+      fps = 1000.0 / avg_time
+
+      # Send EVERY processed frame to web preview (no interval check for low latency)
+      # Time-based skipping already controls the rate
+      if state.preview && state.preview_dir do
+        save_preview_frame(annotated_mat, state.preview_dir, frame_count, length(detections), fps)
       end
 
-    # Save annotated preview if enabled (only every N frames to avoid I/O bottleneck)
-    if state.preview && state.preview_dir && rem(state.frame_count, state.preview_interval) == 0 do
-      save_preview_frame(annotated_mat, state.preview_dir, state.frame_count, length(detections))
+      if rem(frame_count, 30) == 0 do
+        Logger.info(
+          "Frame #{frame_count}: #{length(detections)} detections, " <>
+            "#{inference_time}ms inference, avg #{Float.round(avg_time, 1)}ms (#{Float.round(fps, 1)} FPS)"
+        )
+      end
+
+      # Pass through the original buffer with detection metadata
+      buffer = %{
+        buffer
+        | metadata: Map.put(buffer.metadata || %{}, :detections, detections)
+      }
+
+      state = %{
+        state
+        | frame_count: frame_count,
+          total_inference_time: total_time,
+          last_process_time: current_time
+      }
+
+      {[buffer: {:output, buffer}], state}
     end
-
-    # Update statistics
-    frame_count = state.frame_count + 1
-    total_time = state.total_inference_time + inference_time
-    avg_time = total_time / frame_count
-    fps = 1000.0 / avg_time
-
-    if rem(frame_count, 30) == 0 do
-      Logger.info(
-        "Frame #{frame_count}: #{length(detections)} detections, " <>
-          "#{inference_time}ms inference, avg #{Float.round(avg_time, 1)}ms (#{Float.round(fps, 1)} FPS)"
-      )
-    end
-
-    # Pass through the original buffer with detection metadata
-    buffer = %{
-      buffer
-      | metadata: Map.put(buffer.metadata || %{}, :detections, detections)
-    }
-
-    state = %{
-      state
-      | frame_count: frame_count,
-        total_inference_time: total_time
-    }
-
-    {[buffer: {:output, buffer}], state}
   end
 
   # Private helper to run YOLO detection
@@ -212,13 +226,28 @@ defmodule VideoAnnotator.YoloDetector do
       {[], nil}
   end
 
-  # Private helper to save preview frame (already annotated)
-  # Saves frames to a fixed filename for live viewing
-  # Only saves the live preview to minimize I/O overhead
-  defp save_preview_frame(annotated_mat, preview_dir, _frame_count, _detection_count) do
-    # Use a fixed filename so viewers can refresh to see latest frame
-    preview_path = "#{preview_dir}/live_preview.jpg"
-    Evision.imwrite(preview_path, annotated_mat)
+  # Private helper to save/send preview frame (already annotated)
+  # Sends to web preview if available, otherwise saves to disk
+  defp save_preview_frame(annotated_mat, preview_dir, frame_count, detection_count, fps) do
+    # Convert to JPEG for web preview
+    jpeg_binary = Evision.imencode(".jpg", annotated_mat)
+
+    # Send to web preview server (if running)
+    try do
+      VideoAnnotator.WebPreview.update_frame(jpeg_binary, %{
+        frame_count: frame_count,
+        fps: fps,
+        detections: detection_count
+      })
+    catch
+      :error, _ -> :ok  # Web preview not running, ignore
+    end
+
+    # Also save to disk as fallback
+    if preview_dir do
+      preview_path = "#{preview_dir}/live_preview.jpg"
+      Evision.imwrite(preview_path, annotated_mat)
+    end
   end
 
   # Draw bounding boxes and labels on image

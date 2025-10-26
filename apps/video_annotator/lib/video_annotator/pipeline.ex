@@ -31,24 +31,25 @@ defmodule VideoAnnotator.Pipeline do
     output_dir = Path.dirname(output_path)
     File.mkdir_p!(output_dir)
 
-    spec = [
-      # Webcam source - captures raw video frames
-      # Use 30fps which is supported by FaceTime HD Camera
+    spec =
+      # Webcam source - captures raw video frames at 30fps
       # Supported resolutions: 1920x1080, 1280x720, 640x480, 1552x1552 @ 15-30fps
       child(:camera, %Membrane.CameraCapture{
         device: camera,
         framerate: 30
       })
+      # Use minimal toilet capacity to drop old frames automatically
+      # This ensures YoloDetector always gets the latest frame and processes as fast as it can
+      # Adapts automatically to CPU load - faster when CPU is free, slower when busy
+      |> via_in(:input, toilet_capacity: 1)
       |> child(:yolo_detector, %VideoAnnotator.YoloDetector{
         model_path: model_path,
         classes_path: classes_path,
         preview: preview,
-        preview_dir: if(preview, do: "priv/preview", else: nil),
+        preview_dir: "priv/preview",
         preview_interval: preview_interval
       })
-      # Use Fake sink to consume frames (preview is file-based)
       |> child(:sink, Membrane.Fake.Sink.Buffers)
-    ]
 
     {[spec: spec], %{output_path: output_path, preview: preview}}
   end

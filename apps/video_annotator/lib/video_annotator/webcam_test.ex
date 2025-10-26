@@ -16,14 +16,15 @@ defmodule VideoAnnotator.WebcamTest do
     * `:model_path` - Path to YOLOX model
     * `:classes_path` - Path to classes JSON
     * `:output_path` - Path for output video file
-    * `:preview` - Show live preview with annotations (default: false)
-    * `:preview_interval` - Save preview every N frames (default: 10 = ~3 FPS)
+    * `:preview` - Show live preview window with annotations (default: false)
+                   Uses Evision HighGui for zero-latency display
+    * `:preview_interval` - (Deprecated - no longer needed for live preview)
 
   ## Example
 
       VideoAnnotator.WebcamTest.start(duration: 30, camera: "FaceTime HD Camera")
       VideoAnnotator.WebcamTest.start(camera: "FaceTime HD Camera", preview: true)
-      VideoAnnotator.WebcamTest.start(camera: "FaceTime HD Camera", preview: true, preview_interval: 1)
+      VideoAnnotator.WebcamTest.start(camera: "FaceTime HD Camera", preview: false)  # No preview for max speed
   """
   def start(opts \\ []) do
     duration = Keyword.get(opts, :duration, 10)

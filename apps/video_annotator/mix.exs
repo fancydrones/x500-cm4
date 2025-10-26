@@ -26,6 +26,7 @@ defmodule VideoAnnotator.MixProject do
       {:yolo, ">= 0.2.0"},
       {:nx, "~> 0.7"},
       {:exla, "~> 0.9"},
+      {:emlx, "~> 0.2", only: :dev},  # Metal GPU acceleration for macOS development
 
       # Image processing
       {:evision, "~> 0.2"},
@@ -35,7 +36,11 @@ defmodule VideoAnnotator.MixProject do
       {:membrane_h264_ffmpeg_plugin, "~> 0.32"},
       {:membrane_core, "~> 1.1"},
       {:membrane_fake_plugin, "~> 0.11"},
-      {:membrane_sdl_plugin, "~> 0.18"}
+      {:membrane_sdl_plugin, "~> 0.18"},
+
+      # Web-based preview (for development)
+      {:plug, "~> 1.15", only: :dev},
+      {:bandit, "~> 1.0", only: :dev}
     ]
   end
 end
