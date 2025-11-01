@@ -125,7 +125,7 @@ We can improve the onboard stack (for example, better object detection or better
 5. Lower operational cost
 This replaces ad-hoc, per-drone manual maintenance (“can someone update Drone 3 before launch?”) with a known, repeatable, reviewable process.
 
-7. The one-sentence version you can use in slides
+6. The one-sentence version you can use in slides
 
 “Each drone carries a self-managing runtime that keeps its mission software running and up to date by securely pulling approved configurations from our own Git repository — no inbound access, no manual patching in the field, and full traceability of what ran during flight.”
 
