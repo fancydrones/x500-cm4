@@ -15,7 +15,7 @@ jobs:
       run:
         working-directory: apps/video_streamer
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
@@ -45,7 +45,7 @@ jobs:
     name: Docker Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
