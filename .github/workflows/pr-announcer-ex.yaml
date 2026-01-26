@@ -24,7 +24,7 @@ jobs:
           version-type: strict
 
       - name: Restore dependencies cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             apps/announcer_ex/deps
