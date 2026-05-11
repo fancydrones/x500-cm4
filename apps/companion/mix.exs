@@ -32,7 +32,7 @@ defmodule Companion.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:xmavlink, "~> 0.5.0"},
+      {:xmavlink, "~> 0.13.0"},
       {:phoenix, "~> 1.8.1"},
       {:phoenix_html, "~> 4.3.0"},
       {:phoenix_live_reload, "~> 1.6.1", only: :dev},
